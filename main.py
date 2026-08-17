@@ -29,11 +29,9 @@ def enviar_reporte(
     descripcion: str = Form(""),
     correo_destino: str = Form(...)
 ):
-    # 1. Cargar la plantilla Excel conservando formulas y formato
     wb = openpyxl.load_workbook(PLANTILLA_PATH)
-    
-    # 2. Rellenar Pestaña Principal: INFORME_PRELIMINAR
     ws_pre = wb['INFORME_PRELIMINAR']
+
     ws_pre['C4'] = tipo_evento
     ws_pre['C6'] = fecha_evento
     ws_pre['J8'] = hora_evento
@@ -42,17 +40,14 @@ def enviar_reporte(
     ws_pre['F10'] = cargo
     ws_pre['C15'] = descripcion
 
-    # 3. Rellenar Pestaña de Analisis: T_FACTORES (Causas Subestandar)
     if 'T_FACTORES' in wb.sheetnames:
         ws_fact = wb['T_FACTORES']
         ws_fact['B4'] = acto_subestandar
         ws_fact['B5'] = condicion_subestandar
 
-    # 4. Guardar archivo generado con el nombre del lesionado
     nombre_archivo = f"Informe_SSOMA_{nombre_lesionado.replace(' ', '_')}.xlsx"
     wb.save(nombre_archivo)
 
-    # 5. Enviar por correo si las credenciales estan configuradas
     remitente = os.environ.get("CORREO_REMITENTE")
     password = os.environ.get("PASSWORD_REMITENTE")
 
@@ -78,9 +73,8 @@ def enviar_reporte(
         except Exception as e:
             print(f"Error al enviar correo: {e}")
 
-    # Retorna la descarga directa del Excel procesado en la web
     return FileResponse(
-        path=nombre_archivo, 
-        filename=nombre_archivo, 
+        path=nombre_archivo,
+        filename=nombre_archivo,
         media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )hivo, filename=nombre_archivo, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    )
