@@ -2,10 +2,9 @@ import os
 import smtplib
 import requests
 import traceback
-from typing import List, Optional
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 import openpyxl
 
@@ -50,12 +49,43 @@ def home():
 @app.post("/enviar-reporte")
 async def enviar_reporte(request: Request):
     try:
-        # Extraer absolutamente todos los datos que envía el HTML directamente
         form_data = await request.form()
 
-        tipo_informe = form_data.get("tipo_informe", "FINAL")
+        # Extraer variables con soporte para arreglos o valores individuales
+        fin_fecha_evento = form_data.get("fin_fecha_evento", "")
+        fin_hora_evento = form_data.get("fin_hora_evento", "")
+        fin_lugar_exacto = form_data.get("fin_lugar_exacto", "")
+        fin_tipo_evento = form_data.get("fin_tipo_evento", "")
+        
+        trab_nombres = form_data.get("trab_nombres") or form_data.get("trab_nombres[]") or ""
+        trab_paterno = form_data.get("trab_paterno") or form_data.get("trab_paterno[]") or ""
+        trab_materno = form_data.get("trab_materno") or form_data.get("trab_materno[]") or ""
+        trab_dni = form_data.get("trab_dni") or form_data.get("trab_dni[]") or ""
+        
+        ana_que_sucedio = form_data.get("ana_que_sucedio", "")
+        inv_nombre = form_data.get("inv_nombre") or form_data.get("inv_nombre[]") or ""
 
-        # Cargar plantilla base
+        # Objeto mapeado exacto para Google Sheets
+        datos_envio = {
+            "fin_fecha_evento": fin_fecha_evento,
+            "fin_hora_evento": fin_hora_evento,
+            "fin_lugar_exacto": fin_lugar_exacto,
+            "fin_tipo_evento": fin_tipo_evento,
+            "trab_nombres": trab_nombres,
+            "trab_paterno": trab_paterno,
+            "trab_materno": trab_materno,
+            "trab_dni": trab_dni,
+            "ana_que_sucedio": ana_que_sucedio,
+            "inv_nombre": inv_nombre
+        }
+
+        # 1. ENVIAR A GOOGLE SHEETS
+        try:
+            requests.post(GOOGLE_WEBHOOK_URL, json=datos_envio, timeout=8)
+        except Exception as err_sheet:
+            print(f"Error al enviar a Google Sheets: {err_sheet}")
+
+        # Llenar Excel para descarga
         if os.path.exists(PLANTILLA_PATH):
             wb = openpyxl.load_workbook(PLANTILLA_PATH)
             ws = wb.active
@@ -63,45 +93,13 @@ async def enviar_reporte(request: Request):
             wb = openpyxl.Workbook()
             ws = wb.active
 
-        # Mapeo de campos flexibles (captura cualquier nombre común del formulario)
-        fecha_evento = form_data.get("fin_fecha_evento") or form_data.get("fecha_evento") or form_data.get("fecha_evento_pre") or ""
-        hora_evento = form_data.get("fin_hora_evento") or form_data.get("hora_evento") or form_data.get("hora_ocurrencia_pre") or ""
-        lugar_exacto = form_data.get("fin_lugar_exacto") or form_data.get("lugar_exacto") or form_data.get("lugar_ocurrencia_pre") or ""
-        tipo_evento = form_data.get("fin_tipo_evento") or form_data.get("tipo_evento") or form_data.get("tipo_evento_pre") or ""
-        
-        nombres = form_data.get("trab_nombres") or form_data.get("nombre_lesionado_pre") or form_data.get("nombres") or ""
-        paterno = form_data.get("trab_paterno") or form_data.get("paterno") or ""
-        materno = form_data.get("trab_materno") or form_data.get("materno") or ""
-        dni = form_data.get("trab_dni") or form_data.get("dni") or ""
-        
-        que_sucedio = form_data.get("que_sucedio") or form_data.get("breve_descripcion_pre") or form_data.get("descripcion") or ""
+        ws['C30'] = fin_fecha_evento
+        ws['C31'] = fin_hora_evento
+        ws['R30'] = fin_lugar_exacto
 
-        # Llenar Excel individual para descarga
-        ws['C30'] = fecha_evento
-        ws['C31'] = hora_evento
-        ws['R30'] = lugar_exacto
-
-        # 1. ENVIAR A GOOGLE SHEETS
-        datos_envio = {
-            "fin_fecha_evento": fecha_evento,
-            "fin_hora_evento": hora_evento,
-            "fin_lugar_exacto": lugar_exacto,
-            "fin_tipo_evento": tipo_evento,
-            "trab_nombres": nombres,
-            "trab_paterno": paterno,
-            "trab_materno": materno,
-            "trab_dni": dni,
-            "que_sucedio": que_sucedio
-        }
-
-        try:
-            requests.post(GOOGLE_WEBHOOK_URL, json=datos_envio, timeout=8)
-        except Exception as err_sheet:
-            print(f"Error al enviar a Google Sheets: {err_sheet}")
-
-        nombre_completo = f"{paterno} {materno} {nombres}".strip() or "Anónimo"
+        nombre_completo = f"{trab_paterno} {trab_materno} {trab_nombres}".strip() or "Anónimo"
         asunto = f"NUEVO REGISTRO SSOMA: Informe Final - {nombre_completo}"
-        cuerpo = f"Se ha registrado un Informe Final de Accidente.\nTrabajador: {nombre_completo}\nDNI: {dni}\nFecha: {fecha_evento}"
+        cuerpo = f"Se ha registrado un Informe Final de Accidente.\nTrabajador: {nombre_completo}\nDNI: {trab_dni}\nFecha: {fin_fecha_evento}"
         nombre_archivo = "Informe_Final.xlsx"
 
         wb.save(nombre_archivo)
