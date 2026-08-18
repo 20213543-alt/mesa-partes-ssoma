@@ -1,3 +1,4 @@
+import os
 import smtplib
 import traceback
 import zoneinfo
@@ -13,10 +14,12 @@ from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 
-# Configurar archivos estáticos y plantillas si existen en tu proyecto
+# Crear carpetas si no existen para evitar errores en Render
+os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
 
+os.makedirs("templates", exist_ok=True)
+templates = Jinja2Templates(directory="templates")
 # ==========================================
 # CONFIGURACIÓN DE CORREO SMTP
 # ==========================================
