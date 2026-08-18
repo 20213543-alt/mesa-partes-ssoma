@@ -1,146 +1,181 @@
 import os
 import smtplib
+import requests
 import traceback
-import zoneinfo
 from datetime import datetime
-from email.mime.application import MIMEApplication
+import zoneinfo
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
-from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 
-# Definir rutas absolutas para evitar fallos de ubicación en servidores Linux
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
 
-# Crear directorios si no existen en Render
-os.makedirs(STATIC_DIR, exist_ok=True)
-os.makedirs(TEMPLATES_DIR, exist_ok=True)
-
-# Montar archivos estáticos y plantillas
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
-
-# Configuración de correo SMTP
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USER = "tu_correo@gmail.com"  # Configurar con tu correo emisor
-SMTP_PASSWORD = "tu_contrasena_de_aplicacion"  # Configurar contraseña de aplicación
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "")
 
-CORREOS_DESTINO = ["chanelone14@gmail.com", "sebastianstalin19@gmail.com"]
+CORREOS_NOTIFICACION = ["chanelone14@gmail.com", "20213543@aloe.ulima.edu.pe"]
 
+def enviar_correo_notificacion(asunto: str, cuerpo: str):
+    if not SENDER_EMAIL or not SENDER_PASSWORD:
+        return
 
-def enviar_correo_con_adjunto(asunto: str, cuerpo: str, adjunto_bytes: bytes = None, nombre_adjunto: str = "reporte.pdf"):
-    msg = MIMEMultipart()
-    msg["From"] = SMTP_USER
-    msg["To"] = ", ".join(CORREOS_DESTINO)
-    msg["Subject"] = asunto
-    msg.attach(MIMEText(cuerpo, "plain"))
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = ", ".join(CORREOS_NOTIFICACION)
+        msg['Subject'] = asunto
+        msg.attach(MIMEText(cuerpo, 'plain'))
 
-    if adjunto_bytes:
-        part = MIMEApplication(adjunto_bytes, Name=nombre_adjunto)
-        part["Content-Disposition"] = f'attachment; filename="{nombre_adjunto}"'
-        msg.attach(part)
-
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=5)
         server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SMTP_USER, CORREOS_DESTINO, msg.as_string())
-
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.sendmail(SENDER_EMAIL, CORREOS_NOTIFICACION, msg.as_string())
+        server.quit()
+    except Exception as e:
+        print(f"Error al enviar correo: {e}")
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    """Verifica si index.html existe antes de renderizar para prevenir errores 500."""
-    index_path = os.path.join(TEMPLATES_DIR, "index.html")
-    if not os.path.exists(index_path):
-        return HTMLResponse(
-            content="""
-            <div style='font-family: sans-serif; text-align: center; padding: 40px;'>
-                <h2 style='color: #dc2626;'>Falta el archivo index.html</h2>
-                <p>Crea la carpeta <b>templates</b> y coloca el archivo <b>index.html</b> adentro.</p>
-            </div>
-            """,
-            status_code=500
-        )
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.post("/enviar-reporte-preliminar", response_class=HTMLResponse)
-async def enviar_reporte_preliminar(request: Request, pdf_file: UploadFile = File(None)):
-    try:
-        form_data = await request.form()
-        try:
-            tz_peru = zoneinfo.ZoneInfo("America/Lima")
-            ahora_peru = datetime.now(tz_peru)
-        except Exception:
-            ahora_peru = datetime.now()
-
-        fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
-        nombre_lesionado = form_data.get("nombre_lesionado_pre") or "No especificado"
-        fecha_evento = form_data.get("fecha_evento_pre") or "No especificada"
-        tipo_evento = form_data.get("tipo_evento_pre") or "No especificado"
-        codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d')}-{ahora_peru.strftime('%H%M%S')}"
-
-        pdf_bytes = await pdf_file.read() if pdf_file else None
-
-        asunto = f"INFORME PRELIMINAR SSOMA [{codigo_comprobante}]: {nombre_lesionado}"
-        cuerpo = f"""Se ha generado un nuevo Informe Preliminar de Accidente/Incidente.
-
-Código de Comprobante: {codigo_comprobante}
-Fecha y Hora de Registro: {fecha_registro_str}
-Lesionado/Afectado: {nombre_lesionado}
-Fecha del Evento: {fecha_evento}
-Tipo de Evento: {tipo_evento}
-"""
-        enviar_correo_con_adjunto(
-            asunto=asunto,
-            cuerpo=cuerpo,
-            adjunto_bytes=pdf_bytes,
-            nombre_adjunto=f"Informe_Preliminar_{codigo_comprobante}.pdf"
-        )
-
-        return HTMLResponse(content=f"""
-            <div style='font-family: sans-serif; text-align: center; padding: 40px;'>
-                <h2 style='color: #16a34a;'>¡Informe Preliminar Enviado!</h2>
-                <p>Código: <b>{codigo_comprobante}</b></p>
-                <a href='/' style='display: inline-block; background: #1d4ed8; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;'>Volver</a>
-            </div>
-        """, status_code=200)
-
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e), "trace": traceback.format_exc()})
-
+def home():
+    if os.path.exists("index.html"):
+        with open("index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>Servidor SSOMA activo</h1>"
 
 @app.post("/enviar-reporte", response_class=HTMLResponse)
-async def enviar_reporte_final(request: Request):
+async def enviar_reporte(request: Request):
     try:
         form_data = await request.form()
-        try:
-            tz_peru = zoneinfo.ZoneInfo("America/Lima")
-            ahora_peru = datetime.now(tz_peru)
-        except Exception:
-            ahora_peru = datetime.now()
 
+        # Obtener fecha y hora exacta en zona horaria de Perú
+        tz_peru = zoneinfo.ZoneInfo("America/Lima")
+        ahora_peru = datetime.now(tz_peru)
         fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
-        codigo_comprobante = f"FIN-{ahora_peru.strftime('%Y%m%d')}-{ahora_peru.strftime('%H%M%S')}"
 
-        asunto = f"INFORME FINAL SSOMA [{codigo_comprobante}]"
-        cuerpo = f"""Se ha registrado un nuevo Informe Final de Accidente/Incidente.
+        # Extraer variables
+        fin_fecha_evento = form_data.get("fin_fecha_evento", "")
+        fin_hora_evento = form_data.get("fin_hora_evento", "")
+        fin_lugar_exacto = form_data.get("fin_lugar_exacto", "")
+        fin_tipo_evento = form_data.get("fin_tipo_evento", "")
+        
+        trab_nombres = form_data.get("trab_nombres") or form_data.get("trab_nombres[]") or ""
+        trab_paterno = form_data.get("trab_paterno") or form_data.get("trab_paterno[]") or ""
+        trab_materno = form_data.get("trab_materno") or form_data.get("trab_materno[]") or ""
+        trab_dni = form_data.get("trab_dni") or form_data.get("trab_dni[]") or ""
+        
+        ana_que_sucedio = form_data.get("ana_que_sucedio", "")
+        inv_nombre = form_data.get("inv_nombre") or form_data.get("inv_nombre[]") or ""
 
-Código de Comprobante: {codigo_comprobante}
-Fecha y Hora de Registro: {fecha_registro_str}
-Lugar Exacto: {form_data.get('fin_lugar_exacto', 'N/A')}
-Tipo de Evento: {form_data.get('fin_tipo_evento', 'N/A')}
-Investigador: {form_data.get('inv_nombre', 'N/A')}
-"""
-        enviar_correo_con_adjunto(asunto=asunto, cuerpo=cuerpo)
-        return HTMLResponse(content=f"<h2>¡Informe Final {codigo_comprobante} registrado con éxito!</h2><a href='/'>Volver</a>")
+        datos_envio = {
+            "fin_fecha_evento": fin_fecha_evento,
+            "fin_hora_evento": fin_hora_evento,
+            "fin_lugar_exacto": fin_lugar_exacto,
+            "fin_tipo_evento": fin_tipo_evento,
+            "trab_nombres": trab_nombres,
+            "trab_paterno": trab_paterno,
+            "trab_materno": trab_materno,
+            "trab_dni": trab_dni,
+            "ana_que_sucedio": ana_que_sucedio,
+            "inv_nombre": inv_nombre
+        }
+
+        # 1. ENVIAR A GOOGLE SHEETS Y OBTENER CÓDIGO CORRELATIVO
+        codigo_comprobante = f"EMP-{ahora_peru.strftime('%Y%m%d')}-000"
+        try:
+            res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_envio, timeout=8)
+            res_json = res.json()
+            if "codigo_comprobante" in res_json:
+                codigo_comprobante = res_json["codigo_comprobante"]
+        except Exception as err_sheet:
+            print(f"Error al enviar a Google Sheets: {err_sheet}")
+
+        nombre_completo = f"{trab_paterno} {trab_materno} {trab_nombres}".strip() or "Anónimo"
+        
+        # 2. ENVIAR CORREO DE NOTIFICACIÓN
+        asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: Informe Final - {nombre_completo}"
+        cuerpo = f"Se ha registrado un Informe Final de Accidente.\n\nCódigo de Comprobante: {codigo_comprobante}\nFecha y Hora de Registro (Perú): {fecha_registro_str}\nTrabajador: {nombre_completo}\nDNI: {trab_dni}\nFecha Evento: {fin_fecha_evento}"
+        enviar_correo_notificacion(asunto, cuerpo)
+
+        # 3. PANTALLA DE CONFIRMACIÓN EN LA WEB
+        html_confirmacion = f"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reporte Registrado Exitosamente</title>
+            <style>
+                body {{
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f4f7f6;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                }}
+                .card {{
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    max-width: 500px;
+                    width: 90%;
+                    text-align: center;
+                }}
+                .icon {{
+                    font-size: 50px;
+                    color: #28a745;
+                    margin-bottom: 10px;
+                }}
+                h2 {{ color: #333; margin-bottom: 20px; }}
+                .comprobante-box {{
+                    background-color: #e9ecef;
+                    border-left: 5px solid #007bff;
+                    padding: 15px;
+                    text-align: left;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }}
+                .comprobante-box p {{ margin: 5px 0; font-size: 14px; color: #495057; }}
+                .code {{ font-weight: bold; font-size: 16px; color: #007bff; }}
+                .btn {{
+                    display: inline-block;
+                    background-color: #007bff;
+                    color: white;
+                    padding: 10px 20px;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    margin-top: 15px;
+                    font-weight: bold;
+                }}
+                .btn:hover {{ background-color: #0056b3; }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="icon">✓</div>
+                <h2>¡Reporte Enviado con Éxito!</h2>
+                <p>El informe ha sido registrado correctamente en la base de datos de SSOMA.</p>
+                
+                <div class="comprobante-box">
+                    <p><strong>Código de Comprobante:</strong> <span class="code">{codigo_comprobante}</span></p>
+                    <p><strong>Fecha y Hora (Perú):</strong> {fecha_registro_str}</p>
+                    <p><strong>Afectado / Trabajador:</strong> {nombre_completo}</p>
+                    <p><strong>DNI:</strong> {trab_dni}</p>
+                </div>
+
+                <a href="/" class="btn">Volver al Formulario</a>
+            </div>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_confirmacion, status_code=200)
 
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e), "trace": traceback.format_exc()})
+        error_detallado = traceback.format_exc()
+        return JSONResponse(status_code=500, content={"error": str(e), "trace": error_detallado})
