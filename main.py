@@ -3,6 +3,7 @@ import smtplib
 import requests
 import traceback
 from datetime import datetime
+import zoneinfo
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi import FastAPI, Request
@@ -50,8 +51,10 @@ async def enviar_reporte(request: Request):
     try:
         form_data = await request.form()
 
-        ahora = datetime.now()
-        fecha_registro_str = ahora.strftime("%d/%m/%Y %H:%M:%S")
+        # Obtener fecha y hora exacta en zona horaria de Perú
+        tz_peru = zoneinfo.ZoneInfo("America/Lima")
+        ahora_peru = datetime.now(tz_peru)
+        fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
 
         # Extraer variables
         fin_fecha_evento = form_data.get("fin_fecha_evento", "")
@@ -80,8 +83,8 @@ async def enviar_reporte(request: Request):
             "inv_nombre": inv_nombre
         }
 
-        # 1. ENVIAR A GOOGLE SHEETS Y OBTENER EL CÓDIGO CORRELATIVO
-        codigo_comprobante = f"EMP-{ahora.strftime('%Y%m%d')}-000" # Valor respaldo
+        # 1. ENVIAR A GOOGLE SHEETS Y OBTENER CÓDIGO CORRELATIVO
+        codigo_comprobante = f"EMP-{ahora_peru.strftime('%Y%m%d')}-000"
         try:
             res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_envio, timeout=8)
             res_json = res.json()
@@ -94,10 +97,10 @@ async def enviar_reporte(request: Request):
         
         # 2. ENVIAR CORREO DE NOTIFICACIÓN
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: Informe Final - {nombre_completo}"
-        cuerpo = f"Se ha registrado un Informe Final de Accidente.\n\nCódigo de Comprobante: {codigo_comprobante}\nFecha de Registro: {fecha_registro_str}\nTrabajador: {nombre_completo}\nDNI: {trab_dni}\nFecha Evento: {fin_fecha_evento}"
+        cuerpo = f"Se ha registrado un Informe Final de Accidente.\n\nCódigo de Comprobante: {codigo_comprobante}\nFecha y Hora de Registro (Perú): {fecha_registro_str}\nTrabajador: {nombre_completo}\nDNI: {trab_dni}\nFecha Evento: {fin_fecha_evento}"
         enviar_correo_notificacion(asunto, cuerpo)
 
-        # 3. MOSTRAR PANTALLA DE CONFIRMACIÓN EN LA WEB
+        # 3. PANTALLA DE CONFIRMACIÓN EN LA WEB
         html_confirmacion = f"""
         <!DOCTYPE html>
         <html lang="es">
@@ -161,7 +164,7 @@ async def enviar_reporte(request: Request):
                 
                 <div class="comprobante-box">
                     <p><strong>Código de Comprobante:</strong> <span class="code">{codigo_comprobante}</span></p>
-                    <p><strong>Fecha y Hora de Registro:</strong> {fecha_registro_str}</p>
+                    <p><strong>Fecha y Hora (Perú):</strong> {fecha_registro_str}</p>
                     <p><strong>Afectado / Trabajador:</strong> {nombre_completo}</p>
                     <p><strong>DNI:</strong> {trab_dni}</p>
                 </div>
