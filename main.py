@@ -7,12 +7,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
-import openpyxl
 
 app = FastAPI()
 
 GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
-PLANTILLA_PATH = "INFORME DE ACCIDENTES (1).xlsx"
 
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
@@ -52,10 +50,8 @@ async def enviar_reporte(request: Request):
     try:
         form_data = await request.form()
 
-        # Generar Fecha/Hora de Registro y Código Único de Comprobante
         ahora = datetime.now()
         fecha_registro_str = ahora.strftime("%d/%m/%Y %H:%M:%S")
-        codigo_comprobante = f"REP-{ahora.strftime('%Y%m%d-%H%M%S')}"
 
         # Extraer variables
         fin_fecha_evento = form_data.get("fin_fecha_evento", "")
@@ -71,7 +67,6 @@ async def enviar_reporte(request: Request):
         ana_que_sucedio = form_data.get("ana_que_sucedio", "")
         inv_nombre = form_data.get("inv_nombre") or form_data.get("inv_nombre[]") or ""
 
-        # Objeto para Google Sheets
         datos_envio = {
             "fin_fecha_evento": fin_fecha_evento,
             "fin_hora_evento": fin_hora_evento,
@@ -85,15 +80,19 @@ async def enviar_reporte(request: Request):
             "inv_nombre": inv_nombre
         }
 
-        # 1. ENVIAR A GOOGLE SHEETS
+        # 1. ENVIAR A GOOGLE SHEETS Y OBTENER EL CÓDIGO CORRELATIVO
+        codigo_comprobante = f"EMP-{ahora.strftime('%Y%m%d')}-000" # Valor respaldo
         try:
-            requests.post(GOOGLE_WEBHOOK_URL, json=datos_envio, timeout=8)
+            res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_envio, timeout=8)
+            res_json = res.json()
+            if "codigo_comprobante" in res_json:
+                codigo_comprobante = res_json["codigo_comprobante"]
         except Exception as err_sheet:
             print(f"Error al enviar a Google Sheets: {err_sheet}")
 
         nombre_completo = f"{trab_paterno} {trab_materno} {trab_nombres}".strip() or "Anónimo"
         
-        # 2. ENVIAR CORREO DE NOTIFICACIÓN CON EL CÓDIGO INCLUIDO
+        # 2. ENVIAR CORREO DE NOTIFICACIÓN
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: Informe Final - {nombre_completo}"
         cuerpo = f"Se ha registrado un Informe Final de Accidente.\n\nCódigo de Comprobante: {codigo_comprobante}\nFecha de Registro: {fecha_registro_str}\nTrabajador: {nombre_completo}\nDNI: {trab_dni}\nFecha Evento: {fin_fecha_evento}"
         enviar_correo_notificacion(asunto, cuerpo)
