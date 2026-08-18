@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MESA DE PARTES SSOMA - EMAPE S.A.</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Librerías para renderizar captura HTML a PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans p-2 md:p-6">
 
-  <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-300">
+  <div id="contenedor_formulario" class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-300">
     <div class="bg-blue-900 text-white p-5 border-b-4 border-amber-500">
       <h1 class="text-xl font-black tracking-wider">EMAPE S.A.</h1>
       <h2 class="text-sm font-bold text-amber-400">MESA DE PARTES SSOMA - REGISTRO DE EVENTOS</h2>
     </div>
 
-    <form action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-6 space-y-6 text-xs">
+    <form id="form_ssoma" method="POST" enctype="multipart/form-data" onsubmit="procesarEnvio(event)" class="p-6 space-y-6 text-xs">
       
       <!-- SELECTOR PRINCIPAL -->
       <div class="bg-amber-50 p-4 rounded-lg border border-amber-300">
@@ -611,14 +614,8 @@
 
       </div>
 
-      <!-- CORREO DESTINO Y BOTÓN ENVIAR -->
-      <div class="bg-amber-100 p-4 rounded-lg border border-amber-300">
-        <label class="font-bold block text-slate-800 mb-1">CORREO DESTINO DE NOTIFICACIÓN:</label>
-        <input type="email" name="correo_destino" required placeholder="correo@empresa.com" class="w-full border rounded p-2 bg-white">
-      </div>
-
-      <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-4 rounded-lg text-sm uppercase tracking-wider shadow-lg transition">
-        💾 GENERAR Y GUARDAR REGISTRO EN EXCEL
+      <button id="btn_guardar" type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-4 rounded-lg text-sm uppercase tracking-wider shadow-lg transition">
+        💾 GENERAR Y GUARDAR REGISTRO
       </button>
 
     </form>
@@ -637,6 +634,56 @@
       } else {
         secPreliminar.classList.add('hidden');
         secFinal.classList.remove('hidden');
+      }
+    }
+
+    async function procesarEnvio(event) {
+      event.preventDefault();
+      const tipo = document.getElementById('tipo_informe').value;
+      const form = document.getElementById('form_ssoma');
+      const btn = document.getElementById('btn_guardar');
+
+      btn.disabled = true;
+      btn.innerText = "⏳ GENERANDO Y ENVIANDO REGISTRO...";
+
+      if (tipo === 'PRELIMINAR') {
+        try {
+          // Captura de pantalla del formulario en un lienzo de imagen
+          const elemento = document.getElementById('contenedor_formulario');
+          const canvas = await html2canvas(elemento, { scale: 2, useCORS: true });
+          const imgData = canvas.toDataURL('image/png');
+
+          // Generar el archivo PDF
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          const pdfBlob = pdf.output('blob');
+
+          // Preparar datos para enviar por Fetch
+          const formData = new FormData(form);
+          formData.append('pdf_file', pdfBlob, 'Informe_Preliminar.pdf');
+
+          const response = await fetch('/enviar-reporte-preliminar', {
+            method: 'POST',
+            body: formData
+          });
+
+          const htmlRespuesta = await response.text();
+          document.open();
+          document.write(htmlRespuesta);
+          document.close();
+        } catch (err) {
+          alert("Error al generar el PDF de captura: " + err);
+          btn.disabled = false;
+          btn.innerText = "💾 GENERAR Y GUARDAR REGISTRO";
+        }
+      } else {
+        // Informe Final
+        form.action = '/enviar-reporte';
+        form.submit();
       }
     }
 
@@ -670,9 +717,9 @@
       const tr = document.createElement('tr');
       tr.className = 'border-b bg-white';
       tr.innerHTML = `
-        <td class="p-1"><input type="text" name="trab_paterno[]" required class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="text" name="trab_materno[]" required class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="text" name="trab_nombres[]" required class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
         <td class="p-1">
