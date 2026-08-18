@@ -9,16 +9,14 @@
 <body class="bg-slate-900 text-slate-800 font-sans p-2 md:p-6">
 
   <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-300">
-    
-    <!-- ENCABEZADO PRINCIPAL -->
     <div class="bg-blue-900 text-white p-5 border-b-4 border-amber-500">
       <h1 class="text-xl font-black tracking-wider">EMAPE S.A.</h1>
       <h2 class="text-sm font-bold text-amber-400">MESA DE PARTES SSOMA - REGISTRO DE EVENTOS</h2>
     </div>
 
     <form action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-6 space-y-6 text-xs">
-
-      <!-- SELECCIÓN DE TIPO DE INFORME -->
+      
+      <!-- SELECTOR PRINCIPAL -->
       <div class="bg-amber-50 p-4 rounded-lg border border-amber-300">
         <label class="font-extrabold text-sm block text-slate-800 mb-2">SELECCIONE EL TIPO DE INFORME:</label>
         <select id="tipo_informe" name="tipo_informe" onchange="cambiarTipoInforme()" class="w-full md:w-1/2 border-2 border-amber-500 rounded p-2 text-sm font-bold bg-white focus:outline-none">
@@ -27,11 +25,11 @@
         </select>
       </div>
 
-      <!-- ================================================================= -->
-      <!-- SECCIÓN 1: INFORME PRELIMINAR                                     -->
-      <!-- ================================================================= -->
+      <!-- ========================================== -->
+      <!-- SECCIÓN 1: INFORME PRELIMINAR (BLOQUE) -->
+      <!-- ========================================== -->
       <div id="seccion_preliminar" class="space-y-6">
-
+        
         <div class="bg-slate-100 p-4 rounded-lg border border-slate-300 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="font-bold text-slate-600 block mb-1">Razón Social:</label>
@@ -137,12 +135,11 @@
 
       </div>
 
-      <!-- ================================================================= -->
-      <!-- SECCIÓN 2: INFORME FINAL DE ACCIDENTE                            -->
-      <!-- ================================================================= -->
+      <!-- ========================================== -->
+      <!-- SECCIÓN 2: INFORME FINAL (BLOQUE) -->
+      <!-- ========================================== -->
       <div id="seccion_final" class="hidden space-y-6">
-
-        <!-- DATOS DEL EMPLEADOR PRINCIPAL -->
+        
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DATOS DEL EMPLEADOR PRINCIPAL</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -177,7 +174,6 @@
           </div>
         </div>
 
-        <!-- DATOS DEL EMPLEADOR DE TERCERIZACIÓN / CONTRATISTA -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DATOS DEL EMPLEADOR DE TERCERIZACIÓN, CONTRATISTA U OTROS</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -212,7 +208,6 @@
           </div>
         </div>
 
-        <!-- 1) OCURRENCIA DEL EVENTO -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">1) OCURRENCIA DEL EVENTO</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -231,7 +226,6 @@
           </div>
         </div>
 
-        <!-- 2) TIPO Y CLASIFICACIÓN DEL EVENTO -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">2) TIPO Y CLASIFICACIÓN DEL EVENTO</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -259,7 +253,6 @@
           </div>
         </div>
 
-        <!-- TABLA DINÁMICA: DATOS DEL TRABAJADOR AFECTADO E INVOLUCRADO -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider flex justify-between items-center">
             <span>DATOS DEL TRABAJADOR AFECTADO E INVOLUCRADO EN EL EVENTO</span>
@@ -286,9 +279,9 @@
               </thead>
               <tbody id="body_trabajadores">
                 <tr class="border-b bg-white">
-                  <td class="p-1"><input type="text" name="trab_paterno[]" required class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="trab_materno[]" required class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="trab_nombres[]" required class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
                   <td class="p-1">
@@ -320,7 +313,6 @@
           </div>
         </div>
 
-        <!-- CONDICIONAL: SECCIÓN ACCIDENTE -->
         <div id="bloque_accidente" class="border border-red-900 rounded-lg overflow-hidden">
           <div class="bg-red-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ACCIDENTE (EVALUACIÓN DE GRAVEDAD)</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -352,7 +344,6 @@
           </div>
         </div>
 
-        <!-- SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
           <div class="p-4 bg-slate-50">
@@ -361,7 +352,6 @@
           </div>
         </div>
 
-        <!-- SOLO EN CASOS DE ACCIDENTE A LA PERSONA E INCIDENTE CON CUIDADOS DE PRIMEROS AUXILIOS -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -410,7 +400,6 @@
           </div>
         </div>
 
-        <!-- DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -435,7 +424,6 @@
           </div>
         </div>
 
-        <!-- ANÁLISIS DEL ACCIDENTE -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ANÁLISIS DEL ACCIDENTE</div>
           <div class="p-4 bg-slate-50 space-y-3">
@@ -462,7 +450,6 @@
           </div>
         </div>
 
-        <!-- CAUSAS INMEDIATAS O DIRECTAS (5 FILAS: 1 OBLIGATORIA) -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS INMEDIATAS O DIRECTAS</div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
@@ -476,17 +463,16 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Fila 1 (Obligatoria) -->
                 <tr class="border-b bg-white">
                   <td class="p-2 font-bold text-center">1*</td>
                   <td class="p-1">
-                    <select name="cinm_tipo_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="cinm_tipo_1" class="w-full border rounded p-1 bg-white">
                       <option value="Acto Subestandar">Acto Subestandar</option>
                       <option value="Condición Subestandar">Condición Subestandar</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="cinm_causa_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="cinm_causa_1" class="w-full border rounded p-1 bg-white">
                       <option value="No usar EPP adecuado">No usar EPP adecuado</option>
                       <option value="Operar equipo sin autorización">Operar equipo sin autorización</option>
                       <option value="Uso de herramienta defectuosa">Uso de herramienta defectuosa</option>
@@ -495,91 +481,13 @@
                       <option value="No respetar procedimiento de trabajo seguro">No respetar procedimiento de trabajo seguro</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_1" required placeholder="Obligatorio" class="w-full border rounded p-1"></td>
-                </tr>
-                <!-- Filas 2 a 5 (Opcionales) -->
-                <tr class="border-b bg-slate-50">
-                  <td class="p-2 text-center">2</td>
-                  <td class="p-1">
-                    <select name="cinm_tipo_2" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Acto Subestandar">Acto Subestandar</option>
-                      <option value="Condición Subestandar">Condición Subestandar</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="cinm_causa_2" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="No usar EPP adecuado">No usar EPP adecuado</option>
-                      <option value="Operar equipo sin autorización">Operar equipo sin autorización</option>
-                      <option value="Uso de herramienta defectuosa">Uso de herramienta defectuosa</option>
-                      <option value="Falta de señalización en área de trabajo">Falta de señalización en área de trabajo</option>
-                      <option value="Superficie resbalosa o desordenada">Superficie resbalosa o desordenada</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_2" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-white">
-                  <td class="p-2 text-center">3</td>
-                  <td class="p-1">
-                    <select name="cinm_tipo_3" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Acto Subestandar">Acto Subestandar</option>
-                      <option value="Condición Subestandar">Condición Subestandar</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="cinm_causa_3" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="No usar EPP adecuado">No usar EPP adecuado</option>
-                      <option value="Operar equipo sin autorización">Operar equipo sin autorización</option>
-                      <option value="Uso de herramienta defectuosa">Uso de herramienta defectuosa</option>
-                      <option value="Falta de señalización en área de trabajo">Falta de señalización en área de trabajo</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_3" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-slate-50">
-                  <td class="p-2 text-center">4</td>
-                  <td class="p-1">
-                    <select name="cinm_tipo_4" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Acto Subestandar">Acto Subestandar</option>
-                      <option value="Condición Subestandar">Condición Subestandar</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="cinm_causa_4" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="No usar EPP adecuado">No usar EPP adecuado</option>
-                      <option value="Superficie resbalosa o desordenada">Superficie resbalosa o desordenada</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_4" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-white">
-                  <td class="p-2 text-center">5</td>
-                  <td class="p-1">
-                    <select name="cinm_tipo_5" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Acto Subestandar">Acto Subestandar</option>
-                      <option value="Condición Subestandar">Condición Subestandar</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="cinm_causa_5" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="No respetar procedimiento de trabajo seguro">No respetar procedimiento de trabajo seguro</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_5" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="cinm_obs_1" placeholder="Obligatorio" class="w-full border rounded p-1"></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- CAUSAS SUBYACENTES / BÁSICAS (5 FILAS: 1 OBLIGATORIA) -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS SUBYACENTES / BÁSICAS</div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
@@ -597,13 +505,13 @@
                 <tr class="border-b bg-white">
                   <td class="p-2 font-bold text-center">1*</td>
                   <td class="p-1">
-                    <select name="csub_tipo_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="csub_tipo_1" class="w-full border rounded p-1 bg-white">
                       <option value="Factores Personales">Factores Personales</option>
                       <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="csub_causa_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="csub_causa_1" class="w-full border rounded p-1 bg-white">
                       <option value="Falta de capacitación o entrenamiento">Falta de capacitación o entrenamiento</option>
                       <option value="Fatiga / Estrés laboral">Fatiga / Estrés laboral</option>
                       <option value="Liderazgo o supervisión deficiente">Liderazgo o supervisión deficiente</option>
@@ -611,88 +519,14 @@
                       <option value="Estándares de trabajo insuficientes">Estándares de trabajo insuficientes</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="csub_subyacente_1" required placeholder="Causa raíz" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="csub_obs_1" required placeholder="Obligatorio" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-slate-50">
-                  <td class="p-2 text-center">2</td>
-                  <td class="p-1">
-                    <select name="csub_tipo_2" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Factores Personales">Factores Personales</option>
-                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="csub_causa_2" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Falta de capacitación o entrenamiento">Falta de capacitación o entrenamiento</option>
-                      <option value="Liderazgo o supervisión deficiente">Liderazgo o supervisión deficiente</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="csub_subyacente_2" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="csub_obs_2" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-white">
-                  <td class="p-2 text-center">3</td>
-                  <td class="p-1">
-                    <select name="csub_tipo_3" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Factores Personales">Factores Personales</option>
-                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="csub_causa_3" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Fatiga / Estrés laboral">Fatiga / Estrés laboral</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="csub_subyacente_3" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="csub_obs_3" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-slate-50">
-                  <td class="p-2 text-center">4</td>
-                  <td class="p-1">
-                    <select name="csub_tipo_4" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Factores Personales">Factores Personales</option>
-                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="csub_causa_4" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Estándares de trabajo insuficientes">Estándares de trabajo insuficientes</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="csub_subyacente_4" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="csub_obs_4" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-white">
-                  <td class="p-2 text-center">5</td>
-                  <td class="p-1">
-                    <select name="csub_tipo_5" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Factores Personales">Factores Personales</option>
-                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                    </select>
-                  </td>
-                  <td class="p-1">
-                    <select name="csub_causa_5" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Mantenimiento inadecuado de equipos">Mantenimiento inadecuado de equipos</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="csub_subyacente_5" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="csub_obs_5" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_subyacente_1" placeholder="Causa raíz" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_obs_1" placeholder="Obligatorio" class="w-full border rounded p-1"></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- ACCIONES CORRECTIVAS Y/O PREVENTIVAS (4 FILAS: 1 OBLIGATORIA) -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ACCIONES CORRECTIVAS Y/O PREVENTIVAS PARA EVITAR REPETICIÓN</div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
@@ -712,15 +546,15 @@
                 <tr class="border-b bg-white">
                   <td class="p-2 font-bold text-center">1*</td>
                   <td class="p-1">
-                    <select name="acc_tipo_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="acc_tipo_1" class="w-full border rounded p-1 bg-white">
                       <option value="Correctiva">Correctiva</option>
                       <option value="Preventiva">Preventiva</option>
                       <option value="Mejora Continua">Mejora Continua</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="acc_control_1" required placeholder="Acción a realizar" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="acc_resp_1" required placeholder="Nombre responsable" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="date" name="acc_fecha_1" required class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_control_1" placeholder="Acción a realizar" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_resp_1" placeholder="Nombre responsable" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="date" name="acc_fecha_1" class="w-full border rounded p-1"></td>
                   <td class="p-1">
                     <select name="acc_sit_1" class="w-full border rounded p-1 bg-white">
                       <option value="Pendiente">Pendiente</option>
@@ -730,75 +564,11 @@
                   </td>
                   <td class="p-1"><input type="text" name="acc_obs_1" class="w-full border rounded p-1"></td>
                 </tr>
-                <tr class="border-b bg-slate-50">
-                  <td class="p-2 text-center">2</td>
-                  <td class="p-1">
-                    <select name="acc_tipo_2" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Correctiva">Correctiva</option>
-                      <option value="Preventiva">Preventiva</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="acc_control_2" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="acc_resp_2" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="date" name="acc_fecha_2" class="w-full border rounded p-1"></td>
-                  <td class="p-1">
-                    <select name="acc_sit_2" class="w-full border rounded p-1 bg-white">
-                      <option value="Pendiente">Pendiente</option>
-                      <option value="En Proceso">En Proceso</option>
-                      <option value="Ejecutado">Ejecutado</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="acc_obs_2" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-white">
-                  <td class="p-2 text-center">3</td>
-                  <td class="p-1">
-                    <select name="acc_tipo_3" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Correctiva">Correctiva</option>
-                      <option value="Preventiva">Preventiva</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="acc_control_3" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="acc_resp_3" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="date" name="acc_fecha_3" class="w-full border rounded p-1"></td>
-                  <td class="p-1">
-                    <select name="acc_sit_3" class="w-full border rounded p-1 bg-white">
-                      <option value="Pendiente">Pendiente</option>
-                      <option value="En Proceso">En Proceso</option>
-                      <option value="Ejecutado">Ejecutado</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="acc_obs_3" class="w-full border rounded p-1"></td>
-                </tr>
-                <tr class="border-b bg-slate-50">
-                  <td class="p-2 text-center">4</td>
-                  <td class="p-1">
-                    <select name="acc_tipo_4" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Opcional --</option>
-                      <option value="Correctiva">Correctiva</option>
-                      <option value="Preventiva">Preventiva</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="acc_control_4" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="acc_resp_4" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="date" name="acc_fecha_4" class="w-full border rounded p-1"></td>
-                  <td class="p-1">
-                    <select name="acc_sit_4" class="w-full border rounded p-1 bg-white">
-                      <option value="Pendiente">Pendiente</option>
-                      <option value="En Proceso">En Proceso</option>
-                      <option value="Ejecutado">Ejecutado</option>
-                    </select>
-                  </td>
-                  <td class="p-1"><input type="text" name="acc_obs_4" class="w-full border rounded p-1"></td>
-                </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -819,7 +589,6 @@
           </div>
         </div>
 
-        <!-- TESTIGOS -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">TESTIGOS</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -842,7 +611,7 @@
 
       </div>
 
-      <!-- NOTIFICACIÓN DE CORREO GENERAL -->
+      <!-- CORREO DESTINO Y BOTÓN ENVIAR -->
       <div class="bg-amber-100 p-4 rounded-lg border border-amber-300">
         <label class="font-bold block text-slate-800 mb-1">CORREO DESTINO DE NOTIFICACIÓN:</label>
         <input type="email" name="correo_destino" required placeholder="correo@empresa.com" class="w-full border rounded p-2 bg-white">
@@ -855,6 +624,7 @@
     </form>
   </div>
 
+  <!-- SCRIPT DE INTERACTIVIDAD INTEGRADO -->
   <script>
     function cambiarTipoInforme() {
       const tipo = document.getElementById('tipo_informe').value;
@@ -934,6 +704,5 @@
       body.appendChild(tr);
     }
   </script>
-
 </body>
 </html>
