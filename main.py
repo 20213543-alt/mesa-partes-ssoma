@@ -2,10 +2,11 @@ import os
 import smtplib
 import requests
 import traceback
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 import openpyxl
 
 app = FastAPI()
@@ -46,12 +47,17 @@ def home():
             return f.read()
     return "<h1>Servidor SSOMA activo</h1>"
 
-@app.post("/enviar-reporte")
+@app.post("/enviar-reporte", response_class=HTMLResponse)
 async def enviar_reporte(request: Request):
     try:
         form_data = await request.form()
 
-        # Extraer variables con soporte para arreglos o valores individuales
+        # Generar Fecha/Hora de Registro y Código Único de Comprobante
+        ahora = datetime.now()
+        fecha_registro_str = ahora.strftime("%d/%m/%Y %H:%M:%S")
+        codigo_comprobante = f"REP-{ahora.strftime('%Y%m%d-%H%M%S')}"
+
+        # Extraer variables
         fin_fecha_evento = form_data.get("fin_fecha_evento", "")
         fin_hora_evento = form_data.get("fin_hora_evento", "")
         fin_lugar_exacto = form_data.get("fin_lugar_exacto", "")
@@ -65,7 +71,7 @@ async def enviar_reporte(request: Request):
         ana_que_sucedio = form_data.get("ana_que_sucedio", "")
         inv_nombre = form_data.get("inv_nombre") or form_data.get("inv_nombre[]") or ""
 
-        # Objeto mapeado exacto para Google Sheets
+        # Objeto para Google Sheets
         datos_envio = {
             "fin_fecha_evento": fin_fecha_evento,
             "fin_hora_evento": fin_hora_evento,
@@ -85,33 +91,88 @@ async def enviar_reporte(request: Request):
         except Exception as err_sheet:
             print(f"Error al enviar a Google Sheets: {err_sheet}")
 
-        # Llenar Excel para descarga
-        if os.path.exists(PLANTILLA_PATH):
-            wb = openpyxl.load_workbook(PLANTILLA_PATH)
-            ws = wb.active
-        else:
-            wb = openpyxl.Workbook()
-            ws = wb.active
-
-        ws['C30'] = fin_fecha_evento
-        ws['C31'] = fin_hora_evento
-        ws['R30'] = fin_lugar_exacto
-
         nombre_completo = f"{trab_paterno} {trab_materno} {trab_nombres}".strip() or "Anónimo"
-        asunto = f"NUEVO REGISTRO SSOMA: Informe Final - {nombre_completo}"
-        cuerpo = f"Se ha registrado un Informe Final de Accidente.\nTrabajador: {nombre_completo}\nDNI: {trab_dni}\nFecha: {fin_fecha_evento}"
-        nombre_archivo = "Informe_Final.xlsx"
-
-        wb.save(nombre_archivo)
         
-        # 2. ENVIAR CORREO DE NOTIFICACIÓN
+        # 2. ENVIAR CORREO DE NOTIFICACIÓN CON EL CÓDIGO INCLUIDO
+        asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: Informe Final - {nombre_completo}"
+        cuerpo = f"Se ha registrado un Informe Final de Accidente.\n\nCódigo de Comprobante: {codigo_comprobante}\nFecha de Registro: {fecha_registro_str}\nTrabajador: {nombre_completo}\nDNI: {trab_dni}\nFecha Evento: {fin_fecha_evento}"
         enviar_correo_notificacion(asunto, cuerpo)
 
-        return FileResponse(
-            path=nombre_archivo,
-            filename=nombre_archivo,
-            media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        # 3. MOSTRAR PANTALLA DE CONFIRMACIÓN EN LA WEB
+        html_confirmacion = f"""
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reporte Registrado Exitosamente</title>
+            <style>
+                body {{
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f4f7f6;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                }}
+                .card {{
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    max-width: 500px;
+                    width: 90%;
+                    text-align: center;
+                }}
+                .icon {{
+                    font-size: 50px;
+                    color: #28a745;
+                    margin-bottom: 10px;
+                }}
+                h2 {{ color: #333; margin-bottom: 20px; }}
+                .comprobante-box {{
+                    background-color: #e9ecef;
+                    border-left: 5px solid #007bff;
+                    padding: 15px;
+                    text-align: left;
+                    margin: 20px 0;
+                    border-radius: 4px;
+                }}
+                .comprobante-box p {{ margin: 5px 0; font-size: 14px; color: #495057; }}
+                .code {{ font-weight: bold; font-size: 16px; color: #007bff; }}
+                .btn {{
+                    display: inline-block;
+                    background-color: #007bff;
+                    color: white;
+                    padding: 10px 20px;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    margin-top: 15px;
+                    font-weight: bold;
+                }}
+                .btn:hover {{ background-color: #0056b3; }}
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="icon">✓</div>
+                <h2>¡Reporte Enviado con Éxito!</h2>
+                <p>El informe ha sido registrado correctamente en la base de datos de SSOMA.</p>
+                
+                <div class="comprobante-box">
+                    <p><strong>Código de Comprobante:</strong> <span class="code">{codigo_comprobante}</span></p>
+                    <p><strong>Fecha y Hora de Registro:</strong> {fecha_registro_str}</p>
+                    <p><strong>Afectado / Trabajador:</strong> {nombre_completo}</p>
+                    <p><strong>DNI:</strong> {trab_dni}</p>
+                </div>
+
+                <a href="/" class="btn">Volver al Formulario</a>
+            </div>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_confirmacion, status_code=200)
 
     except Exception as e:
         error_detallado = traceback.format_exc()
