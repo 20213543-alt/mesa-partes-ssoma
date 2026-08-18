@@ -3,5 +3,3 @@ uvicorn
 openpyxl
 python-multipart
 requests
-jinja2
-tzdata
