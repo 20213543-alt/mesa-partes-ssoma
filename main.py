@@ -48,22 +48,80 @@ def enviar_correo_con_pdf(destinatarios: list, asunto: str, cuerpo: str, pdf_pat
         server.sendmail(SENDER_EMAIL, destinatarios, msg.as_string())
         server.quit()
     except Exception as e:
-        print(f"Error al enviar correo con PDF: {e}")
+        print(f"Error al enviar correo: {e}")
 
-def generar_pdf_reporte_completo(f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str):
-    # Generar tabla de trabajadores
+def g(form_dict, key, default="-"):
+    val = form_dict.get(key)
+    if val is None or str(val).strip() == "":
+        return default
+    return str(val).strip()
+
+def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str):
+    # 1. TRABAJADORES
     filas_trabajadores = ""
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
         <tr>
-            <td>{trab['paterno']} {trab['materno']} {trab['nombres']}</td>
-            <td>{trab['dni']}</td>
-            <td>{trab.get('puesto', '-')}</td>
-            <td>{trab.get('area', '-')}</td>
+            <td>{trab.get('paterno','-')}</td>
+            <td>{trab.get('materno','-')}</td>
+            <td>{trab.get('nombres','-')}</td>
+            <td>{trab.get('ocupacion','-')}</td>
+            <td>{trab.get('condicion','-')}</td>
+            <td>{trab.get('sexo','-')}</td>
+            <td>{trab.get('dni','-')}</td>
+            <td>{trab.get('edad','-')}</td>
+            <td>{trab.get('turno','-')}</td>
+            <td>{trab.get('personal','-')}</td>
         </tr>
         """
     if not filas_trabajadores:
-        filas_trabajadores = "<tr><td colspan='4'>No se registraron trabajadores</td></tr>"
+        filas_trabajadores = "<tr><td colspan='10'>No se registraron trabajadores</td></tr>"
+
+    # 2. CAUSAS INMEDIATAS
+    filas_causas_inmediatas = ""
+    for ci in f.get("causas_inmediatas_list", []):
+        filas_causas_inmediatas += f"""
+        <tr>
+            <td style='text-align:center;'>{ci.get('fila','-')}</td>
+            <td>{ci.get('tipo','-')}</td>
+            <td>{ci.get('causa','-')}</td>
+            <td>{ci.get('obs','-')}</td>
+        </tr>
+        """
+    if not filas_causas_inmediatas:
+        filas_causas_inmediatas = "<tr><td colspan='4'>Sin registros</td></tr>"
+
+    # 3. CAUSAS BÁSICAS
+    filas_causas_basicas = ""
+    for cb in f.get("causas_basicas_list", []):
+        filas_causas_basicas += f"""
+        <tr>
+            <td style='text-align:center;'>{cb.get('fila','-')}</td>
+            <td>{cb.get('tipo','-')}</td>
+            <td>{cb.get('causa','-')}</td>
+            <td>{cb.get('subyacente','-')}</td>
+            <td>{cb.get('obs','-')}</td>
+        </tr>
+        """
+    if not filas_causas_basicas:
+        filas_causas_basicas = "<tr><td colspan='5'>Sin registros</td></tr>"
+
+    # 4. MEDIDAS CORRECTIVAS
+    filas_medidas = ""
+    for mc in f.get("medidas_correctivas_list", []):
+        filas_medidas += f"""
+        <tr>
+            <td style='text-align:center;'>{mc.get('fila','-')}</td>
+            <td>{mc.get('tipo','-')}</td>
+            <td>{mc.get('accion','-')}</td>
+            <td>{mc.get('responsable','-')}</td>
+            <td>{mc.get('fecha','-')}</td>
+            <td>{mc.get('situacion','-')}</td>
+            <td>{mc.get('obs','-')}</td>
+        </tr>
+        """
+    if not filas_medidas:
+        filas_medidas = "<tr><td colspan='7'>Sin registros</td></tr>"
 
     html_content = f"""
     <!DOCTYPE html>
@@ -71,25 +129,27 @@ def generar_pdf_reporte_completo(f: dict, codigo: str, tipo_informe: str, fecha_
     <head>
         <meta charset="UTF-8">
         <style>
-            @page {{ size: A4; margin: 12mm 10mm; background-color: #ffffff; }}
-            body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #222; margin: 0; padding: 0; }}
-            .header {{ background-color: #003366; color: white; padding: 12px; border-radius: 5px; margin-bottom: 12px; }}
+            @page {{ size: A4; margin: 10mm 8mm; background-color: #ffffff; }}
+            body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8pt; color: #111; margin: 0; padding: 0; }}
+            
+            .header {{ background-color: #1a365d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 10px; }}
             .header table {{ width: 100%; border-collapse: collapse; }}
-            .title {{ font-size: 13pt; font-weight: bold; text-transform: uppercase; }}
-            .subtitle {{ font-size: 8.5pt; opacity: 0.9; margin-top: 3px; }}
-            .badge {{ background-color: #f0a500; color: #003366; padding: 5px 10px; font-weight: bold; font-size: 10pt; border-radius: 3px; }}
+            .title {{ font-size: 12pt; font-weight: bold; text-transform: uppercase; }}
+            .subtitle {{ font-size: 8pt; opacity: 0.9; margin-top: 2px; }}
+            .badge {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9.5pt; border-radius: 3px; }}
             
-            .section-title {{ font-size: 9.5pt; font-weight: bold; color: #003366; border-bottom: 1.5px solid #003366; padding-bottom: 2px; margin-top: 10px; margin-bottom: 6px; text-transform: uppercase; }}
+            .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 8.5pt; padding: 4px 8px; margin-top: 8px; margin-bottom: 4px; text-transform: uppercase; border-radius: 2px; }}
+            .sec-red {{ background-color: #742a2a; }}
             
-            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }}
-            .grid-table td, .grid-table th {{ border: 1px solid #cccccc; padding: 4px 6px; font-size: 8pt; vertical-align: top; word-wrap: break-word; }}
-            .grid-table th {{ background-color: #f2f4f8; color: #003366; text-align: left; font-weight: bold; }}
+            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; }}
+            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px 5px; font-size: 7.5pt; vertical-align: middle; word-wrap: break-word; }}
+            .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
             
-            .label {{ font-weight: bold; color: #444; background-color: #f8f9fa; width: 25%; }}
-            .value {{ color: #111; width: 25%; }}
+            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
+            .val {{ color: #1a202c; width: 28%; }}
             
-            .text-box {{ border: 1px solid #cccccc; background-color: #fcfcfc; padding: 6px; font-size: 8pt; line-height: 1.3; min-height: 35px; border-radius: 3px; margin-bottom: 8px; }}
-            .footer {{ margin-top: 15px; font-size: 7.5pt; color: #666; text-align: center; border-top: 1px solid #ddd; padding-top: 5px; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 5px; font-size: 7.5pt; line-height: 1.2; min-height: 25px; border-radius: 3px; margin-bottom: 6px; }}
+            .footer {{ margin-top: 10px; font-size: 7pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
     </head>
     <body>
@@ -98,7 +158,7 @@ def generar_pdf_reporte_completo(f: dict, codigo: str, tipo_informe: str, fecha_
                 <tr>
                     <td>
                         <div class="title">EMAPE S.A. - MESA DE PARTES SSOMA</div>
-                        <div class="subtitle">REGISTRO COMPLETO DE RESPUESTAS - INFORME {tipo_informe}</div>
+                        <div class="subtitle">CONSTANCIA Y REGISTRO OFICIAL - {tipo_informe.upper()}</div>
                     </td>
                     <td style="text-align: right;">
                         <div class="badge">{codigo}</div>
@@ -107,42 +167,88 @@ def generar_pdf_reporte_completo(f: dict, codigo: str, tipo_informe: str, fecha_
             </table>
         </div>
 
-        <div class="section-title">1. DATOS GENERALES DEL INFORME Y EVENTO</div>
+        <div class="sec-header">DATOS DEL EMPLEADOR PRINCIPAL</div>
         <table class="grid-table">
             <tr>
-                <td class="label">Tipo de Informe:</td>
-                <td class="value">{tipo_informe}</td>
-                <td class="label">Fecha y Hora Registro:</td>
-                <td class="value">{fecha_registro}</td>
+                <td class="lbl">Razón Social:</td>
+                <td class="val" colspan="3">{g(f, 'emp_razon_social', 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td class="lbl">RUC:</td>
+                <td class="val">{g(f, 'emp_ruc', '20100063337')}</td>
             </tr>
             <tr>
-                <td class="label">Fecha del Evento:</td>
-                <td class="value">{f.get('fin_fecha_evento') or f.get('fecha_evento_pre') or '-'}</td>
-                <td class="label">Hora del Evento:</td>
-                <td class="value">{f.get('fin_hora_evento') or f.get('hora_ocurrencia_pre') or '-'}</td>
+                <td class="lbl">Sede:</td>
+                <td class="val">{g(f, 'emp_sede')}</td>
+                <td class="lbl">Dirección:</td>
+                <td class="val" colspan="3">{g(f, 'emp_direccion')}</td>
             </tr>
             <tr>
-                <td class="label">Lugar Exacto:</td>
-                <td class="value">{f.get('fin_lugar_exacto') or f.get('lugar_ocurrencia_pre') or '-'}</td>
-                <td class="label">Tipo de Evento:</td>
-                <td class="value">{f.get('fin_tipo_evento') or f.get('tipo_evento_pre') or '-'}</td>
-            </tr>
-            <tr>
-                <td class="label">Gravedad del Evento:</td>
-                <td class="value">{f.get('fin_gravedad_evento') or f.get('gravedad_evento_pre') or '-'}</td>
-                <td class="label">Correo Notificación:</td>
-                <td class="value">{f.get('correo_destino') or '-'}</td>
+                <td class="lbl">N° Trab. Centro Laboral:</td>
+                <td class="val">{g(f, 'emp_num_trab')}</td>
+                <td class="lbl">N° Afiliados SCTR:</td>
+                <td class="val">{g(f, 'emp_num_sctr')}</td>
+                <td class="lbl">Aseguradora SCTR:</td>
+                <td class="val">{g(f, 'emp_aseguradora')}</td>
             </tr>
         </table>
 
-        <div class="section-title">2. DATOS DE LOS TRABAJADORES AFECTADOS</div>
+        <div class="sec-header">DATOS DEL EMPLEADOR DE TERCERIZACIÓN, CONTRATISTA U OTROS</div>
+        <table class="grid-table">
+            <tr>
+                <td class="lbl">Razón Social / Nombre:</td>
+                <td class="val" colspan="3">{g(f, 'ter_razon_social')}</td>
+                <td class="lbl">RUC:</td>
+                <td class="val">{g(f, 'ter_ruc')}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Domicilio:</td>
+                <td class="val" colspan="3">{g(f, 'ter_domicilio')}</td>
+                <td class="lbl">Actividad Económica:</td>
+                <td class="val">{g(f, 'ter_actividad')}</td>
+            </tr>
+            <tr>
+                <td class="lbl">N° Trab. Centro Laboral:</td>
+                <td class="val">{g(f, 'ter_num_trab')}</td>
+                <td class="lbl">N° Afiliados SCTR:</td>
+                <td class="val">{g(f, 'ter_num_sctr')}</td>
+                <td class="lbl">Aseguradora:</td>
+                <td class="val">{g(f, 'ter_aseguradora')}</td>
+            </tr>
+        </table>
+
+        <div class="sec-header">1) OCURRENCIA DEL EVENTO Y 2) TIPO Y CLASIFICACIÓN</div>
+        <table class="grid-table">
+            <tr>
+                <td class="lbl">Fecha Evento:</td>
+                <td class="val">{g(f, 'fin_fecha_evento', g(f, 'fecha_evento_pre'))}</td>
+                <td class="lbl">Hora Evento:</td>
+                <td class="val">{g(f, 'fin_hora_evento', g(f, 'hora_ocurrencia_pre'))}</td>
+                <td class="lbl">Lugar Exacto:</td>
+                <td class="val">{g(f, 'fin_lugar_exacto', g(f, 'lugar_ocurrencia_pre'))}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Tipo de Evento:</td>
+                <td class="val">{g(f, 'fin_tipo_evento', g(f, 'tipo_evento_pre'))}</td>
+                <td class="lbl">Clasificación Evento:</td>
+                <td class="val">{g(f, 'fin_clasificacion')}</td>
+                <td class="lbl">Solo Incidente (Peligrosidad):</td>
+                <td class="val">{g(f, 'fin_solo_incidente')}</td>
+            </tr>
+        </table>
+
+        <div class="sec-header">DATOS DEL TRABAJADOR AFECTADO E INVOLUCRADO EN EL EVENTO</div>
         <table class="grid-table">
             <thead>
                 <tr>
-                    <th>Apellidos y Nombres</th>
-                    <th>DNI / Documento</th>
-                    <th>Puesto / Cargo</th>
-                    <th>Área / Gerencia</th>
+                    <th>A. Paterno</th>
+                    <th>A. Materno</th>
+                    <th>Nombres</th>
+                    <th>Ocupación</th>
+                    <th>Condición</th>
+                    <th>Sexo</th>
+                    <th>DNI</th>
+                    <th>Edad</th>
+                    <th>Turno</th>
+                    <th>Personal</th>
                 </tr>
             </thead>
             <tbody>
@@ -150,55 +256,146 @@ def generar_pdf_reporte_completo(f: dict, codigo: str, tipo_informe: str, fecha_
             </tbody>
         </table>
 
-        <div class="section-title">3. ANÁLISIS DEL SUCESO Y DESCRIPCIÓN DETALLADA</div>
-        <div class="text-box">
-            <strong>¿Qué sucedió y cómo sucedió?:</strong><br>
-            {f.get('ana_que_sucedio') or f.get('breve_descripcion_pre') or '-'}
-        </div>
-
-        <div class="section-title">4. CAUSAS DE LA INVESTIGACIÓN (INMEDIATAS Y BÁSICAS)</div>
+        <div class="sec-header sec-red">ACCIDENTE (EVALUACIÓN DE GRAVEDAD)</div>
         <table class="grid-table">
             <tr>
-                <td class="label">Actos Subestándar:</td>
-                <td class="value" colspan="3">{f.get('ana_actos_subestandar') or '-'}</td>
+                <td class="lbl">Gravedad Accidente:</td>
+                <td class="val">{g(f, 'fin_gravedad_evento', g(f, 'gravedad_evento_pre'))}</td>
+                <td class="lbl">Grado Incapacitante:</td>
+                <td class="val">{g(f, 'acc_grado_incapacitante')}</td>
+                <td class="lbl">Días Descanso Médico:</td>
+                <td class="val">{g(f, 'acc_dias_descanso')}</td>
             </tr>
             <tr>
-                <td class="label">Condiciones Subestándar:</td>
-                <td class="value" colspan="3">{f.get('ana_condiciones_subestandar') or '-'}</td>
-            </tr>
-            <tr>
-                <td class="label">Factores Personales:</td>
-                <td class="value" colspan="3">{f.get('ana_factores_personales') or '-'}</td>
-            </tr>
-            <tr>
-                <td class="label">Factores del Trabajo:</td>
-                <td class="value" colspan="3">{f.get('ana_factores_trabajo') or '-'}</td>
+                <td class="lbl">Días Cargados:</td>
+                <td class="val">{g(f, 'acc_dias_cargados')}</td>
+                <td class="lbl">N° Trab. Afectados:</td>
+                <td class="val" colspan="3">{g(f, 'acc_num_afectados')}</td>
             </tr>
         </table>
 
-        <div class="section-title">5. ACCIONES CORRECTIVAS Y MEDIDAS PREVENTIVAS</div>
+        <div class="sec-header">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
         <div class="text-box">
-            {f.get('medidas_correctivas') or '-'}
+            <strong>Tipo de Atención en Primeros Auxilios:</strong> {g(f, 'pa_tipo_atencion')}
         </div>
 
-        <div class="section-title">6. INTEGRANTES DE LA INVESTIGACIÓN Y FIRMAS</div>
+        <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
         <table class="grid-table">
             <tr>
-                <td class="label">Nombre Investigador:</td>
-                <td class="value">{f.get('inv_nombre') or f.get('resp_nombre_pre') or '-'}</td>
-                <td class="label">Cargo Investigador:</td>
-                <td class="value">{f.get('inv_cargo') or '-'}</td>
+                <td class="lbl">Forma Accidente/Incidente:</td>
+                <td class="val">{g(f, 'les_forma')}</td>
+                <td class="lbl">Tipo de Lesión:</td>
+                <td class="val" colspan="3">{g(f, 'les_tipo')}</td>
             </tr>
             <tr>
-                <td class="label">Firma Digital / Nombre:</td>
-                <td class="value">{f.get('firma_inv_text') or f.get('firma_pre_text') or '-'}</td>
-                <td class="label">Testigos / Afectados:</td>
-                <td class="value">{f.get('testigo_nombre') or '-'}</td>
+                <td class="lbl">Agente Causante (EMAPE):</td>
+                <td class="val">{g(f, 'les_agente')}</td>
+                <td class="lbl">Parte Cuerpo Afectada:</td>
+                <td class="val" colspan="3">{g(f, 'les_parte_cuerpo')}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Hospital / Clínica / Tópico:</td>
+                <td class="val" colspan="5">{g(f, 'les_hospital')}</td>
+            </tr>
+        </table>
+
+        <div class="sec-header">DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE</div>
+        <table class="grid-table">
+            <tr>
+                <td class="lbl">Daño Material:</td>
+                <td class="val">{g(f, 'dan_material')}</td>
+                <td class="lbl">Agente Causante del Daño:</td>
+                <td class="val">{g(f, 'dan_agente')}</td>
+            </tr>
+        </table>
+        <div class="text-box">
+            <strong>Descripción del Evento (Daños / M.A.):</strong> {g(f, 'dan_descripcion')}
+        </div>
+
+        <div class="sec-header">ANÁLISIS DEL ACCIDENTE</div>
+        <table class="grid-table">
+            <tr><td class="lbl">¿Qué sucedió?:</td><td class="val" colspan="5">{g(f, 'ana_que_sucedio', g(f, 'breve_descripcion_pre'))}</td></tr>
+            <tr><td class="lbl">¿Por qué? / Tipo Contacto:</td><td class="val" colspan="5">{g(f, 'ana_tipo_contacto')}</td></tr>
+            <tr><td class="lbl">¿Por qué? / Causa Inmediata:</td><td class="val" colspan="5">{g(f, 'ana_causa_inmediata')}</td></tr>
+            <tr><td class="lbl">¿Por qué? / Causa Básica:</td><td class="val" colspan="5">{g(f, 'ana_causa_basica')}</td></tr>
+            <tr><td class="lbl">¿Por qué? / Falta Control:</td><td class="val" colspan="5">{g(f, 'ana_falta_control')}</td></tr>
+        </table>
+
+        <div class="sec-header">CAUSAS INMEDIATAS O DIRECTAS</div>
+        <table class="grid-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">Fila</th>
+                    <th style="width: 25%;">Tipo</th>
+                    <th style="width: 35%;">Causas Frecuentes</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {filas_causas_inmediatas}
+            </tbody>
+        </table>
+
+        <div class="sec-header">CAUSAS SUBYACENTES / BÁSICAS</div>
+        <table class="grid-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">Fila</th>
+                    <th style="width: 22%;">Tipo</th>
+                    <th style="width: 25%;">Causas Comunes</th>
+                    <th style="width: 25%;">Causa Subyacente</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {filas_causas_basicas}
+            </tbody>
+        </table>
+
+        <div class="sec-header">ACCIONES CORRECTIVAS Y/O PREVENTIVAS PARA EVITAR REPETICIÓN</div>
+        <table class="grid-table">
+            <thead>
+                <tr>
+                    <th style="width: 6%;">Fila</th>
+                    <th style="width: 14%;">Tipo Acción</th>
+                    <th style="width: 28%;">¿Qué se debería hacer?</th>
+                    <th style="width: 18%;">Responsable</th>
+                    <th style="width: 12%;">F. Prog.</th>
+                    <th style="width: 10%;">Situación</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+            <tbody>
+                {filas_medidas}
+            </tbody>
+        </table>
+
+        <div class="sec-header">RESPONSABLE DE REGISTRO, INVESTIGACIÓN Y TESTIGOS</div>
+        <table class="grid-table">
+            <tr>
+                <td class="lbl">Nombre Resp./Investigador:</td>
+                <td class="val">{g(f, 'inv_nombre', g(f, 'resp_nombre_pre'))}</td>
+                <td class="lbl">Cargo:</td>
+                <td class="val">{g(f, 'inv_cargo')}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Firma Investigador:</td>
+                <td class="val" colspan="3">{g(f, 'firma_inv_text', f"<b>[REGISTRADO POR: {g(f, 'inv_nombre', g(f, 'resp_nombre_pre'))}]</b>")}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Nombre Completo Testigo:</td>
+                <td class="val">{g(f, 'tes_nombre')}</td>
+                <td class="lbl">Cargo / Vínculo:</td>
+                <td class="val">{g(f, 'tes_cargo')}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Firma del Testigo:</td>
+                <td class="val" colspan="3">{g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
             </tr>
         </table>
 
         <div class="footer">
-            Documento integral de respuestas - Sistema de Gestión SSOMA - EMAPE S.A.
+            Documento Digital Generado por el Sistema de Gestión SSOMA - EMAPE S.A. | Fecha Registro: {fecha_registro}
         </div>
     </body>
     </html>
@@ -231,36 +428,79 @@ async def enviar_reporte(request: Request):
 
         tipo_informe = form_data.get("tipo_informe", "PRELIMINAR")
 
-        # Capturar lista completa de trabajadores
+        # 1. PARSEAR TRABAJADORES (MULTIFILAS)
         lista_trabajadores = []
-        if tipo_informe == "PRELIMINAR":
-            trab_nombres_str = form_data.get("nombre_lesionado_pre", "")
+        paterno_list = form_data.getlist("trab_paterno[]") or [form_data.get("trab_paterno", "")]
+        materno_list = form_data.getlist("trab_materno[]") or [form_data.get("trab_materno", "")]
+        nombres_list = form_data.getlist("trab_nombres[]") or [form_data.get("trab_nombres", "")]
+        ocupacion_list = form_data.getlist("trab_ocupacion[]") or [form_data.get("trab_ocupacion", "")]
+        condicion_list = form_data.getlist("trab_condicion[]") or [form_data.get("trab_condicion", "")]
+        sexo_list = form_data.getlist("trab_sexo[]") or [form_data.get("trab_sexo", "")]
+        dni_list = form_data.getlist("trab_dni[]") or [form_data.get("trab_dni", "")]
+        edad_list = form_data.getlist("trab_edad[]") or [form_data.get("trab_edad", "")]
+        turno_list = form_data.getlist("trab_turno[]") or [form_data.get("trab_turno", "")]
+        personal_list = form_data.getlist("trab_personal[]") or [form_data.get("trab_personal", "")]
+
+        for p, m, n, oc, co, sx, d, ed, tu, pe in zip(
+            paterno_list, materno_list, nombres_list, ocupacion_list, condicion_list, sexo_list, dni_list, edad_list, turno_list, personal_list
+        ):
+            if any([p, m, n, d]):
+                lista_trabajadores.append({
+                    "paterno": p, "materno": m, "nombres": n, "ocupacion": oc, "condicion": co,
+                    "sexo": sx, "dni": d, "edad": ed, "turno": tu, "personal": pe
+                })
+
+        if not lista_trabajadores and tipo_informe == "PRELIMINAR":
             lista_trabajadores.append({
-                "nombres": trab_nombres_str, "paterno": "", "materno": "", "dni": "-", "puesto": "-", "area": "-"
+                "paterno": "", "materno": "", "nombres": form_data.get("nombre_lesionado_pre", ""),
+                "ocupacion": "-", "condicion": "Afectado", "sexo": "-", "dni": "-", "edad": "-", "turno": "-", "personal": "-"
             })
-            trab_paterno_str, trab_materno_str, trab_dni_str = "", "", "N/A"
-        else:
-            nombres_list = form_data.getlist("trab_nombres[]") or [form_data.get("trab_nombres", "")]
-            paterno_list = form_data.getlist("trab_paterno[]") or [form_data.get("trab_paterno", "")]
-            materno_list = form_data.getlist("trab_materno[]") or [form_data.get("trab_materno", "")]
-            dni_list = form_data.getlist("trab_dni[]") or [form_data.get("trab_dni", "")]
-            puesto_list = form_data.getlist("trab_puesto[]") or [form_data.get("trab_puesto", "")]
-            area_list = form_data.getlist("trab_area[]") or [form_data.get("trab_area", "")]
-
-            for n, p, m, d, pu, ar in zip(nombres_list, paterno_list, materno_list, dni_list, puesto_list, area_list):
-                if n or p or d:
-                    lista_trabajadores.append({
-                        "nombres": n, "paterno": p, "materno": m, "dni": d, "puesto": pu, "area": ar
-                    })
-
-            trab_nombres_str = ", ".join(filter(None, nombres_list))
-            trab_paterno_str = ", ".join(filter(None, paterno_list))
-            trab_materno_str = ", ".join(filter(None, materno_list))
-            trab_dni_str = ", ".join(filter(None, dni_list))
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
-        # 1. ENVÍO A GOOGLE SHEETS
+        # 2. PARSEAR TABLA CAUSAS INMEDIATAS
+        causas_inmediatas_list = []
+        ci_filas = form_data.getlist("ci_fila[]")
+        ci_tipos = form_data.getlist("ci_tipo[]")
+        ci_causas = form_data.getlist("ci_causa[]")
+        ci_obs = form_data.getlist("ci_obs[]")
+        for f_num, t, c, o in zip(ci_filas, ci_tipos, ci_causas, ci_obs):
+            if t or c or o:
+                causas_inmediatas_list.append({"fila": f_num, "tipo": t, "causa": c, "obs": o})
+        form_dict["causas_inmediatas_list"] = causas_inmediatas_list
+
+        # 3. PARSEAR TABLA CAUSAS BÁSICAS
+        causas_basicas_list = []
+        cb_filas = form_data.getlist("cb_fila[]")
+        cb_tipos = form_data.getlist("cb_tipo[]")
+        cb_causas = form_data.getlist("cb_causa[]")
+        cb_sub = form_data.getlist("cb_subyacente[]")
+        cb_obs = form_data.getlist("cb_obs[]")
+        for f_num, t, c, s, o in zip(cb_filas, cb_tipos, cb_causas, cb_sub, cb_obs):
+            if t or c or s or o:
+                causas_basicas_list.append({"fila": f_num, "tipo": t, "causa": c, "subyacente": s, "obs": o})
+        form_dict["causas_basicas_list"] = causas_basicas_list
+
+        # 4. PARSEAR MEDIDAS CORRECTIVAS
+        medidas_correctivas_list = []
+        mc_filas = form_data.getlist("mc_fila[]")
+        mc_tipos = form_data.getlist("mc_tipo[]")
+        mc_acciones = form_data.getlist("mc_accion[]")
+        mc_resp = form_data.getlist("mc_responsable[]")
+        mc_fechas = form_data.getlist("mc_fecha[]")
+        mc_sits = form_data.getlist("mc_situacion[]")
+        mc_obs = form_data.getlist("mc_obs[]")
+        for f_num, t, a, r, fe, si, o in zip(mc_filas, mc_tipos, mc_acciones, mc_resp, mc_fechas, mc_sits, mc_obs):
+            if t or a or r or fe:
+                medidas_correctivas_list.append({"fila": f_num, "tipo": t, "accion": a, "responsable": r, "fecha": fe, "situacion": si, "obs": o})
+        form_dict["medidas_correctivas_list"] = medidas_correctivas_list
+
+        # 5. REGISTRO EN GOOGLE SHEETS
+        trab_nombres_str = ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']])
+        trab_paterno_str = ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']])
+        trab_materno_str = ", ".join([t['materno'] for t in lista_trabajadores if t['materno']])
+        trab_dni_str = ", ".join([t['dni'] for t in lista_trabajadores if t['dni']])
+
         datos_sheet = {
             "fin_fecha_evento": form_data.get("fin_fecha_evento") or form_data.get("fecha_evento_pre", ""),
             "fin_hora_evento": form_data.get("fin_hora_evento") or form_data.get("hora_ocurrencia_pre", ""),
@@ -283,12 +523,12 @@ async def enviar_reporte(request: Request):
         except Exception as err_sheet:
             print(f"Error Google Sheets: {err_sheet}")
 
-        # 2. GENERAR PDF COMPLETO DE TODAS LAS PREGUNTAS
+        # 6. GENERAR PDF
         pdf_filename = f"Reporte_{codigo_comprobante}.pdf"
         pdf_filepath = os.path.join(PDF_DIR, pdf_filename)
-        generar_pdf_reporte_completo(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
+        generar_pdf_100_porciento(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
 
-        # 3. CORREO ELECTRÓNICO CON ADJUNTO PDF
+        # 7. ENVIAR CORREO
         correo_usuario = form_data.get("correo_destino", "").strip()
         lista_destinos = list(CORREOS_PREDETERMINADOS)
         if correo_usuario and correo_usuario not in lista_destinos:
@@ -296,11 +536,11 @@ async def enviar_reporte(request: Request):
 
         nombre_completo = f"{trab_paterno_str} {trab_materno_str} {trab_nombres_str}".strip() or "No especificado"
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: Informe {tipo_informe} - {nombre_completo}"
-        cuerpo = f"Se ha registrado un Informe {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_completo}\n\nAdjunto encontrará el informe completo en formato PDF."
+        cuerpo = f"Se ha registrado un Informe {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_completo}\n\nAdjunto encontrará el PDF con el 100% de las respuestas."
         
         enviar_correo_con_pdf(lista_destinos, asunto, cuerpo, pdf_filepath)
 
-        # 4. PANTALLA DE CONFIRMACIÓN
+        # 8. PANTALLA CONFIRMACIÓN
         html_confirmacion = f"""
         <!DOCTYPE html>
         <html lang="es">
@@ -326,7 +566,7 @@ async def enviar_reporte(request: Request):
             <div class="card">
                 <div class="icon">✓</div>
                 <h2>¡Reporte Guardado Exitosamente!</h2>
-                <p>Todas las respuestas del formulario han sido compiladas en el PDF oficial.</p>
+                <p>El PDF ha sido generado conteniendo el 100% de los campos y preguntas de la web.</p>
                 <div class="comprobante-box">
                     <p><strong>Código de Comprobante:</strong> <span class="code">{codigo_comprobante}</span></p>
                     <p><strong>Fecha y Hora:</strong> {fecha_registro_str}</p>
