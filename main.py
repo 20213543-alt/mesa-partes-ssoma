@@ -59,7 +59,10 @@ def g(form_dict, key, default="-"):
 
 # --- PLANTILLA PDF PARA INFORME PRELIMINAR ---
 def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: str, foto_base64: str = None):
-    img_html = f'<img src="data:image/jpeg;base64,{foto_base64}" style="max-width: 100%; max-height: 250px; border-radius: 4px; border: 1px solid #cbd5e0;" />' if foto_base64 else '<p style="color: #718096; font-size: 8pt;">Sin fotografía adjunta</p>'
+    if foto_base64 and foto_base64.strip():
+        img_html = f'<img src="data:image/jpeg;base64,{foto_base64}" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 4px; border: 1px solid #cbd5e0;" />'
+    else:
+        img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px;">Sin fotografía adjunta</p>'
 
     html_content = f"""
     <!DOCTYPE html>
@@ -553,19 +556,20 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         ahora_peru = datetime.now(tz_peru)
         fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
 
-        # Capturar el valor enviado desde el formulario (normalizando texto)
+        # Capturar el valor enviado desde el formulario
         tipo_informe_raw = str(form_data.get("tipo_informe", "")).strip()
 
-        # Determinar si es Preliminar evaluando varias coincidencias posibles
+        # Determinar si es Preliminar evaluando coincidencias
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
 
         tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
 
-        # Procesar fotografía adjunta
+        # Procesar fotografía adjunta (Lectura asíncrona corregida con seek)
         foto_base64 = None
-        if foto_evento and foto_evento.filename:
+        if foto_evento is not None and hasattr(foto_evento, "filename") and foto_evento.filename:
+            await foto_evento.seek(0)
             contents = await foto_evento.read()
-            if contents:
+            if contents and len(contents) > 0:
                 foto_base64 = base64.b64encode(contents).decode("utf-8")
 
         # Parsear Trabajadores (para Informe Final)
@@ -648,7 +652,7 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         if es_preliminar:
             generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64)
             
-            # Mapeo flexible para obtener el nombre del lesionado en preliminar
+            # Mapeo flexible para el nombre del lesionado
             nombre_afectado = (
                 form_data.get("pre_nombre_lesionado") or 
                 form_data.get("nombre_lesionado_pre") or 
