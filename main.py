@@ -3,12 +3,13 @@ import smtplib
 import requests
 import traceback
 import base64
+import mimetypes
 from datetime import datetime
 import zoneinfo
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from fastapi import FastAPI, Request, File, UploadFile, Form
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from weasyprint import HTML
 
@@ -58,9 +59,9 @@ def g(form_dict, key, default="-"):
     return str(val).strip()
 
 # --- PLANTILLA PDF PARA INFORME PRELIMINAR ---
-def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: str, foto_base64: str = None):
+def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: str, foto_base64: str = None, mime_type: str = "image/jpeg"):
     if foto_base64 and foto_base64.strip():
-        img_html = f'<img src="data:image/jpeg;base64,{foto_base64}" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 4px; border: 1px solid #cbd5e0;" />'
+        img_html = f'<img src="data:{mime_type};base64,{foto_base64}" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 4px; border: 1px solid #cbd5e0;" />'
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px;">Sin fotografía adjunta</p>'
 
@@ -177,7 +178,7 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
             </tr>
             <tr>
                 <td class="lbl">Firma:</td>
-                <td class="val" colspan="3"><b>[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]</b></td>
+                <td class="val" colspan="3"><b>[FIRMA REGISTRADA]</b></td>
             </tr>
         </table>
 
@@ -547,7 +548,7 @@ def descargar_pdf(filename: str):
     return JSONResponse(status_code=404, content={"error": "Archivo PDF no encontrado"})
 
 @app.post("/enviar-reporte", response_class=HTMLResponse)
-async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None)):
+async def enviar_reporte(request: Request):
     try:
         form_data = await request.form()
         form_dict = dict(form_data)
@@ -556,21 +557,29 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         ahora_peru = datetime.now(tz_peru)
         fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
 
-        # Capturar el valor enviado desde el formulario
         tipo_informe_raw = str(form_data.get("tipo_informe", "")).strip()
-
-        # Determinar si es Preliminar evaluando coincidencias
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
-
         tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
 
-        # Procesar fotografía adjunta (Lectura asíncrona corregida con seek)
+        # --- PROCESAMIENTO SEGURO Y CORREGIDO DE LA IMAGEN ---
         foto_base64 = None
-        if foto_evento is not None and hasattr(foto_evento, "filename") and foto_evento.filename:
-            await foto_evento.seek(0)
-            contents = await foto_evento.read()
-            if contents and len(contents) > 0:
-                foto_base64 = base64.b64encode(contents).decode("utf-8")
+        mime_type = "image/jpeg"
+
+        archivo_foto = form_data.get("foto_evento") or form_data.get("foto_evento_pre")
+
+        if archivo_foto and hasattr(archivo_foto, "filename") and archivo_foto.filename:
+            try:
+                await archivo_foto.seek(0)
+                contents = await archivo_foto.read()
+                if contents and len(contents) > 0:
+                    foto_base64 = base64.b64encode(contents).decode("utf-8").replace("\n", "").replace("\r", "")
+                    content_type = getattr(archivo_foto, "content_type", None)
+                    if content_type and "image" in content_type:
+                        mime_type = content_type
+                    else:
+                        mime_type = mimetypes.guess_type(archivo_foto.filename)[0] or "image/jpeg"
+            except Exception as err_img:
+                print(f"Error procesando la imagen: {err_img}")
 
         # Parsear Trabajadores (para Informe Final)
         lista_trabajadores = []
@@ -617,7 +626,6 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
 
         codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
-        # CONDICIONAL: Solo enviar a Google Sheets si es INFORME FINAL
         if not es_preliminar:
             trab_nombres_str = ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']])
             trab_paterno_str = ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']])
@@ -648,11 +656,9 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         pdf_filename = f"Reporte_{codigo_comprobante}.pdf"
         pdf_filepath = os.path.join(PDF_DIR, pdf_filename)
 
-        # CONDICIONAL: Generar el PDF adecuado según la selección
         if es_preliminar:
-            generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64)
+            generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64, mime_type)
             
-            # Mapeo flexible para el nombre del lesionado
             nombre_afectado = (
                 form_data.get("pre_nombre_lesionado") or 
                 form_data.get("nombre_lesionado_pre") or 
@@ -664,7 +670,6 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
             generar_pdf_100_porciento(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
             nombre_afectado = ", ".join([f"{t.get('paterno','')} {t.get('nombres','')}".strip() for t in lista_trabajadores if t.get('nombres')]) or "No especificado"
 
-        # Envío de correo electrónico
         correo_usuario = form_data.get("correo_destino", "").strip()
         lista_destinos = list(CORREOS_PREDETERMINADOS)
         if correo_usuario and correo_usuario not in lista_destinos:
@@ -675,7 +680,6 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         
         enviar_correo_con_pdf(lista_destinos, asunto, cuerpo, pdf_filepath)
 
-        # Pantalla de éxito
         html_confirmacion = f"""
         <!DOCTYPE html>
         <html lang="es">
