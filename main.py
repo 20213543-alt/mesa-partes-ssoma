@@ -553,7 +553,13 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         ahora_peru = datetime.now(tz_peru)
         fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
 
-        tipo_informe = form_data.get("tipo_informe", "Informe Preliminar")
+        # Capturar el valor enviado desde el formulario (normalizando texto)
+        tipo_informe_raw = str(form_data.get("tipo_informe", "")).strip()
+
+        # Determinar si es Preliminar evaluando varias coincidencias posibles
+        es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
+
+        tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
 
         # Procesar fotografía adjunta
         foto_base64 = None
@@ -608,7 +614,7 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
         # CONDICIONAL: Solo enviar a Google Sheets si es INFORME FINAL
-        if tipo_informe == "Informe Final de Accidente":
+        if not es_preliminar:
             trab_nombres_str = ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']])
             trab_paterno_str = ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']])
             trab_materno_str = ", ".join([t['materno'] for t in lista_trabajadores if t['materno']])
@@ -639,9 +645,17 @@ async def enviar_reporte(request: Request, foto_evento: UploadFile = File(None))
         pdf_filepath = os.path.join(PDF_DIR, pdf_filename)
 
         # CONDICIONAL: Generar el PDF adecuado según la selección
-        if tipo_informe == "Informe Preliminar":
+        if es_preliminar:
             generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64)
-            nombre_afectado = form_data.get("nombre_lesionado_pre") or form_data.get("pre_nombre_lesionado", "No especificado")
+            
+            # Mapeo flexible para obtener el nombre del lesionado en preliminar
+            nombre_afectado = (
+                form_data.get("pre_nombre_lesionado") or 
+                form_data.get("nombre_lesionado_pre") or 
+                form_dict.get("pre_nombre_lesionado") or 
+                form_dict.get("nombre_lesionado_pre") or 
+                "No especificado"
+            )
         else:
             generar_pdf_100_porciento(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
             nombre_afectado = ", ".join([f"{t.get('paterno','')} {t.get('nombres','')}".strip() for t in lista_trabajadores if t.get('nombres')]) or "No especificado"
