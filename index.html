@@ -16,7 +16,7 @@
       <h2 class="text-sm font-bold text-amber-400">MESA DE PARTES SSOMA - REGISTRO DE EVENTOS</h2>
     </div>
 
-    <form action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-6 space-y-6 text-xs">
+    <form id="ssomaForm" action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-6 space-y-6 text-xs">
 
       <!-- SELECCIÓN DE TIPO DE INFORME -->
       <div class="bg-amber-50 p-4 rounded-lg border border-amber-300">
@@ -286,9 +286,9 @@
               </thead>
               <tbody id="body_trabajadores">
                 <tr class="border-b bg-white">
-                  <td class="p-1"><input type="text" name="trab_paterno[]" required class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="trab_materno[]" required class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="trab_nombres[]" required class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
                   <td class="p-1">
@@ -462,7 +462,7 @@
           </div>
         </div>
 
-        <!-- CAUSAS INMEDIATAS O DIRECTAS (5 FILAS: 1 OBLIGATORIA) -->
+        <!-- CAUSAS INMEDIATAS O DIRECTAS (5 FILAS) -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS INMEDIATAS O DIRECTAS</div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
@@ -476,17 +476,16 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Fila 1 (Obligatoria) -->
                 <tr class="border-b bg-white">
-                  <td class="p-2 font-bold text-center">1*</td>
+                  <td class="p-2 font-bold text-center">1</td>
                   <td class="p-1">
-                    <select name="cinm_tipo_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="cinm_tipo_1" class="w-full border rounded p-1 bg-white">
                       <option value="Acto Subestandar">Acto Subestandar</option>
                       <option value="Condición Subestandar">Condición Subestandar</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="cinm_causa_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="cinm_causa_1" class="w-full border rounded p-1 bg-white">
                       <option value="No usar EPP adecuado">No usar EPP adecuado</option>
                       <option value="Operar equipo sin autorización">Operar equipo sin autorización</option>
                       <option value="Uso de herramienta defectuosa">Uso de herramienta defectuosa</option>
@@ -495,9 +494,8 @@
                       <option value="No respetar procedimiento de trabajo seguro">No respetar procedimiento de trabajo seguro</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_1" required placeholder="Obligatorio" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="cinm_obs_1" class="w-full border rounded p-1"></td>
                 </tr>
-                <!-- Filas 2 a 5 (Opcionales) -->
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">2</td>
                   <td class="p-1">
@@ -579,7 +577,7 @@
           </div>
         </div>
 
-        <!-- CAUSAS SUBYACENTES / BÁSICAS (5 FILAS: 1 OBLIGATORIA) -->
+        <!-- CAUSAS SUBYACENTES / BÁSICAS (5 FILAS) -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS SUBYACENTES / BÁSICAS</div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
@@ -595,15 +593,15 @@
               </thead>
               <tbody>
                 <tr class="border-b bg-white">
-                  <td class="p-2 font-bold text-center">1*</td>
+                  <td class="p-2 font-bold text-center">1</td>
                   <td class="p-1">
-                    <select name="csub_tipo_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="csub_tipo_1" class="w-full border rounded p-1 bg-white">
                       <option value="Factores Personales">Factores Personales</option>
                       <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="csub_causa_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="csub_causa_1" class="w-full border rounded p-1 bg-white">
                       <option value="Falta de capacitación o entrenamiento">Falta de capacitación o entrenamiento</option>
                       <option value="Fatiga / Estrés laboral">Fatiga / Estrés laboral</option>
                       <option value="Liderazgo o supervisión deficiente">Liderazgo o supervisión deficiente</option>
@@ -611,8 +609,8 @@
                       <option value="Estándares de trabajo insuficientes">Estándares de trabajo insuficientes</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="csub_subyacente_1" required placeholder="Causa raíz" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="csub_obs_1" required placeholder="Obligatorio" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_subyacente_1" placeholder="Causa raíz" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_obs_1" class="w-full border rounded p-1"></td>
                 </tr>
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">2</td>
@@ -692,7 +690,7 @@
           </div>
         </div>
 
-        <!-- ACCIONES CORRECTIVAS Y/O PREVENTIVAS (4 FILAS: 1 OBLIGATORIA) -->
+        <!-- ACCIONES CORRECTIVAS Y/O PREVENTIVAS (4 FILAS) -->
         <div class="border border-blue-900 rounded-lg overflow-hidden">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ACCIONES CORRECTIVAS Y/O PREVENTIVAS PARA EVITAR REPETICIÓN</div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
@@ -710,17 +708,17 @@
               </thead>
               <tbody>
                 <tr class="border-b bg-white">
-                  <td class="p-2 font-bold text-center">1*</td>
+                  <td class="p-2 font-bold text-center">1</td>
                   <td class="p-1">
-                    <select name="acc_tipo_1" required class="w-full border rounded p-1 bg-white">
+                    <select name="acc_tipo_1" class="w-full border rounded p-1 bg-white">
                       <option value="Correctiva">Correctiva</option>
                       <option value="Preventiva">Preventiva</option>
                       <option value="Mejora Continua">Mejora Continua</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="acc_control_1" required placeholder="Acción a realizar" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="text" name="acc_resp_1" required placeholder="Nombre responsable" class="w-full border rounded p-1"></td>
-                  <td class="p-1"><input type="date" name="acc_fecha_1" required class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_control_1" placeholder="Acción a realizar" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_resp_1" placeholder="Nombre responsable" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="date" name="acc_fecha_1" class="w-full border rounded p-1"></td>
                   <td class="p-1">
                     <select name="acc_sit_1" class="w-full border rounded p-1 bg-white">
                       <option value="Pendiente">Pendiente</option>
@@ -848,7 +846,7 @@
         <input type="email" name="correo_destino" required placeholder="correo@empresa.com" class="w-full border rounded p-2 bg-white">
       </div>
 
-      <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-4 rounded-lg text-sm uppercase tracking-wider shadow-lg transition">
+      <button type="submit" id="btnGuardar" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-4 rounded-lg text-sm uppercase tracking-wider shadow-lg transition">
         💾 GENERAR Y GUARDAR REGISTRO EN EXCEL
       </button>
 
@@ -900,9 +898,9 @@
       const tr = document.createElement('tr');
       tr.className = 'border-b bg-white';
       tr.innerHTML = `
-        <td class="p-1"><input type="text" name="trab_paterno[]" required class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="text" name="trab_materno[]" required class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="text" name="trab_nombres[]" required class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
         <td class="p-1">
@@ -933,6 +931,14 @@
       `;
       body.appendChild(tr);
     }
+
+    // Event listener para el envío del formulario
+    document.getElementById('ssomaForm').addEventListener('submit', function(e) {
+      const btn = document.getElementById('btnGuardar');
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      btn.innerHTML = '⏳ GENERANDO Y GUARDANDO REGISTRO...';
+    });
   </script>
 
 </body>
