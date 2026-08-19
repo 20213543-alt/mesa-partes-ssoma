@@ -932,12 +932,17 @@
       body.appendChild(tr);
     }
 
-    // Event listener para el envío del formulario
-    document.getElementById('ssomaForm').addEventListener('submit', function(e) {
-      const btn = document.getElementById('btnGuardar');
-      btn.disabled = true;
-      btn.classList.add('opacity-50', 'cursor-not-allowed');
-      btn.innerHTML = '⏳ GENERANDO Y GUARDANDO REGISTRO...';
+    // Inicialización al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      cambiarTipoInforme();
+      evaluarOpcionesEvento();
+
+      document.getElementById('ssomaForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('btnGuardar');
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.innerHTML = '⏳ GENERANDO Y GUARDANDO REGISTRO...';
+      });
     });
   </script>
 
