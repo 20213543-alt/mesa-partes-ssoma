@@ -1,6 +1,6 @@
-fastapi
-uvicorn
-python-multipart
-requests
-xhtml2pdf
-Pillow
+fastapi>=0.100.0
+uvicorn>=0.22.0
+python-multipart>=0.0.6
+requests>=2.31.0
+xhtml2pdf>=0.2.11
+pillow>=10.0.0
