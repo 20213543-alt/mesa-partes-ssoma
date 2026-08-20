@@ -24,8 +24,6 @@ SMTP_PORT = 587
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "")
 
-CORREOS_PREDETERMINADOS = ["chanelone14@gmail.com", "20213543@aloe.ulima.edu.pe"]
-
 PDF_DIR = "pdf_reports"
 os.makedirs(PDF_DIR, exist_ok=True)
 
@@ -109,7 +107,6 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
         </style>
     </head>
     <body>
-        <!-- ENCABEZADO CORREGIDO CON TABLA PURA -->
         <table class="header-table">
             <tr>
                 <td style="width: 70%;">
@@ -553,6 +550,66 @@ def descargar_pdf(filename: str):
         return FileResponse(file_path, media_type='application/pdf', filename=filename)
     return JSONResponse(status_code=404, content={"error": "Archivo PDF no encontrado"})
 
+@app.get("/buscar-reporte", response_class=HTMLResponse)
+def buscar_reporte(codigo: str = ""):
+    codigo_limpio = codigo.strip().upper()
+    resultados = []
+
+    if codigo_limpio:
+        for archivo in os.listdir(PDF_DIR):
+            if archivo.endswith(".pdf") and codigo_limpio in archivo.upper():
+                resultados.append(archivo)
+
+    filas_html = ""
+    if resultados:
+        for pdf in resultados:
+            filas_html += f"""
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;">{pdf}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                    <a href="/descargar-pdf/{pdf}" target="_blank" 
+                       style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">
+                       📥 Descargar
+                    </a>
+                </td>
+            </tr>
+            """
+    elif codigo_limpio:
+        filas_html = "<tr><td colspan='2' style='text-align:center; padding: 10px;'>No se encontraron reportes con ese código.</td></tr>"
+
+    html_response = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Buscador de Reportes SSOMA</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 40px; background-color: #f4f7f6; }}
+            .container {{ max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+            input[type="text"] {{ width: 70%; padding: 8px; margin-right: 5px; }}
+            button {{ padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }}
+            table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+            th {{ background: #1a365d; color: white; padding: 8px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>🔎 Buscador de Reportes SSOMA</h2>
+            <form action="/buscar-reporte" method="get">
+                <input type="text" name="codigo" placeholder="Ejemplo: PRE-2026..." value="{codigo}">
+                <button type="submit">Buscar</button>
+            </form>
+
+            {"<table><thead><tr><th>Nombre de Archivo</th><th>Acción</th></tr></thead><tbody>" + filas_html + "</tbody></table>" if codigo_limpio else ""}
+            
+            <br>
+            <a href="/" style="display:inline-block; margin-top:10px; text-decoration:none; color:#007bff;">← Volver al Formulario</a>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_response)
+
 @app.post("/enviar-reporte", response_class=HTMLResponse)
 async def enviar_reporte(request: Request):
     try:
@@ -659,15 +716,17 @@ async def enviar_reporte(request: Request):
             generar_pdf_100_porciento(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
             nombre_afectado = ", ".join([f"{t.get('paterno','')} {t.get('nombres','')}".strip() for t in lista_trabajadores if t.get('nombres')]) or "No especificado"
 
+        # --- DESTINATARIOS DEL CORREO ---
+        lista_correos = ["s.espinozav_ext@emape.gob.pe"]
+
         correo_usuario = str(form_data.get("correo_destino", "")).strip()
-        lista_destinos = list(CORREOS_PREDETERMINADOS)
-        if correo_usuario and correo_usuario not in lista_destinos:
-            lista_destinos.append(correo_usuario)
+        if correo_usuario and correo_usuario not in lista_correos:
+            lista_correos.append(correo_usuario)
 
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: {tipo_informe} - {nombre_afectado}"
         cuerpo = f"Se ha generado un {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_afectado}\n\nAdjunto encontrará el archivo PDF correspondiente."
         
-        enviar_correo_con_pdf(lista_destinos, asunto, cuerpo, pdf_filepath)
+        enviar_correo_con_pdf(lista_correos, asunto, cuerpo, pdf_filepath)
 
         html_confirmacion = f"""
         <!DOCTYPE html>
