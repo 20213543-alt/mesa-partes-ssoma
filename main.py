@@ -3,15 +3,17 @@ import smtplib
 import requests
 import traceback
 import base64
-import mimetypes
+import io
 from datetime import datetime
 import zoneinfo
+from io import BytesIO
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
-from weasyprint import HTML
+from xhtml2pdf import pisa
+from PIL import Image
 
 app = FastAPI()
 
@@ -26,6 +28,20 @@ CORREOS_PREDETERMINADOS = ["chanelone14@gmail.com", "20213543@aloe.ulima.edu.pe"
 
 PDF_DIR = "pdf_reports"
 os.makedirs(PDF_DIR, exist_ok=True)
+
+def optimizar_imagen_base64(bytes_imagen):
+    """Redimensiona y comprime la imagen a JPEG para evitar fallos de memoria en xhtml2pdf."""
+    try:
+        img = Image.open(io.BytesIO(bytes_imagen))
+        img = img.convert("RGB")
+        img.thumbnail((700, 700))  # Tamaño ideal para hoja A4
+        
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=75)
+        return base64.b64encode(buffer.getvalue()).decode("utf-8")
+    except Exception as e:
+        print(f"Error optimizando la fotografía: {e}")
+        return None
 
 def enviar_correo_con_pdf(destinatarios: list, asunto: str, cuerpo: str, pdf_path: str = None):
     if not SENDER_EMAIL or not SENDER_PASSWORD:
@@ -58,10 +74,14 @@ def g(form_dict, key, default="-"):
         return default
     return str(val).strip()
 
-# --- PLANTILLA PDF PARA INFORME PRELIMINAR ---
-def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: str, foto_base64: str = None, mime_type: str = "image/jpeg"):
-    if foto_base64 and foto_base64.strip():
-        img_html = f'<img src="data:{mime_type};base64,{foto_base64}" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 4px; border: 1px solid #cbd5e0;" />'
+def html_to_pdf_file(html_string: str, pdf_path: str):
+    with open(pdf_path, "wb") as pdf_file:
+        pisa_status = pisa.CreatePDF(BytesIO(html_string.encode("utf-8")), dest=pdf_file)
+    return not pisa_status.err
+
+def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: str, foto_base64: str = None):
+    if foto_base64:
+        img_html = f'<img src="data:image/jpeg;base64,{foto_base64}" width="380" height="230" />'
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px;">Sin fotografía adjunta</p>'
 
@@ -71,38 +91,32 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
     <head>
         <meta charset="UTF-8">
         <style>
-            @page {{ size: A4; margin: 12mm 10mm; background-color: #ffffff; }}
-            body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; margin: 0; padding: 0; }}
-            
-            .header {{ background-color: #1a365d; color: white; padding: 12px; border-radius: 4px; margin-bottom: 12px; }}
-            .header table {{ width: 100%; border-collapse: collapse; }}
-            .title {{ font-size: 13pt; font-weight: bold; text-transform: uppercase; }}
-            .subtitle {{ font-size: 8.5pt; opacity: 0.9; margin-top: 2px; }}
-            .badge {{ background-color: #d69e2e; color: #1a365d; padding: 5px 10px; font-weight: bold; font-size: 10pt; border-radius: 3px; }}
-            
-            .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 9pt; padding: 5px 8px; margin-top: 10px; margin-bottom: 6px; text-transform: uppercase; border-radius: 2px; }}
-            
-            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }}
-            .grid-table td {{ border: 1px solid #cbd5e0; padding: 5px 7px; font-size: 8pt; vertical-align: middle; word-wrap: break-word; }}
-            
+            @page {{ size: a4 portrait; margin: 10mm; }}
+            body {{ font-family: Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; }}
+            .header {{ background-color: #1a365d; color: white; padding: 10px; margin-bottom: 10px; }}
+            .title {{ font-size: 12pt; font-weight: bold; }}
+            .subtitle {{ font-size: 8pt; margin-top: 2px; }}
+            .badge {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; }}
+            .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 8.5pt; padding: 4px; margin-top: 8px; margin-bottom: 4px; }}
+            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; }}
+            .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: middle; }}
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
-            
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 8px; font-size: 8pt; line-height: 1.3; min-height: 40px; border-radius: 3px; margin-bottom: 8px; }}
-            .photo-box {{ text-align: center; padding: 10px; border: 1px solid #cbd5e0; background-color: #f7fafc; border-radius: 3px; margin-bottom: 8px; }}
-            .footer {{ margin-top: 20px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 6px; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; }}
+            .photo-box {{ text-align: center; padding: 8px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
+            .footer {{ margin-top: 15px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
     </head>
     <body>
         <div class="header">
-            <table>
+            <table style="width: 100%;">
                 <tr>
-                    <td>
+                    <td style="border: none;">
                         <div class="title">EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.</div>
                         <div class="subtitle">INFORME PRELIMINAR DE INCIDENTE / ACCIDENTE</div>
                     </td>
-                    <td style="text-align: right;">
-                        <div class="badge">{codigo}</div>
+                    <td style="text-align: right; border: none;">
+                        <span class="badge">{codigo}</span>
                     </td>
                 </tr>
             </table>
@@ -137,7 +151,7 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
             </tr>
         </table>
         <div class="text-box">
-            <strong>Trabajo que se Realizaba:</strong><br/>
+            <b>Trabajo que se Realizaba:</b><br/>
             {g(f, 'pre_trabajo_realizaba', g(f, 'trabajo_realizaba_pre'))}
         </div>
 
@@ -155,7 +169,7 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
             </tr>
         </table>
         <div class="text-box">
-            <strong>Breve Descripción del Suceso:</strong><br/>
+            <b>Breve Descripción del Suceso:</b><br/>
             {g(f, 'pre_breve_descripcion', g(f, 'breve_descripcion_pre'))}
         </div>
 
@@ -188,9 +202,8 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
     </body>
     </html>
     """
-    HTML(string=html_content).write_pdf(pdf_path)
+    html_to_pdf_file(html_content, pdf_path)
 
-# --- PLANTILLA PDF PARA INFORME FINAL DE ACCIDENTE ---
 def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str):
     filas_trabajadores = ""
     for trab in f.get("lista_trabajadores", []):
@@ -260,39 +273,33 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
     <head>
         <meta charset="UTF-8">
         <style>
-            @page {{ size: A4; margin: 10mm 8mm; background-color: #ffffff; }}
-            body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8pt; color: #111; margin: 0; padding: 0; }}
-            
-            .header {{ background-color: #1a365d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 10px; }}
-            .header table {{ width: 100%; border-collapse: collapse; }}
-            .title {{ font-size: 12pt; font-weight: bold; text-transform: uppercase; }}
-            .subtitle {{ font-size: 8pt; opacity: 0.9; margin-top: 2px; }}
-            .badge {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9.5pt; border-radius: 3px; }}
-            
-            .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 8.5pt; padding: 4px 8px; margin-top: 8px; margin-bottom: 4px; text-transform: uppercase; border-radius: 2px; }}
+            @page {{ size: a4 portrait; margin: 8mm; }}
+            body {{ font-family: Helvetica, Arial, sans-serif; font-size: 7.5pt; color: #111; }}
+            .header {{ background-color: #1a365d; color: white; padding: 8px; margin-bottom: 8px; }}
+            .title {{ font-size: 11pt; font-weight: bold; }}
+            .subtitle {{ font-size: 7.5pt; margin-top: 2px; }}
+            .badge {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; }}
+            .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 8pt; padding: 3px; margin-top: 6px; margin-bottom: 3px; }}
             .sec-red {{ background-color: #742a2a; }}
-            
-            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; }}
-            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px 5px; font-size: 7.5pt; vertical-align: middle; word-wrap: break-word; }}
+            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; }}
+            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 7pt; vertical-align: middle; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
-            
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
-            
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 5px; font-size: 7.5pt; line-height: 1.2; min-height: 25px; border-radius: 3px; margin-bottom: 6px; }}
-            .footer {{ margin-top: 10px; font-size: 7pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; }}
+            .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
         </style>
     </head>
     <body>
         <div class="header">
-            <table>
+            <table style="width: 100%;">
                 <tr>
-                    <td>
+                    <td style="border: none;">
                         <div class="title">EMAPE S.A. - MESA DE PARTES SSOMA</div>
                         <div class="subtitle">CONSTANCIA Y REGISTRO OFICIAL - {tipo_informe.upper()}</div>
                     </td>
-                    <td style="text-align: right;">
-                        <div class="badge">{codigo}</div>
+                    <td style="text-align: right; border: none;">
+                        <span class="badge">{codigo}</span>
                     </td>
                 </tr>
             </table>
@@ -361,7 +368,7 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
                 <td class="val">{g(f, 'fin_tipo_evento')}</td>
                 <td class="lbl">Clasificación Evento:</td>
                 <td class="val">{g(f, 'fin_clasificacion')}</td>
-                <td class="lbl">Solo Incidente (Peligrosidad):</td>
+                <td class="lbl">Solo Incidente:</td>
                 <td class="val">{g(f, 'fin_solo_incidente')}</td>
             </tr>
         </table>
@@ -407,7 +414,7 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
 
         <div class="sec-header">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
         <div class="text-box">
-            <strong>Tipo de Atención en Primeros Auxilios:</strong> {g(f, 'pa_tipo_atencion')}
+            <b>Tipo de Atención en Primeros Auxilios:</b> {g(f, 'pa_tipo_atencion')}
         </div>
 
         <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
@@ -419,7 +426,7 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
                 <td class="val" colspan="3">{g(f, 'les_tipo')}</td>
             </tr>
             <tr>
-                <td class="lbl">Agente Causante (EMAPE):</td>
+                <td class="lbl">Agente Causante:</td>
                 <td class="val">{g(f, 'les_agente')}</td>
                 <td class="lbl">Parte Cuerpo Afectada:</td>
                 <td class="val" colspan="3">{g(f, 'les_parte_cuerpo')}</td>
@@ -440,7 +447,7 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
             </tr>
         </table>
         <div class="text-box">
-            <strong>Descripción del Evento (Daños / M.A.):</strong> {g(f, 'dan_descripcion')}
+            <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion')}
         </div>
 
         <div class="sec-header">ANÁLISIS DEL ACCIDENTE</div>
@@ -531,7 +538,7 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
     </body>
     </html>
     """
-    HTML(string=html_content).write_pdf(pdf_path)
+    html_to_pdf_file(html_content, pdf_path)
 
 @app.get("/", response_class=HTMLResponse)
 def home():
@@ -551,7 +558,10 @@ def descargar_pdf(filename: str):
 async def enviar_reporte(request: Request):
     try:
         form_data = await request.form()
-        form_dict = dict(form_data)
+        form_dict = {}
+        for key in form_data.keys():
+            val = form_data.getlist(key)
+            form_dict[key] = val[0] if len(val) == 1 else val
 
         tz_peru = zoneinfo.ZoneInfo("America/Lima")
         ahora_peru = datetime.now(tz_peru)
@@ -561,27 +571,19 @@ async def enviar_reporte(request: Request):
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
         tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
 
-        # --- PROCESAMIENTO SEGURO Y CORREGIDO DE LA IMAGEN ---
+        # Procesar Fotografía con Optimización de Imagen
         foto_base64 = None
-        mime_type = "image/jpeg"
-
-        archivo_foto = form_data.get("foto_evento") or form_data.get("foto_evento_pre")
+        archivo_foto = form_data.get("fotografia_pre") or form_data.get("foto_evento_pre") or form_data.get("foto_evento")
 
         if archivo_foto and hasattr(archivo_foto, "filename") and archivo_foto.filename:
             try:
-                await archivo_foto.seek(0)
                 contents = await archivo_foto.read()
                 if contents and len(contents) > 0:
-                    foto_base64 = base64.b64encode(contents).decode("utf-8").replace("\n", "").replace("\r", "")
-                    content_type = getattr(archivo_foto, "content_type", None)
-                    if content_type and "image" in content_type:
-                        mime_type = content_type
-                    else:
-                        mime_type = mimetypes.guess_type(archivo_foto.filename)[0] or "image/jpeg"
+                    foto_base64 = optimizar_imagen_base64(contents)
             except Exception as err_img:
                 print(f"Error procesando la imagen: {err_img}")
 
-        # Parsear Trabajadores (para Informe Final)
+        # Parsear Trabajadores
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or [form_data.get("trab_paterno", "")]
         materno_list = form_data.getlist("trab_materno[]") or [form_data.get("trab_materno", "")]
@@ -605,7 +607,7 @@ async def enviar_reporte(request: Request):
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
-        # Parsear Tablas (para Informe Final)
+        # Tablas secundarias
         causas_inmediatas_list = []
         for f_num, t, c, o in zip(form_data.getlist("ci_fila[]"), form_data.getlist("ci_tipo[]"), form_data.getlist("ci_causa[]"), form_data.getlist("ci_obs[]")):
             if t or c or o:
@@ -627,26 +629,21 @@ async def enviar_reporte(request: Request):
         codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
         if not es_preliminar:
-            trab_nombres_str = ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']])
-            trab_paterno_str = ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']])
-            trab_materno_str = ", ".join([t['materno'] for t in lista_trabajadores if t['materno']])
-            trab_dni_str = ", ".join([t['dni'] for t in lista_trabajadores if t['dni']])
-
             datos_sheet = {
                 "fin_fecha_evento": form_data.get("fin_fecha_evento", ""),
                 "fin_hora_evento": form_data.get("fin_hora_evento", ""),
                 "fin_lugar_exacto": form_data.get("fin_lugar_exacto", ""),
                 "fin_tipo_evento": form_data.get("fin_tipo_evento", ""),
-                "trab_nombres": trab_nombres_str,
-                "trab_paterno": trab_paterno_str,
-                "trab_materno": trab_materno_str,
-                "trab_dni": trab_dni_str,
+                "trab_nombres": ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']]),
+                "trab_paterno": ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']]),
+                "trab_materno": ", ".join([t['materno'] for t in lista_trabajadores if t['materno']]),
+                "trab_dni": ", ".join([t['dni'] for t in lista_trabajadores if t['dni']]),
                 "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
                 "inv_nombre": form_data.get("inv_nombre", "")
             }
 
             try:
-                res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=8)
+                res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=10)
                 res_json = res.json()
                 if "codigo_comprobante" in res_json:
                     codigo_comprobante = res_json["codigo_comprobante"]
@@ -657,20 +654,13 @@ async def enviar_reporte(request: Request):
         pdf_filepath = os.path.join(PDF_DIR, pdf_filename)
 
         if es_preliminar:
-            generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64, mime_type)
-            
-            nombre_afectado = (
-                form_data.get("pre_nombre_lesionado") or 
-                form_data.get("nombre_lesionado_pre") or 
-                form_dict.get("pre_nombre_lesionado") or 
-                form_dict.get("nombre_lesionado_pre") or 
-                "No especificado"
-            )
+            generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64)
+            nombre_afectado = form_data.get("pre_nombre_lesionado") or form_data.get("nombre_lesionado_pre") or "No especificado"
         else:
             generar_pdf_100_porciento(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
             nombre_afectado = ", ".join([f"{t.get('paterno','')} {t.get('nombres','')}".strip() for t in lista_trabajadores if t.get('nombres')]) or "No especificado"
 
-        correo_usuario = form_data.get("correo_destino", "").strip()
+        correo_usuario = str(form_data.get("correo_destino", "")).strip()
         lista_destinos = list(CORREOS_PREDETERMINADOS)
         if correo_usuario and correo_usuario not in lista_destinos:
             lista_destinos.append(correo_usuario)
