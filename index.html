@@ -843,7 +843,6 @@
       <!-- NOTIFICACIÓN DE CORREO GENERAL -->
       <div class="bg-amber-100 p-4 rounded-lg border border-amber-300">
         <label class="font-bold block text-slate-800 mb-1">CORREO DESTINO DE NOTIFICACIÓN:</label>
-        <p class="text-[10px] text-slate-600 mb-2">Ingresa el correo al que se enviará automáticamente una copia en PDF al presionar enviar.</p>
         <input type="email" name="correo_destino" required placeholder="correo@empresa.com" class="w-full border rounded p-2 bg-white">
       </div>
 
@@ -942,7 +941,7 @@
         const btn = document.getElementById('btnGuardar');
         btn.disabled = true;
         btn.classList.add('opacity-50', 'cursor-not-allowed');
-        btn.innerHTML = '⏳ ENVIANDO REGISTRO Y GENERANDO PDF...';
+        btn.innerHTML = '⏳ GENERANDO Y GUARDANDO REGISTRO...';
       });
     });
   </script>
