@@ -3,4 +3,4 @@ uvicorn
 python-multipart
 requests
 xhtml2pdf
-pillow
+Pillow 
