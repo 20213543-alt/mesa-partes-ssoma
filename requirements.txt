@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-openpyxl
 python-multipart
 requests
-weasyprint 
+xhtml2pdf
+Pillow
