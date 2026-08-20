@@ -561,11 +561,16 @@ async def enviar_reporte(request: Request):
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
         tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
 
-        # --- PROCESAMIENTO SEGURO Y CORREGIDO DE LA IMAGEN ---
+        # --- PROCESAMIENTO CORREGIDO DE LA IMAGEN ---
         foto_base64 = None
         mime_type = "image/jpeg"
 
-        archivo_foto = form_data.get("foto_evento") or form_data.get("foto_evento_pre")
+        # Captura todos los nombres posibles enviados por el HTML
+        archivo_foto = (
+            form_data.get("fotografia_pre") or 
+            form_data.get("foto_evento_pre") or 
+            form_data.get("foto_evento")
+        )
 
         if archivo_foto and hasattr(archivo_foto, "filename") and archivo_foto.filename:
             try:
@@ -646,7 +651,7 @@ async def enviar_reporte(request: Request):
             }
 
             try:
-                res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=8)
+                res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=10, allow_redirects=True)
                 res_json = res.json()
                 if "codigo_comprobante" in res_json:
                     codigo_comprobante = res_json["codigo_comprobante"]
