@@ -93,11 +93,12 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
         <style>
             @page {{ size: a4 portrait; margin: 10mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; }}
-            .header {{ background-color: #1a365d; color: white; padding: 10px; margin-bottom: 10px; }}
-            .title {{ font-size: 12pt; font-weight: bold; }}
-            .subtitle {{ font-size: 8pt; margin-top: 2px; }}
-            .badge {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; }}
-            .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 8.5pt; padding: 4px; margin-top: 8px; margin-bottom: 4px; }}
+            .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; background-color: #1a365d; }}
+            .header-table td {{ padding: 8px; border: none; vertical-align: middle; }}
+            .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
+            .subtitle {{ font-size: 8pt; color: #ffffff; margin-top: 3px; }}
+            .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; text-align: center; border-radius: 3px; }}
+            .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8.5pt; padding: 4px; margin-top: 8px; margin-bottom: 4px; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; }}
             .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: middle; }}
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
@@ -108,19 +109,18 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
         </style>
     </head>
     <body>
-        <div class="header">
-            <table style="width: 100%;">
-                <tr>
-                    <td style="border: none;">
-                        <div class="title">EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.</div>
-                        <div class="subtitle">INFORME PRELIMINAR DE INCIDENTE / ACCIDENTE</div>
-                    </td>
-                    <td style="text-align: right; border: none;">
-                        <span class="badge">{codigo}</span>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <!-- ENCABEZADO CORREGIDO CON TABLA PURA -->
+        <table class="header-table">
+            <tr>
+                <td style="width: 70%;">
+                    <div class="title">EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.</div>
+                    <div class="subtitle">INFORME PRELIMINAR DE INCIDENTE / ACCIDENTE</div>
+                </td>
+                <td style="width: 30%; text-align: right;">
+                    <span class="badge-box">{codigo}</span>
+                </td>
+            </tr>
+        </table>
 
         <table class="grid-table">
             <tr>
@@ -275,12 +275,13 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
         <style>
             @page {{ size: a4 portrait; margin: 8mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 7.5pt; color: #111; }}
-            .header {{ background-color: #1a365d; color: white; padding: 8px; margin-bottom: 8px; }}
-            .title {{ font-size: 11pt; font-weight: bold; }}
-            .subtitle {{ font-size: 7.5pt; margin-top: 2px; }}
-            .badge {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; }}
-            .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 8pt; padding: 3px; margin-top: 6px; margin-bottom: 3px; }}
-            .sec-red {{ background-color: #742a2a; }}
+            .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; background-color: #1a365d; }}
+            .header-table td {{ padding: 6px; border: none; vertical-align: middle; }}
+            .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
+            .subtitle {{ font-size: 7.5pt; color: #ffffff; margin-top: 2px; }}
+            .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
+            .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8pt; padding: 3px; margin-top: 6px; margin-bottom: 3px; }}
+            .sec-red {{ background-color: #742a2a; color: #ffffff; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 7pt; vertical-align: middle; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
@@ -291,19 +292,17 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
         </style>
     </head>
     <body>
-        <div class="header">
-            <table style="width: 100%;">
-                <tr>
-                    <td style="border: none;">
-                        <div class="title">EMAPE S.A. - MESA DE PARTES SSOMA</div>
-                        <div class="subtitle">CONSTANCIA Y REGISTRO OFICIAL - {tipo_informe.upper()}</div>
-                    </td>
-                    <td style="text-align: right; border: none;">
-                        <span class="badge">{codigo}</span>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <table class="header-table">
+            <tr>
+                <td style="width: 70%;">
+                    <div class="title">EMAPE S.A. - MESA DE PARTES SSOMA</div>
+                    <div class="subtitle">CONSTANCIA Y REGISTRO OFICIAL - {tipo_informe.upper()}</div>
+                </td>
+                <td style="width: 30%; text-align: right;">
+                    <span class="badge-box">{codigo}</span>
+                </td>
+            </tr>
+        </table>
 
         <div class="sec-header">DATOS DEL EMPLEADOR PRINCIPAL</div>
         <table class="grid-table">
@@ -571,7 +570,7 @@ async def enviar_reporte(request: Request):
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
         tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
 
-        # Procesar Fotografía con Optimización de Imagen
+        # Procesar Fotografía con Optimización de Imagen (Pillow)
         foto_base64 = None
         archivo_foto = form_data.get("fotografia_pre") or form_data.get("foto_evento_pre") or form_data.get("foto_evento")
 
