@@ -9,7 +9,7 @@ import zoneinfo
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from weasyprint import HTML
 
@@ -58,7 +58,6 @@ def g(form_dict, key, default="-"):
         return default
     return str(val).strip()
 
-# --- PLANTILLA PDF PARA INFORME PRELIMINAR ---
 def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: str, foto_base64: str = None, mime_type: str = "image/jpeg"):
     if foto_base64 and foto_base64.strip():
         img_html = f'<img src="data:{mime_type};base64,{foto_base64}" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 4px; border: 1px solid #cbd5e0;" />'
@@ -73,21 +72,16 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
         <style>
             @page {{ size: A4; margin: 12mm 10mm; background-color: #ffffff; }}
             body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; margin: 0; padding: 0; }}
-            
             .header {{ background-color: #1a365d; color: white; padding: 12px; border-radius: 4px; margin-bottom: 12px; }}
             .header table {{ width: 100%; border-collapse: collapse; }}
             .title {{ font-size: 13pt; font-weight: bold; text-transform: uppercase; }}
             .subtitle {{ font-size: 8.5pt; opacity: 0.9; margin-top: 2px; }}
             .badge {{ background-color: #d69e2e; color: #1a365d; padding: 5px 10px; font-weight: bold; font-size: 10pt; border-radius: 3px; }}
-            
             .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 9pt; padding: 5px 8px; margin-top: 10px; margin-bottom: 6px; text-transform: uppercase; border-radius: 2px; }}
-            
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }}
             .grid-table td {{ border: 1px solid #cbd5e0; padding: 5px 7px; font-size: 8pt; vertical-align: middle; word-wrap: break-word; }}
-            
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
-            
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 8px; font-size: 8pt; line-height: 1.3; min-height: 40px; border-radius: 3px; margin-bottom: 8px; }}
             .photo-box {{ text-align: center; padding: 10px; border: 1px solid #cbd5e0; background-color: #f7fafc; border-radius: 3px; margin-bottom: 8px; }}
             .footer {{ margin-top: 20px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 6px; }}
@@ -190,7 +184,6 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
     """
     HTML(string=html_content).write_pdf(pdf_path)
 
-# --- PLANTILLA PDF PARA INFORME FINAL DE ACCIDENTE ---
 def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str):
     filas_trabajadores = ""
     for trab in f.get("lista_trabajadores", []):
@@ -262,23 +255,18 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
         <style>
             @page {{ size: A4; margin: 10mm 8mm; background-color: #ffffff; }}
             body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 8pt; color: #111; margin: 0; padding: 0; }}
-            
             .header {{ background-color: #1a365d; color: white; padding: 10px; border-radius: 4px; margin-bottom: 10px; }}
             .header table {{ width: 100%; border-collapse: collapse; }}
             .title {{ font-size: 12pt; font-weight: bold; text-transform: uppercase; }}
             .subtitle {{ font-size: 8pt; opacity: 0.9; margin-top: 2px; }}
             .badge {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9.5pt; border-radius: 3px; }}
-            
             .sec-header {{ background-color: #1a365d; color: white; font-weight: bold; font-size: 8.5pt; padding: 4px 8px; margin-top: 8px; margin-bottom: 4px; text-transform: uppercase; border-radius: 2px; }}
             .sec-red {{ background-color: #742a2a; }}
-            
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px 5px; font-size: 7.5pt; vertical-align: middle; word-wrap: break-word; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
-            
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
-            
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 5px; font-size: 7.5pt; line-height: 1.2; min-height: 25px; border-radius: 3px; margin-bottom: 6px; }}
             .footer {{ margin-top: 10px; font-size: 7pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
@@ -551,7 +539,10 @@ def descargar_pdf(filename: str):
 async def enviar_reporte(request: Request):
     try:
         form_data = await request.form()
-        form_dict = dict(form_data)
+        form_dict = {}
+        for key in form_data.keys():
+            val = form_data.getlist(key)
+            form_dict[key] = val[0] if len(val) == 1 else val
 
         tz_peru = zoneinfo.ZoneInfo("America/Lima")
         ahora_peru = datetime.now(tz_peru)
@@ -561,23 +552,17 @@ async def enviar_reporte(request: Request):
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
         tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
 
-        # --- PROCESAMIENTO CORREGIDO DE LA IMAGEN ---
+        # Captura Segura de Imagen
         foto_base64 = None
         mime_type = "image/jpeg"
 
-        # Captura todos los nombres posibles enviados por el HTML
-        archivo_foto = (
-            form_data.get("fotografia_pre") or 
-            form_data.get("foto_evento_pre") or 
-            form_data.get("foto_evento")
-        )
+        archivo_foto = form_data.get("fotografia_pre") or form_data.get("foto_evento_pre") or form_data.get("foto_evento")
 
         if archivo_foto and hasattr(archivo_foto, "filename") and archivo_foto.filename:
             try:
-                await archivo_foto.seek(0)
                 contents = await archivo_foto.read()
                 if contents and len(contents) > 0:
-                    foto_base64 = base64.b64encode(contents).decode("utf-8").replace("\n", "").replace("\r", "")
+                    foto_base64 = base64.b64encode(contents).decode("utf-8")
                     content_type = getattr(archivo_foto, "content_type", None)
                     if content_type and "image" in content_type:
                         mime_type = content_type
@@ -586,7 +571,7 @@ async def enviar_reporte(request: Request):
             except Exception as err_img:
                 print(f"Error procesando la imagen: {err_img}")
 
-        # Parsear Trabajadores (para Informe Final)
+        # Parsear listas del formulario
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or [form_data.get("trab_paterno", "")]
         materno_list = form_data.getlist("trab_materno[]") or [form_data.get("trab_materno", "")]
@@ -610,7 +595,6 @@ async def enviar_reporte(request: Request):
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
-        # Parsear Tablas (para Informe Final)
         causas_inmediatas_list = []
         for f_num, t, c, o in zip(form_data.getlist("ci_fila[]"), form_data.getlist("ci_tipo[]"), form_data.getlist("ci_causa[]"), form_data.getlist("ci_obs[]")):
             if t or c or o:
@@ -632,26 +616,21 @@ async def enviar_reporte(request: Request):
         codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
         if not es_preliminar:
-            trab_nombres_str = ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']])
-            trab_paterno_str = ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']])
-            trab_materno_str = ", ".join([t['materno'] for t in lista_trabajadores if t['materno']])
-            trab_dni_str = ", ".join([t['dni'] for t in lista_trabajadores if t['dni']])
-
             datos_sheet = {
                 "fin_fecha_evento": form_data.get("fin_fecha_evento", ""),
                 "fin_hora_evento": form_data.get("fin_hora_evento", ""),
                 "fin_lugar_exacto": form_data.get("fin_lugar_exacto", ""),
                 "fin_tipo_evento": form_data.get("fin_tipo_evento", ""),
-                "trab_nombres": trab_nombres_str,
-                "trab_paterno": trab_paterno_str,
-                "trab_materno": trab_materno_str,
-                "trab_dni": trab_dni_str,
+                "trab_nombres": ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']]),
+                "trab_paterno": ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']]),
+                "trab_materno": ", ".join([t['materno'] for t in lista_trabajadores if t['materno']]),
+                "trab_dni": ", ".join([t['dni'] for t in lista_trabajadores if t['dni']]),
                 "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
                 "inv_nombre": form_data.get("inv_nombre", "")
             }
 
             try:
-                res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=10, allow_redirects=True)
+                res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=10)
                 res_json = res.json()
                 if "codigo_comprobante" in res_json:
                     codigo_comprobante = res_json["codigo_comprobante"]
@@ -663,19 +642,12 @@ async def enviar_reporte(request: Request):
 
         if es_preliminar:
             generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64, mime_type)
-            
-            nombre_afectado = (
-                form_data.get("pre_nombre_lesionado") or 
-                form_data.get("nombre_lesionado_pre") or 
-                form_dict.get("pre_nombre_lesionado") or 
-                form_dict.get("nombre_lesionado_pre") or 
-                "No especificado"
-            )
+            nombre_afectado = form_data.get("pre_nombre_lesionado") or form_data.get("nombre_lesionado_pre") or "No especificado"
         else:
             generar_pdf_100_porciento(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
             nombre_afectado = ", ".join([f"{t.get('paterno','')} {t.get('nombres','')}".strip() for t in lista_trabajadores if t.get('nombres')]) or "No especificado"
 
-        correo_usuario = form_data.get("correo_destino", "").strip()
+        correo_usuario = str(form_data.get("correo_destino", "")).strip()
         lista_destinos = list(CORREOS_PREDETERMINADOS)
         if correo_usuario and correo_usuario not in lista_destinos:
             lista_destinos.append(correo_usuario)
