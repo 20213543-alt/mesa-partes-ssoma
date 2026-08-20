@@ -2,4 +2,4 @@ fastapi
 uvicorn
 python-multipart
 requests
-weasyprint
+xhtml2pdf
