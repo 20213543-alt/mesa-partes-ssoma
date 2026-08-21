@@ -32,7 +32,7 @@ app = FastAPI()
 
 GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
 
-CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe"]
+CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe","chanelone14@gmail.com"]
 
 PDF_DIR = "pdf_reports"
 os.makedirs(PDF_DIR, exist_ok=True)
