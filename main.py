@@ -1,5 +1,6 @@
 import base64
 import io
+from itertools import zip_longest
 import os
 import socket
 import traceback
@@ -306,6 +307,10 @@ def generar_pdf_100_porciento(
     if not filas_medidas:
         filas_medidas = "<tr><td colspan='7'>Sin registros</td></tr>"
 
+    inv_nombre_val = g(f, "inv_nombre")
+    firma_inv_default = f"<b>[REGISTRADO POR: {inv_nombre_val}]</b>"
+    firma_inv_text = g(f, "firma_inv_text", firma_inv_default)
+
     html_content = f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -556,7 +561,7 @@ def generar_pdf_100_porciento(
             </tr>
             <tr>
                 <td class="lbl">Firma Investigador:</td>
-                <td class="val" colspan="3">{g(f, 'firma_inv_text', f"<b>[REGISTRADO POR: {g(f, 'inv_nombre')}]</b>")}</td>
+                <td class="val" colspan="3">{firma_inv_text}</td>
             </tr>
             <tr>
                 <td class="lbl">Nombre Completo Testigo:</td>
@@ -639,39 +644,40 @@ async def enviar_reporte(request: Request):
             except Exception as err_img:
                 print(f"Error procesando la imagen: {err_img}")
 
+        # Extracción segura de trabajadores usando zip_longest
         lista_trabajadores = []
-        paterno_list = form_data.getlist("trab_paterno[]") or [
-            form_data.get("trab_paterno", "")
-        ]
-        materno_list = form_data.getlist("trab_materno[]") or [
-            form_data.get("trab_materno", "")
-        ]
-        nombres_list = form_data.getlist("trab_nombres[]") or [
-            form_data.get("trab_nombres", "")
-        ]
-        ocupacion_list = form_data.getlist("trab_ocupacion[]") or [
-            form_data.get("trab_ocupacion", "")
-        ]
-        condicion_list = form_data.getlist("trab_condicion[]") or [
-            form_data.get("trab_condicion", "")
-        ]
-        sexo_list = form_data.getlist("trab_sexo[]") or [
-            form_data.get("trab_sexo", "")
-        ]
-        dni_list = form_data.getlist("trab_dni[]") or [
-            form_data.get("trab_dni", "")
-        ]
-        edad_list = form_data.getlist("trab_edad[]") or [
-            form_data.get("trab_edad", "")
-        ]
-        turno_list = form_data.getlist("trab_turno[]") or [
-            form_data.get("trab_turno", "")
-        ]
-        personal_list = form_data.getlist("trab_personal[]") or [
-            form_data.get("trab_personal", "")
-        ]
+        paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist(
+            "trab_paterno"
+        )
+        materno_list = form_data.getlist("trab_materno[]") or form_data.getlist(
+            "trab_materno"
+        )
+        nombres_list = form_data.getlist("trab_nombres[]") or form_data.getlist(
+            "trab_nombres"
+        )
+        ocupacion_list = form_data.getlist(
+            "trab_ocupacion[]"
+        ) or form_data.getlist("trab_ocupacion")
+        condicion_list = form_data.getlist(
+            "trab_condicion[]"
+        ) or form_data.getlist("trab_condicion")
+        sexo_list = form_data.getlist("trab_sexo[]") or form_data.getlist(
+            "trab_sexo"
+        )
+        dni_list = form_data.getlist("trab_dni[]") or form_data.getlist(
+            "trab_dni"
+        )
+        edad_list = form_data.getlist("trab_edad[]") or form_data.getlist(
+            "trab_edad"
+        )
+        turno_list = form_data.getlist("trab_turno[]") or form_data.getlist(
+            "trab_turno"
+        )
+        personal_list = form_data.getlist(
+            "trab_personal[]"
+        ) or form_data.getlist("trab_personal")
 
-        for p, m, n, oc, co, sx, d, ed, tu, pe in zip(
+        for p, m, n, oc, co, sx, d, ed, tu, pe in zip_longest(
             paterno_list,
             materno_list,
             nombres_list,
@@ -682,7 +688,20 @@ async def enviar_reporte(request: Request):
             edad_list,
             turno_list,
             personal_list,
+            fillvalue="",
         ):
+            p, m, n, oc, co, sx, d, ed, tu, pe = (
+                str(p or ""),
+                str(m or ""),
+                str(n or ""),
+                str(oc or ""),
+                str(co or ""),
+                str(sx or ""),
+                str(d or ""),
+                str(ed or ""),
+                str(tu or ""),
+                str(pe or ""),
+            )
             if any([p, m, n, d]):
                 lista_trabajadores.append({
                     "paterno": p,
@@ -700,12 +719,19 @@ async def enviar_reporte(request: Request):
         form_dict["lista_trabajadores"] = lista_trabajadores
 
         causas_inmediatas_list = []
-        for f_num, t, c, o in zip(
-            form_data.getlist("ci_fila[]"),
-            form_data.getlist("ci_tipo[]"),
-            form_data.getlist("ci_causa[]"),
-            form_data.getlist("ci_obs[]"),
+        for f_num, t, c, o in zip_longest(
+            form_data.getlist("ci_fila[]") or form_data.getlist("ci_fila"),
+            form_data.getlist("ci_tipo[]") or form_data.getlist("ci_tipo"),
+            form_data.getlist("ci_causa[]") or form_data.getlist("ci_causa"),
+            form_data.getlist("ci_obs[]") or form_data.getlist("ci_obs"),
+            fillvalue="",
         ):
+            f_num, t, c, o = (
+                str(f_num or ""),
+                str(t or ""),
+                str(c or ""),
+                str(o or ""),
+            )
             if t or c or o:
                 causas_inmediatas_list.append(
                     {"fila": f_num, "tipo": t, "causa": c, "obs": o}
@@ -713,13 +739,22 @@ async def enviar_reporte(request: Request):
         form_dict["causas_inmediatas_list"] = causas_inmediatas_list
 
         causas_basicas_list = []
-        for f_num, t, c, s, o in zip(
-            form_data.getlist("cb_fila[]"),
-            form_data.getlist("cb_tipo[]"),
-            form_data.getlist("cb_causa[]"),
-            form_data.getlist("cb_subyacente[]"),
-            form_data.getlist("cb_obs[]"),
+        for f_num, t, c, s, o in zip_longest(
+            form_data.getlist("cb_fila[]") or form_data.getlist("cb_fila"),
+            form_data.getlist("cb_tipo[]") or form_data.getlist("cb_tipo"),
+            form_data.getlist("cb_causa[]") or form_data.getlist("cb_causa"),
+            form_data.getlist("cb_subyacente[]")
+            or form_data.getlist("cb_subyacente"),
+            form_data.getlist("cb_obs[]") or form_data.getlist("cb_obs"),
+            fillvalue="",
         ):
+            f_num, t, c, s, o = (
+                str(f_num or ""),
+                str(t or ""),
+                str(c or ""),
+                str(s or ""),
+                str(o or ""),
+            )
             if t or c or s or o:
                 causas_basicas_list.append({
                     "fila": f_num,
@@ -731,15 +766,27 @@ async def enviar_reporte(request: Request):
         form_dict["causas_basicas_list"] = causas_basicas_list
 
         medidas_correctivas_list = []
-        for f_num, t, a, r, fe, si, o in zip(
-            form_data.getlist("mc_fila[]"),
-            form_data.getlist("mc_tipo[]"),
-            form_data.getlist("mc_accion[]"),
-            form_data.getlist("mc_responsable[]"),
-            form_data.getlist("mc_fecha[]"),
-            form_data.getlist("mc_situacion[]"),
-            form_data.getlist("mc_obs[]"),
+        for f_num, t, a, r, fe, si, o in zip_longest(
+            form_data.getlist("mc_fila[]") or form_data.getlist("mc_fila"),
+            form_data.getlist("mc_tipo[]") or form_data.getlist("mc_tipo"),
+            form_data.getlist("mc_accion[]") or form_data.getlist("mc_accion"),
+            form_data.getlist("mc_responsable[]")
+            or form_data.getlist("mc_responsable"),
+            form_data.getlist("mc_fecha[]") or form_data.getlist("mc_fecha"),
+            form_data.getlist("mc_situacion[]")
+            or form_data.getlist("mc_situacion"),
+            form_data.getlist("mc_obs[]") or form_data.getlist("mc_obs"),
+            fillvalue="",
         ):
+            f_num, t, a, r, fe, si, o = (
+                str(f_num or ""),
+                str(t or ""),
+                str(a or ""),
+                str(r or ""),
+                str(fe or ""),
+                str(si or ""),
+                str(o or ""),
+            )
             if t or a or r or fe:
                 medidas_correctivas_list.append({
                     "fila": f_num,
@@ -752,25 +799,26 @@ async def enviar_reporte(request: Request):
                 })
         form_dict["medidas_correctivas_list"] = medidas_correctivas_list
 
-        codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
-
-        if not es_preliminar:
+        if es_preliminar:
+            codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
+        else:
+            codigo_comprobante = f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
             datos_sheet = {
                 "fin_fecha_evento": form_data.get("fin_fecha_evento", ""),
                 "fin_hora_evento": form_data.get("fin_hora_evento", ""),
                 "fin_lugar_exacto": form_data.get("fin_lugar_exacto", ""),
                 "fin_tipo_evento": form_data.get("fin_tipo_evento", ""),
                 "trab_nombres": ", ".join([
-                    t["nombres"] for t in lista_trabajadores if t["nombres"]
+                    t["nombres"] for t in lista_trabajadores if t.get("nombres")
                 ]),
                 "trab_paterno": ", ".join([
-                    t["paterno"] for t in lista_trabajadores if t["paterno"]
+                    t["paterno"] for t in lista_trabajadores if t.get("paterno")
                 ]),
                 "trab_materno": ", ".join([
-                    t["materno"] for t in lista_trabajadores if t["materno"]
+                    t["materno"] for t in lista_trabajadores if t.get("materno")
                 ]),
                 "trab_dni": ", ".join([
-                    t["dni"] for t in lista_trabajadores if t["dni"]
+                    t["dni"] for t in lista_trabajadores if t.get("dni")
                 ]),
                 "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
                 "inv_nombre": form_data.get("inv_nombre", ""),
@@ -778,13 +826,17 @@ async def enviar_reporte(request: Request):
 
             try:
                 res = requests.post(
-                    GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=10
+                    GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=5
                 )
-                res_json = res.json()
-                if "codigo_comprobante" in res_json:
-                    codigo_comprobante = res_json["codigo_comprobante"]
+                if res.status_code == 200:
+                    res_json = res.json()
+                    if (
+                        isinstance(res_json, dict)
+                        and "codigo_comprobante" in res_json
+                    ):
+                        codigo_comprobante = res_json["codigo_comprobante"]
             except Exception as err_sheet:
-                print(f"Error Google Sheets: {err_sheet}")
+                print(f"Error Google Sheets Webhook: {err_sheet}")
 
         pdf_filename = f"Reporte_{codigo_comprobante}.pdf"
         pdf_filepath = os.path.join(PDF_DIR, pdf_filename)
@@ -810,16 +862,21 @@ async def enviar_reporte(request: Request):
                 fecha_registro_str,
                 pdf_filepath,
             )
-            nombre_afectado = (
-                ", ".join([
-                    f"{t.get('paterno','')} {t.get('nombres','')}".strip()
-                    for t in lista_trabajadores
-                    if t.get("nombres")
-                ])
-                or "No especificado"
-            )
+            nombres_trabajadores = [
+                f"{t.get('paterno', '')} {t.get('nombres', '')}".strip()
+                for t in lista_trabajadores
+                if t.get("nombres") or t.get("paterno")
+            ]
+            if nombres_trabajadores:
+                nombre_afectado = ", ".join(nombres_trabajadores)
+            else:
+                nombre_afectado = (
+                    form_data.get("fin_nombre_lesionado")
+                    or form_data.get("nombre_lesionado")
+                    or "No especificado"
+                )
 
-        # Destinatario automático directo
+        # Envío del correo con el PDF para ambos casos
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: {tipo_informe} - {nombre_afectado}"
         cuerpo = f"Se ha generado un {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_afectado}\n\nAdjunto encontrará el archivo PDF correspondiente."
 
@@ -852,7 +909,7 @@ async def enviar_reporte(request: Request):
             <div class="card">
                 <div class="icon">✓</div>
                 <h2>¡{tipo_informe} Generado!</h2>
-                <p>El PDF correspondiente ha sido creado exitosamente.</p>
+                <p>El PDF correspondiente ha sido creado exitosamente y enviado por correo.</p>
                 <div class="comprobante-box">
                     <p><strong>Código:</strong> <span class="code">{codigo_comprobante}</span></p>
                     <p><strong>Tipo:</strong> {tipo_informe}</p>
