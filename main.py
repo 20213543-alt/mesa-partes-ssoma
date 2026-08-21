@@ -14,9 +14,6 @@ import requests
 import resend
 from xhtml2pdf import pisa
 
-# Cargar la API Key desde las variables de entorno de Render
-resend.api_key = os.getenv("RESEND_API_KEY")
-
 # Forzar resolución de DNS a IPv4 para evitar el error [Errno 101] en Render
 old_getaddrinfo = socket.getaddrinfo
 
@@ -32,6 +29,7 @@ app = FastAPI()
 
 GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
 
+# Correo único de destino automatizado
 CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe"]
 
 PDF_DIR = "pdf_reports"
@@ -56,9 +54,15 @@ def optimizar_imagen_base64(bytes_imagen):
 def enviar_correo_con_pdf(
     destinatarios: list, asunto: str, cuerpo: str, pdf_path: str = None
 ):
-    if not resend.api_key:
-        print("⚠️ RESEND_API_KEY no está configurada en las variables de entorno.")
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        print(
+            "⚠️ RESEND_API_KEY no está configurada en las variables de entorno."
+        )
         return
+
+    # Asignar API Key eliminando espacios invisibles
+    resend.api_key = api_key.strip()
 
     try:
         attachments = []
@@ -82,7 +86,7 @@ def enviar_correo_con_pdf(
 
         response = resend.Emails.send(payload)
         print(
-            f"✅ Correo enviado correctamente mediante Resend. ID: {response.get('id')}"
+            f"✅ Correo enviado a {destinatarios} mediante Resend. ID: {response.get('id')}"
         )
 
     except Exception as e:
@@ -815,15 +819,13 @@ async def enviar_reporte(request: Request):
                 or "No especificado"
             )
 
-        correo_usuario = str(form_data.get("correo_destino", "")).strip()
-        lista_destinos = list(CORREOS_PREDETERMINADOS)
-        if correo_usuario and correo_usuario not in lista_destinos:
-            lista_destinos.append(correo_usuario)
-
+        # Destinatario automático directo
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: {tipo_informe} - {nombre_afectado}"
         cuerpo = f"Se ha generado un {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_afectado}\n\nAdjunto encontrará el archivo PDF correspondiente."
 
-        enviar_correo_con_pdf(lista_destinos, asunto, cuerpo, pdf_filepath)
+        enviar_correo_con_pdf(
+            CORREOS_PREDETERMINADOS, asunto, cuerpo, pdf_filepath
+        )
 
         html_confirmacion = f"""
         <!DOCTYPE html>
