@@ -11,7 +11,7 @@ from io import BytesIO
 
 from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from PIL import Image
+from PIL import Image, ImageOps  # Importado ImageOps para el encuadre exacto
 import requests
 import resend
 from xhtml2pdf import pisa
@@ -38,15 +38,17 @@ PDF_DIR = "pdf_reports"
 os.makedirs(PDF_DIR, exist_ok=True)
 
 
-def optimizar_imagen_base64(bytes_imagen):
-    """Redimensiona y comprime la imagen a JPEG para evitar fallos de memoria en xhtml2pdf."""
+def optimizar_imagen_base64(bytes_imagen, target_size=(600, 360)):
+    """Recorta y escala la imagen manteniendo la proporción fija centrada para el cuadro del PDF."""
     try:
         img = Image.open(io.BytesIO(bytes_imagen))
         img = img.convert("RGB")
-        img.thumbnail((700, 700))  # Tamaño ideal para hoja A4
+        
+        # ImageOps.fit realiza un recorte inteligente centrado sin deformar
+        img = ImageOps.fit(img, target_size, Image.Resampling.LANCZOS)
 
         buffer = io.BytesIO()
-        img.save(buffer, format="JPEG", quality=75)
+        img.save(buffer, format="JPEG", quality=80)
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
     except Exception as e:
         print(f"Error optimizando la fotografía: {e}")
@@ -117,13 +119,23 @@ def generar_pdf_preliminar(
     pdf_path: str,
     fotos_base64: list = None,
 ):
+    # Acomoda las imágenes en celdas de tabla (máximo 2 por fila) ajustadas al contenedor PDF
     if fotos_base64 and len(fotos_base64) > 0:
-        img_html = "".join([
-            f'<img src="data:image/jpeg;base64,{b64}" width="350" height="210" style="margin: 5px;" />'
-            for b64 in fotos_base64
-        ])
+        celdas = []
+        for b64 in fotos_base64:
+            celdas.append(
+                f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
+                f'<img src="data:image/jpeg;base64,{b64}" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 3px;" />'
+                f'</td>'
+            )
+        
+        filas_html = ""
+        for i in range(0, len(celdas), 2):
+            filas_html += f"<tr>{''.join(celdas[i:i+2])}</tr>"
+            
+        img_html = f'<table style="width: 100%; border-collapse: collapse; margin: 0 auto;">{filas_html}</table>'
     else:
-        img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px;">Sin fotografía adjunta</p>'
+        img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px; text-align: center;">Sin fotografía adjunta</p>'
 
     html_content = f"""
     <!DOCTYPE html>
@@ -144,7 +156,7 @@ def generar_pdf_preliminar(
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; }}
-            .photo-box {{ text-align: center; padding: 8px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
+            .photo-box {{ text-align: center; padding: 6px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
             .footer {{ margin-top: 15px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
     </head>
@@ -634,7 +646,7 @@ async def enviar_reporte(
 
         fotos_base64 = []
 
-        # Procesamiento de múltiples imágenes mediante List[UploadFile][cite: 8]
+        # Procesamiento de múltiples imágenes mediante List[UploadFile]
         if fotografia_pre:
             for foto in fotografia_pre:
                 if foto and hasattr(foto, "filename") and foto.filename:
@@ -647,7 +659,7 @@ async def enviar_reporte(
                     except Exception as err_img:
                         print(f"Error procesando la fotografía: {err_img}")
 
-        # Respaldo si las imágenes vienen registradas bajo otras claves de form_data[cite: 8]
+        # Respaldo si las imágenes vienen registradas bajo otras claves de form_data
         if not fotos_base64:
             archivos_alt = form_data.getlist("foto_evento_pre") or form_data.getlist("foto_evento")
             for foto in archivos_alt:
