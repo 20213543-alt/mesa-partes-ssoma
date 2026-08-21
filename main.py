@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from PIL import Image
 import requests
 import resend
+from xhtml2pdf import pisa
 
 # Cargar la API Key desde las variables de entorno de Render
 resend.api_key = os.getenv("RESEND_API_KEY")
@@ -67,7 +68,6 @@ def enviar_correo_con_pdf(
             filename = os.path.basename(pdf_path)
             attachments.append({"filename": filename, "content": pdf_bytes})
 
-        # Formatear el texto plano a HTML
         cuerpo_html = f"<p>{cuerpo.replace('\n', '<br>')}</p>"
 
         payload = {
@@ -616,7 +616,6 @@ async def enviar_reporte(request: Request):
             else "Informe Final de Accidente"
         )
 
-        # Procesar Fotografía con Optimización de Imagen (Pillow)
         foto_base64 = None
         archivo_foto = (
             form_data.get("fotografia_pre")
@@ -636,7 +635,6 @@ async def enviar_reporte(request: Request):
             except Exception as err_img:
                 print(f"Error procesando la imagen: {err_img}")
 
-        # Parsear Trabajadores
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or [
             form_data.get("trab_paterno", "")
@@ -697,7 +695,6 @@ async def enviar_reporte(request: Request):
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
-        # Tablas secundarias
         causas_inmediatas_list = []
         for f_num, t, c, o in zip(
             form_data.getlist("ci_fila[]"),
