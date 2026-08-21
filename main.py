@@ -1,20 +1,20 @@
-import os
-import smtplib
-import requests
-import traceback
 import base64
 import io
-from datetime import datetime
-import zoneinfo
-from io import BytesIO
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
-from xhtml2pdf import pisa
-from PIL import Image
+import os
 import socket
+import traceback
+import zoneinfo
+from datetime import datetime
+from io import BytesIO
+
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from PIL import Image
+import requests
+import resend
+
+# Cargar la API Key desde las variables de entorno de Render
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 # Forzar resolución de DNS a IPv4 para evitar el error [Errno 101] en Render
 old_getaddrinfo = socket.getaddrinfo
@@ -31,15 +31,11 @@ app = FastAPI()
 
 GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
 
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "")
-SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "")
-
 CORREOS_PREDETERMINADOS = ["chanelone14@gmail.com", "20213543@aloe.ulima.edu.pe"]
 
 PDF_DIR = "pdf_reports"
 os.makedirs(PDF_DIR, exist_ok=True)
+
 
 def optimizar_imagen_base64(bytes_imagen):
     """Redimensiona y comprime la imagen a JPEG para evitar fallos de memoria en xhtml2pdf."""
@@ -47,7 +43,7 @@ def optimizar_imagen_base64(bytes_imagen):
         img = Image.open(io.BytesIO(bytes_imagen))
         img = img.convert("RGB")
         img.thumbnail((700, 700))  # Tamaño ideal para hoja A4
-        
+
         buffer = io.BytesIO()
         img.save(buffer, format="JPEG", quality=75)
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
@@ -55,30 +51,43 @@ def optimizar_imagen_base64(bytes_imagen):
         print(f"Error optimizando la fotografía: {e}")
         return None
 
-def enviar_correo_con_pdf(destinatarios: list, asunto: str, cuerpo: str, pdf_path: str = None):
-    if not SENDER_EMAIL or not SENDER_PASSWORD:
+
+def enviar_correo_con_pdf(
+    destinatarios: list, asunto: str, cuerpo: str, pdf_path: str = None
+):
+    if not resend.api_key:
+        print("⚠️ RESEND_API_KEY no está configurada en las variables de entorno.")
         return
 
     try:
-        msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = ", ".join(destinatarios)
-        msg['Subject'] = asunto
-        msg.attach(MIMEText(cuerpo, 'plain'))
-
+        attachments = []
         if pdf_path and os.path.exists(pdf_path):
             with open(pdf_path, "rb") as f:
-                adjunto = MIMEApplication(f.read(), _subtype="pdf")
-                adjunto.add_header('Content-Disposition', 'attachment', filename=os.path.basename(pdf_path))
-                msg.attach(adjunto)
+                pdf_bytes = list(f.read())
+            filename = os.path.basename(pdf_path)
+            attachments.append({"filename": filename, "content": pdf_bytes})
 
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10)
-        server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.sendmail(SENDER_EMAIL, destinatarios, msg.as_string())
-        server.quit()
+        # Formatear el texto plano a HTML
+        cuerpo_html = f"<p>{cuerpo.replace('\n', '<br>')}</p>"
+
+        payload = {
+            "from": "Sistema SSOMA <onboarding@resend.dev>",
+            "to": destinatarios,
+            "subject": asunto,
+            "html": cuerpo_html,
+        }
+
+        if attachments:
+            payload["attachments"] = attachments
+
+        response = resend.Emails.send(payload)
+        print(
+            f"✅ Correo enviado correctamente mediante Resend. ID: {response.get('id')}"
+        )
+
     except Exception as e:
-        print(f"Error al enviar correo: {e}")
+        print(f"❌ Error al enviar correo mediante Resend: {e}")
+
 
 def g(form_dict, key, default="-"):
     val = form_dict.get(key)
@@ -86,12 +95,22 @@ def g(form_dict, key, default="-"):
         return default
     return str(val).strip()
 
+
 def html_to_pdf_file(html_string: str, pdf_path: str):
     with open(pdf_path, "wb") as pdf_file:
-        pisa_status = pisa.CreatePDF(BytesIO(html_string.encode("utf-8")), dest=pdf_file)
+        pisa_status = pisa.CreatePDF(
+            BytesIO(html_string.encode("utf-8")), dest=pdf_file
+        )
     return not pisa_status.err
 
-def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: str, foto_base64: str = None):
+
+def generar_pdf_preliminar(
+    f: dict,
+    codigo: str,
+    fecha_registro: str,
+    pdf_path: str,
+    foto_base64: str = None,
+):
     if foto_base64:
         img_html = f'<img src="data:image/jpeg;base64,{foto_base64}" width="380" height="230" />'
     else:
@@ -121,7 +140,6 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
         </style>
     </head>
     <body>
-        <!-- ENCABEZADO CORREGIDO CON TABLA PURA -->
         <table class="header-table">
             <tr>
                 <td style="width: 70%;">
@@ -216,7 +234,10 @@ def generar_pdf_preliminar(f: dict, codigo: str, fecha_registro: str, pdf_path: 
     """
     html_to_pdf_file(html_content, pdf_path)
 
-def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str):
+
+def generar_pdf_100_porciento(
+    f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str
+):
     filas_trabajadores = ""
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
@@ -234,7 +255,9 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
         </tr>
         """
     if not filas_trabajadores:
-        filas_trabajadores = "<tr><td colspan='10'>No se registraron trabajadores</td></tr>"
+        filas_trabajadores = (
+            "<tr><td colspan='10'>No se registraron trabajadores</td></tr>"
+        )
 
     filas_causas_inmediatas = ""
     for ci in f.get("causas_inmediatas_list", []):
@@ -551,6 +574,7 @@ def generar_pdf_100_porciento(f: dict, codigo: str, tipo_informe: str, fecha_reg
     """
     html_to_pdf_file(html_content, pdf_path)
 
+
 @app.get("/", response_class=HTMLResponse)
 def home():
     if os.path.exists("index.html"):
@@ -558,12 +582,18 @@ def home():
             return f.read()
     return "<h1>Servidor SSOMA activo</h1>"
 
+
 @app.get("/descargar-pdf/{filename}")
 def descargar_pdf(filename: str):
     file_path = os.path.join(PDF_DIR, filename)
     if os.path.exists(file_path):
-        return FileResponse(file_path, media_type='application/pdf', filename=filename)
-    return JSONResponse(status_code=404, content={"error": "Archivo PDF no encontrado"})
+        return FileResponse(
+            file_path, media_type="application/pdf", filename=filename
+        )
+    return JSONResponse(
+        status_code=404, content={"error": "Archivo PDF no encontrado"}
+    )
+
 
 @app.post("/enviar-reporte", response_class=HTMLResponse)
 async def enviar_reporte(request: Request):
@@ -580,13 +610,25 @@ async def enviar_reporte(request: Request):
 
         tipo_informe_raw = str(form_data.get("tipo_informe", "")).strip()
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
-        tipo_informe = "Informe Preliminar" if es_preliminar else "Informe Final de Accidente"
+        tipo_informe = (
+            "Informe Preliminar"
+            if es_preliminar
+            else "Informe Final de Accidente"
+        )
 
         # Procesar Fotografía con Optimización de Imagen (Pillow)
         foto_base64 = None
-        archivo_foto = form_data.get("fotografia_pre") or form_data.get("foto_evento_pre") or form_data.get("foto_evento")
+        archivo_foto = (
+            form_data.get("fotografia_pre")
+            or form_data.get("foto_evento_pre")
+            or form_data.get("foto_evento")
+        )
 
-        if archivo_foto and hasattr(archivo_foto, "filename") and archivo_foto.filename:
+        if (
+            archivo_foto
+            and hasattr(archivo_foto, "filename")
+            and archivo_foto.filename
+        ):
             try:
                 contents = await archivo_foto.read()
                 if contents and len(contents) > 0:
@@ -596,45 +638,117 @@ async def enviar_reporte(request: Request):
 
         # Parsear Trabajadores
         lista_trabajadores = []
-        paterno_list = form_data.getlist("trab_paterno[]") or [form_data.get("trab_paterno", "")]
-        materno_list = form_data.getlist("trab_materno[]") or [form_data.get("trab_materno", "")]
-        nombres_list = form_data.getlist("trab_nombres[]") or [form_data.get("trab_nombres", "")]
-        ocupacion_list = form_data.getlist("trab_ocupacion[]") or [form_data.get("trab_ocupacion", "")]
-        condicion_list = form_data.getlist("trab_condicion[]") or [form_data.get("trab_condicion", "")]
-        sexo_list = form_data.getlist("trab_sexo[]") or [form_data.get("trab_sexo", "")]
-        dni_list = form_data.getlist("trab_dni[]") or [form_data.get("trab_dni", "")]
-        edad_list = form_data.getlist("trab_edad[]") or [form_data.get("trab_edad", "")]
-        turno_list = form_data.getlist("trab_turno[]") or [form_data.get("trab_turno", "")]
-        personal_list = form_data.getlist("trab_personal[]") or [form_data.get("trab_personal", "")]
+        paterno_list = form_data.getlist("trab_paterno[]") or [
+            form_data.get("trab_paterno", "")
+        ]
+        materno_list = form_data.getlist("trab_materno[]") or [
+            form_data.get("trab_materno", "")
+        ]
+        nombres_list = form_data.getlist("trab_nombres[]") or [
+            form_data.get("trab_nombres", "")
+        ]
+        ocupacion_list = form_data.getlist("trab_ocupacion[]") or [
+            form_data.get("trab_ocupacion", "")
+        ]
+        condicion_list = form_data.getlist("trab_condicion[]") or [
+            form_data.get("trab_condicion", "")
+        ]
+        sexo_list = form_data.getlist("trab_sexo[]") or [
+            form_data.get("trab_sexo", "")
+        ]
+        dni_list = form_data.getlist("trab_dni[]") or [
+            form_data.get("trab_dni", "")
+        ]
+        edad_list = form_data.getlist("trab_edad[]") or [
+            form_data.get("trab_edad", "")
+        ]
+        turno_list = form_data.getlist("trab_turno[]") or [
+            form_data.get("trab_turno", "")
+        ]
+        personal_list = form_data.getlist("trab_personal[]") or [
+            form_data.get("trab_personal", "")
+        ]
 
         for p, m, n, oc, co, sx, d, ed, tu, pe in zip(
-            paterno_list, materno_list, nombres_list, ocupacion_list, condicion_list, sexo_list, dni_list, edad_list, turno_list, personal_list
+            paterno_list,
+            materno_list,
+            nombres_list,
+            ocupacion_list,
+            condicion_list,
+            sexo_list,
+            dni_list,
+            edad_list,
+            turno_list,
+            personal_list,
         ):
             if any([p, m, n, d]):
                 lista_trabajadores.append({
-                    "paterno": p, "materno": m, "nombres": n, "ocupacion": oc, "condicion": co,
-                    "sexo": sx, "dni": d, "edad": ed, "turno": tu, "personal": pe
+                    "paterno": p,
+                    "materno": m,
+                    "nombres": n,
+                    "ocupacion": oc,
+                    "condicion": co,
+                    "sexo": sx,
+                    "dni": d,
+                    "edad": ed,
+                    "turno": tu,
+                    "personal": pe,
                 })
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
         # Tablas secundarias
         causas_inmediatas_list = []
-        for f_num, t, c, o in zip(form_data.getlist("ci_fila[]"), form_data.getlist("ci_tipo[]"), form_data.getlist("ci_causa[]"), form_data.getlist("ci_obs[]")):
+        for f_num, t, c, o in zip(
+            form_data.getlist("ci_fila[]"),
+            form_data.getlist("ci_tipo[]"),
+            form_data.getlist("ci_causa[]"),
+            form_data.getlist("ci_obs[]"),
+        ):
             if t or c or o:
-                causas_inmediatas_list.append({"fila": f_num, "tipo": t, "causa": c, "obs": o})
+                causas_inmediatas_list.append(
+                    {"fila": f_num, "tipo": t, "causa": c, "obs": o}
+                )
         form_dict["causas_inmediatas_list"] = causas_inmediatas_list
 
         causas_basicas_list = []
-        for f_num, t, c, s, o in zip(form_data.getlist("cb_fila[]"), form_data.getlist("cb_tipo[]"), form_data.getlist("cb_causa[]"), form_data.getlist("cb_subyacente[]"), form_data.getlist("cb_obs[]")):
+        for f_num, t, c, s, o in zip(
+            form_data.getlist("cb_fila[]"),
+            form_data.getlist("cb_tipo[]"),
+            form_data.getlist("cb_causa[]"),
+            form_data.getlist("cb_subyacente[]"),
+            form_data.getlist("cb_obs[]"),
+        ):
             if t or c or s or o:
-                causas_basicas_list.append({"fila": f_num, "tipo": t, "causa": c, "subyacente": s, "obs": o})
+                causas_basicas_list.append({
+                    "fila": f_num,
+                    "tipo": t,
+                    "causa": c,
+                    "subyacente": s,
+                    "obs": o,
+                })
         form_dict["causas_basicas_list"] = causas_basicas_list
 
         medidas_correctivas_list = []
-        for f_num, t, a, r, fe, si, o in zip(form_data.getlist("mc_fila[]"), form_data.getlist("mc_tipo[]"), form_data.getlist("mc_accion[]"), form_data.getlist("mc_responsable[]"), form_data.getlist("mc_fecha[]"), form_data.getlist("mc_situacion[]"), form_data.getlist("mc_obs[]")):
+        for f_num, t, a, r, fe, si, o in zip(
+            form_data.getlist("mc_fila[]"),
+            form_data.getlist("mc_tipo[]"),
+            form_data.getlist("mc_accion[]"),
+            form_data.getlist("mc_responsable[]"),
+            form_data.getlist("mc_fecha[]"),
+            form_data.getlist("mc_situacion[]"),
+            form_data.getlist("mc_obs[]"),
+        ):
             if t or a or r or fe:
-                medidas_correctivas_list.append({"fila": f_num, "tipo": t, "accion": a, "responsable": r, "fecha": fe, "situacion": si, "obs": o})
+                medidas_correctivas_list.append({
+                    "fila": f_num,
+                    "tipo": t,
+                    "accion": a,
+                    "responsable": r,
+                    "fecha": fe,
+                    "situacion": si,
+                    "obs": o,
+                })
         form_dict["medidas_correctivas_list"] = medidas_correctivas_list
 
         codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
@@ -645,16 +759,26 @@ async def enviar_reporte(request: Request):
                 "fin_hora_evento": form_data.get("fin_hora_evento", ""),
                 "fin_lugar_exacto": form_data.get("fin_lugar_exacto", ""),
                 "fin_tipo_evento": form_data.get("fin_tipo_evento", ""),
-                "trab_nombres": ", ".join([t['nombres'] for t in lista_trabajadores if t['nombres']]),
-                "trab_paterno": ", ".join([t['paterno'] for t in lista_trabajadores if t['paterno']]),
-                "trab_materno": ", ".join([t['materno'] for t in lista_trabajadores if t['materno']]),
-                "trab_dni": ", ".join([t['dni'] for t in lista_trabajadores if t['dni']]),
+                "trab_nombres": ", ".join([
+                    t["nombres"] for t in lista_trabajadores if t["nombres"]
+                ]),
+                "trab_paterno": ", ".join([
+                    t["paterno"] for t in lista_trabajadores if t["paterno"]
+                ]),
+                "trab_materno": ", ".join([
+                    t["materno"] for t in lista_trabajadores if t["materno"]
+                ]),
+                "trab_dni": ", ".join([
+                    t["dni"] for t in lista_trabajadores if t["dni"]
+                ]),
                 "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
-                "inv_nombre": form_data.get("inv_nombre", "")
+                "inv_nombre": form_data.get("inv_nombre", ""),
             }
 
             try:
-                res = requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=10)
+                res = requests.post(
+                    GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=10
+                )
                 res_json = res.json()
                 if "codigo_comprobante" in res_json:
                     codigo_comprobante = res_json["codigo_comprobante"]
@@ -665,11 +789,34 @@ async def enviar_reporte(request: Request):
         pdf_filepath = os.path.join(PDF_DIR, pdf_filename)
 
         if es_preliminar:
-            generar_pdf_preliminar(form_dict, codigo_comprobante, fecha_registro_str, pdf_filepath, foto_base64)
-            nombre_afectado = form_data.get("pre_nombre_lesionado") or form_data.get("nombre_lesionado_pre") or "No especificado"
+            generar_pdf_preliminar(
+                form_dict,
+                codigo_comprobante,
+                fecha_registro_str,
+                pdf_filepath,
+                foto_base64,
+            )
+            nombre_afectado = (
+                form_data.get("pre_nombre_lesionado")
+                or form_data.get("nombre_lesionado_pre")
+                or "No especificado"
+            )
         else:
-            generar_pdf_100_porciento(form_dict, codigo_comprobante, tipo_informe, fecha_registro_str, pdf_filepath)
-            nombre_afectado = ", ".join([f"{t.get('paterno','')} {t.get('nombres','')}".strip() for t in lista_trabajadores if t.get('nombres')]) or "No especificado"
+            generar_pdf_100_porciento(
+                form_dict,
+                codigo_comprobante,
+                tipo_informe,
+                fecha_registro_str,
+                pdf_filepath,
+            )
+            nombre_afectado = (
+                ", ".join([
+                    f"{t.get('paterno','')} {t.get('nombres','')}".strip()
+                    for t in lista_trabajadores
+                    if t.get("nombres")
+                ])
+                or "No especificado"
+            )
 
         correo_usuario = str(form_data.get("correo_destino", "")).strip()
         lista_destinos = list(CORREOS_PREDETERMINADOS)
@@ -678,7 +825,7 @@ async def enviar_reporte(request: Request):
 
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: {tipo_informe} - {nombre_afectado}"
         cuerpo = f"Se ha generado un {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_afectado}\n\nAdjunto encontrará el archivo PDF correspondiente."
-        
+
         enviar_correo_con_pdf(lista_destinos, asunto, cuerpo, pdf_filepath)
 
         html_confirmacion = f"""
@@ -725,4 +872,7 @@ async def enviar_reporte(request: Request):
 
     except Exception as e:
         error_detallado = traceback.format_exc()
-        return JSONResponse(status_code=500, content={"error": str(e), "trace": error_detallado})
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "trace": error_detallado},
+        )
