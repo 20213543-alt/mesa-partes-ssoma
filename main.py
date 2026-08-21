@@ -4,11 +4,12 @@ from itertools import zip_longest
 import os
 import socket
 import traceback
+from typing import List
 import zoneinfo
 from datetime import datetime
 from io import BytesIO
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from PIL import Image
 import requests
@@ -114,10 +115,13 @@ def generar_pdf_preliminar(
     codigo: str,
     fecha_registro: str,
     pdf_path: str,
-    foto_base64: str = None,
+    fotos_base64: list = None,
 ):
-    if foto_base64:
-        img_html = f'<img src="data:image/jpeg;base64,{foto_base64}" width="380" height="230" />'
+    if fotos_base64 and len(fotos_base64) > 0:
+        img_html = "".join([
+            f'<img src="data:image/jpeg;base64,{b64}" width="350" height="210" style="margin: 5px;" />'
+            for b64 in fotos_base64
+        ])
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px;">Sin fotografía adjunta</p>'
 
@@ -605,7 +609,10 @@ def descargar_pdf(filename: str):
 
 
 @app.post("/enviar-reporte", response_class=HTMLResponse)
-async def enviar_reporte(request: Request):
+async def enviar_reporte(
+    request: Request,
+    fotografia_pre: List[UploadFile] = File(None)
+):
     try:
         form_data = await request.form()
         form_dict = {}
@@ -615,7 +622,7 @@ async def enviar_reporte(request: Request):
 
         tz_peru = zoneinfo.ZoneInfo("America/Lima")
         ahora_peru = datetime.now(tz_peru)
-        fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
+        fecha_registro_str = me_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
 
         tipo_informe_raw = str(form_data.get("tipo_informe", "")).strip()
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
@@ -625,57 +632,47 @@ async def enviar_reporte(request: Request):
             else "Informe Final de Accidente"
         )
 
-        foto_base64 = None
-        archivo_foto = (
-            form_data.get("fotografia_pre")
-            or form_data.get("foto_evento_pre")
-            or form_data.get("foto_evento")
-        )
+        fotos_base64 = []
 
-        if (
-            archivo_foto
-            and hasattr(archivo_foto, "filename")
-            and archivo_foto.filename
-        ):
-            try:
-                contents = await archivo_foto.read()
-                if contents and len(contents) > 0:
-                    foto_base64 = optimizar_imagen_base64(contents)
-            except Exception as err_img:
-                print(f"Error procesando la imagen: {err_img}")
+        # Procesamiento de múltiples imágenes mediante List[UploadFile][cite: 8]
+        if fotografia_pre:
+            for foto in fotografia_pre:
+                if foto and hasattr(foto, "filename") and foto.filename:
+                    try:
+                        contenido = await foto.read()
+                        if contenido and len(contenido) > 0:
+                            encoded = optimizar_imagen_base64(contenido)
+                            if encoded:
+                                fotos_base64.append(encoded)
+                    except Exception as err_img:
+                        print(f"Error procesando la fotografía: {err_img}")
+
+        # Respaldo si las imágenes vienen registradas bajo otras claves de form_data[cite: 8]
+        if not fotos_base64:
+            archivos_alt = form_data.getlist("foto_evento_pre") or form_data.getlist("foto_evento")
+            for foto in archivos_alt:
+                if hasattr(foto, "filename") and foto.filename:
+                    try:
+                        contenido = await foto.read()
+                        if contenido and len(contenido) > 0:
+                            encoded = optimizar_imagen_base64(contenido)
+                            if encoded:
+                                fotos_base64.append(encoded)
+                    except Exception as err_img:
+                        print(f"Error procesando la imagen alternativa: {err_img}")
 
         # Extracción segura de trabajadores usando zip_longest
         lista_trabajadores = []
-        paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist(
-            "trab_paterno"
-        )
-        materno_list = form_data.getlist("trab_materno[]") or form_data.getlist(
-            "trab_materno"
-        )
-        nombres_list = form_data.getlist("trab_nombres[]") or form_data.getlist(
-            "trab_nombres"
-        )
-        ocupacion_list = form_data.getlist(
-            "trab_ocupacion[]"
-        ) or form_data.getlist("trab_ocupacion")
-        condicion_list = form_data.getlist(
-            "trab_condicion[]"
-        ) or form_data.getlist("trab_condicion")
-        sexo_list = form_data.getlist("trab_sexo[]") or form_data.getlist(
-            "trab_sexo"
-        )
-        dni_list = form_data.getlist("trab_dni[]") or form_data.getlist(
-            "trab_dni"
-        )
-        edad_list = form_data.getlist("trab_edad[]") or form_data.getlist(
-            "trab_edad"
-        )
-        turno_list = form_data.getlist("trab_turno[]") or form_data.getlist(
-            "trab_turno"
-        )
-        personal_list = form_data.getlist(
-            "trab_personal[]"
-        ) or form_data.getlist("trab_personal")
+        paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist("trab_paterno")
+        materno_list = form_data.getlist("trab_materno[]") or form_data.getlist("trab_materno")
+        nombres_list = form_data.getlist("trab_nombres[]") or form_data.getlist("trab_nombres")
+        ocupacion_list = form_data.getlist("trab_ocupacion[]") or form_data.getlist("trab_ocupacion")
+        condicion_list = form_data.getlist("trab_condicion[]") or form_data.getlist("trab_condicion")
+        sexo_list = form_data.getlist("trab_sexo[]") or form_data.getlist("trab_sexo")
+        dni_list = form_data.getlist("trab_dni[]") or form_data.getlist("trab_dni")
+        edad_list = form_data.getlist("trab_edad[]") or form_data.getlist("trab_edad")
+        turno_list = form_data.getlist("trab_turno[]") or form_data.getlist("trab_turno")
+        personal_list = form_data.getlist("trab_personal[]") or form_data.getlist("trab_personal")
 
         for p, m, n, oc, co, sx, d, ed, tu, pe in zip_longest(
             paterno_list,
@@ -743,8 +740,7 @@ async def enviar_reporte(request: Request):
             form_data.getlist("cb_fila[]") or form_data.getlist("cb_fila"),
             form_data.getlist("cb_tipo[]") or form_data.getlist("cb_tipo"),
             form_data.getlist("cb_causa[]") or form_data.getlist("cb_causa"),
-            form_data.getlist("cb_subyacente[]")
-            or form_data.getlist("cb_subyacente"),
+            form_data.getlist("cb_subyacente[]") or form_data.getlist("cb_subyacente"),
             form_data.getlist("cb_obs[]") or form_data.getlist("cb_obs"),
             fillvalue="",
         ):
@@ -770,11 +766,9 @@ async def enviar_reporte(request: Request):
             form_data.getlist("mc_fila[]") or form_data.getlist("mc_fila"),
             form_data.getlist("mc_tipo[]") or form_data.getlist("mc_tipo"),
             form_data.getlist("mc_accion[]") or form_data.getlist("mc_accion"),
-            form_data.getlist("mc_responsable[]")
-            or form_data.getlist("mc_responsable"),
+            form_data.getlist("mc_responsable[]") or form_data.getlist("mc_responsable"),
             form_data.getlist("mc_fecha[]") or form_data.getlist("mc_fecha"),
-            form_data.getlist("mc_situacion[]")
-            or form_data.getlist("mc_situacion"),
+            form_data.getlist("mc_situacion[]") or form_data.getlist("mc_situacion"),
             form_data.getlist("mc_obs[]") or form_data.getlist("mc_obs"),
             fillvalue="",
         ):
@@ -847,7 +841,7 @@ async def enviar_reporte(request: Request):
                 codigo_comprobante,
                 fecha_registro_str,
                 pdf_filepath,
-                foto_base64,
+                fotos_base64,
             )
             nombre_afectado = (
                 form_data.get("pre_nombre_lesionado")
