@@ -4,3 +4,4 @@ python-multipart
 requests
 xhtml2pdf
 Pillow 
+resend
