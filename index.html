@@ -502,98 +502,87 @@
                 </tr>
               </thead>
               <tbody>
+                <!-- Fila 1 -->
                 <tr class="border-b bg-white">
                   <td class="p-2 font-bold text-center">1</td>
                   <td class="p-1">
-                    <select name="cinm_tipo_1" class="w-full border rounded p-1 bg-white">
-                      <option value="Acto Subestandar">Acto Subestandar</option>
+                    <select id="cinm_tipo_1" name="cinm_tipo_1" onchange="cargarCausasFrecuentes(1)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Acto Subestandar" selected>Acto Subestandar</option>
                       <option value="Condición Subestandar">Condición Subestandar</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="cinm_causa_1" class="w-full border rounded p-1 bg-white">
-                      <option value="No usar EPP adecuado">No usar EPP adecuado</option>
-                      <option value="Operar equipo sin autorización">Operar equipo sin autorización</option>
-                      <option value="Uso de herramienta defectuosa">Uso de herramienta defectuosa</option>
-                      <option value="Falta de señalización en área de trabajo">Falta de señalización en área de trabajo</option>
-                      <option value="Superficie resbalosa o desordenada">Superficie resbalosa o desordenada</option>
-                      <option value="No respetar procedimiento de trabajo seguro">No respetar procedimiento de trabajo seguro</option>
+                    <select id="cinm_causa_1" name="cinm_causa_1" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="cinm_obs_1" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 2 -->
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">2</td>
                   <td class="p-1">
-                    <select name="cinm_tipo_2" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_tipo_2" name="cinm_tipo_2" onchange="cargarCausasFrecuentes(2)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Acto Subestandar">Acto Subestandar</option>
                       <option value="Condición Subestandar">Condición Subestandar</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="cinm_causa_2" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_causa_2" name="cinm_causa_2" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="No usar EPP adecuado">No usar EPP adecuado</option>
-                      <option value="Operar equipo sin autorización">Operar equipo sin autorización</option>
-                      <option value="Uso de herramienta defectuosa">Uso de herramienta defectuosa</option>
-                      <option value="Falta de señalización en área de trabajo">Falta de señalización en área de trabajo</option>
-                      <option value="Superficie resbalosa o desordenada">Superficie resbalosa o desordenada</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="cinm_obs_2" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 3 -->
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">3</td>
                   <td class="p-1">
-                    <select name="cinm_tipo_3" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_tipo_3" name="cinm_tipo_3" onchange="cargarCausasFrecuentes(3)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Acto Subestandar">Acto Subestandar</option>
                       <option value="Condición Subestandar">Condición Subestandar</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="cinm_causa_3" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_causa_3" name="cinm_causa_3" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="No usar EPP adecuado">No usar EPP adecuado</option>
-                      <option value="Operar equipo sin autorización">Operar equipo sin autorización</option>
-                      <option value="Uso de herramienta defectuosa">Uso de herramienta defectuosa</option>
-                      <option value="Falta de señalización en área de trabajo">Falta de señalización en área de trabajo</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="cinm_obs_3" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 4 -->
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">4</td>
                   <td class="p-1">
-                    <select name="cinm_tipo_4" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_tipo_4" name="cinm_tipo_4" onchange="cargarCausasFrecuentes(4)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Acto Subestandar">Acto Subestandar</option>
                       <option value="Condición Subestandar">Condición Subestandar</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="cinm_causa_4" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_causa_4" name="cinm_causa_4" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="No usar EPP adecuado">No usar EPP adecuado</option>
-                      <option value="Superficie resbalosa o desordenada">Superficie resbalosa o desordenada</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="cinm_obs_4" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 5 -->
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">5</td>
                   <td class="p-1">
-                    <select name="cinm_tipo_5" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_tipo_5" name="cinm_tipo_5" onchange="cargarCausasFrecuentes(5)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Acto Subestandar">Acto Subestandar</option>
                       <option value="Condición Subestandar">Condición Subestandar</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="cinm_causa_5" class="w-full border rounded p-1 bg-white">
+                    <select id="cinm_causa_5" name="cinm_causa_5" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="No respetar procedimiento de trabajo seguro">No respetar procedimiento de trabajo seguro</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="cinm_obs_5" class="w-full border rounded p-1"></td>
@@ -874,6 +863,83 @@
   </div>
 
   <script>
+    // DICCIONARIO DE CAUSAS INMEDIATAS DEDUCIDAS
+    const causasInmediatasData = {
+      "Acto Subestandar": [
+        "Operar equipo sin autorización",
+        "Omisión de informar/ advertir",
+        "Omisión de Sujetar/Bloquear/Contener",
+        "Operar Equipo /Sistema a Velocidad Inadecuada",
+        "Desactivar o Anular Dispositivos Críticos de Seguridad",
+        "Usar Herramientas /Equipos/ Máquina /Dispositivo Defectuoso",
+        "Operación inadecuada de Herramientas / equipo / Maquina /Dispositivo /Instalación de Proceso",
+        "Mantenimiento Inadecuado de Equipo / Maquina / Instalación de proceso en funcionamiento",
+        "Uso de Material Incorrecto / Inadecuado",
+        "No usar correctamente el equipo de protección personal (EPP).",
+        "Operación incorrecta de carga",
+        "Operación incorrecta de colocación",
+        "Operación incorrecta de izado",
+        "Posición inadecuada para el trabajo o la tarea.",
+        "Comportamiento incorrecto/ inadecuado.",
+        "Trabajar bajo la influencia de medicación/ alcohol/ drogas.",
+        "No seguir procedimiento/ instrucciones.",
+        "Falla al identificar peligro",
+        "Acto sub estándar por parte de terceros (que no está bajo control propio).",
+        "No identificar requisitos de clientes/ partes interesadas",
+        "No cumplir requisitos de clientes/ partes interesadas",
+        "Disturbios civiles (motines, revueltas, guerra)",
+        "Actividad Delictivas"
+      ],
+      "Condición Subestandar": [
+        "Condiciones inadecuadas de pisos/superficie",
+        "Herramienta/ equipo defectuoso",
+        "Herramientas/ equipo incorrecto/ Inadecuado.",
+        "Integridad inadecuada de herramientas/ equipo de proceso",
+        "Falla en detectar/ medir",
+        "Medida /medida de señal inadecuada",
+        "Material incorrecto",
+        "Composición incorrecta de material / gas/ líquido",
+        "Protección/ barrera inadecuada",
+        "Equipo de Protección Personal (EPP) inadecuado/ incorrecto",
+        "Espacio para actuar limitado/ restringido.",
+        "Sistema de advertencia inadecuado",
+        "Presencia de atmosfera explosiva /Inflamable",
+        "Presencia no autorizada de materiales peligrosos",
+        "Orden y limpieza deficiente",
+        "Nivel de ruido por encima del umbral",
+        "Radiación por encima del umbral",
+        "Iluminación excesiva / deficiente",
+        "Vibración por encima del umbral.",
+        "Exposición a altas temperaturas",
+        "Exposición a bajas temperaturas",
+        "Presión excede los límites",
+        "Ventilación inadecuada",
+        "Información inadecuada",
+        "Exposición a condiciones climáticas adversas"
+      ]
+    };
+
+    function cargarCausasFrecuentes(index) {
+      const selectTipo = document.getElementById(`cinm_tipo_${index}`);
+      const selectCausa = document.getElementById(`cinm_causa_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+      
+      // Limpiar opciones previas
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      // Agregar las opciones dinámicas
+      if (causasInmediatasData[valorSeleccionado]) {
+        causasInmediatasData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
     function cambiarTipoInforme() {
       const tipo = document.getElementById('tipo_informe').value;
       const secPreliminar = document.getElementById('seccion_preliminar');
@@ -980,6 +1046,11 @@
     document.addEventListener('DOMContentLoaded', function() {
       cambiarTipoInforme();
       evaluarOpcionesEvento();
+
+      // Cargar causas según los tipos predefinidos al iniciar
+      for (let i = 1; i <= 5; i++) {
+        cargarCausasFrecuentes(i);
+      }
 
       document.getElementById('ssomaForm').addEventListener('submit', function(e) {
         const btn = document.getElementById('btnGuardar');
