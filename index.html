@@ -592,7 +592,7 @@
           </div>
         </div>
 
-        <!-- CAUSAS SUBYACENTES / BÁSICAS -->
+        <!-- CAUSAS SUBYACENTES / BÁSICAS MODIFICADAS -->
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS SUBYACENTES / BÁSICAS</div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
@@ -607,94 +607,91 @@
                 </tr>
               </thead>
               <tbody>
+                <!-- Fila 1 -->
                 <tr class="border-b bg-white">
                   <td class="p-2 font-bold text-center">1</td>
                   <td class="p-1">
-                    <select name="csub_tipo_1" class="w-full border rounded p-1 bg-white">
-                      <option value="Factores Personales">Factores Personales</option>
+                    <select id="csub_tipo_1" name="csub_tipo_1" onchange="cargarCausasSubyacentes(1)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Factores Personales" selected>Factores Personales</option>
                       <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="csub_causa_1" class="w-full border rounded p-1 bg-white">
-                      <option value="Falta de capacitación o entrenamiento">Falta de capacitación o entrenamiento</option>
-                      <option value="Fatiga / Estrés laboral">Fatiga / Estrés laboral</option>
-                      <option value="Liderazgo o supervisión deficiente">Liderazgo o supervisión deficiente</option>
-                      <option value="Mantenimiento inadecuado de equipos">Mantenimiento inadecuado de equipos</option>
-                      <option value="Estándares de trabajo insuficientes">Estándares de trabajo insuficientes</option>
+                    <select id="csub_causa_1" name="csub_causa_1" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_subyacente_1" placeholder="Causa raíz" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="csub_obs_1" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 2 -->
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">2</td>
                   <td class="p-1">
-                    <select name="csub_tipo_2" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_tipo_2" name="csub_tipo_2" onchange="cargarCausasSubyacentes(2)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Factores Personales">Factores Personales</option>
                       <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="csub_causa_2" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_causa_2" name="csub_causa_2" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="Falta de capacitación o entrenamiento">Falta de capacitación o entrenamiento</option>
-                      <option value="Liderazgo o supervisión deficiente">Liderazgo o supervisión deficiente</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_subyacente_2" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="csub_obs_2" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 3 -->
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">3</td>
                   <td class="p-1">
-                    <select name="csub_tipo_3" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_tipo_3" name="csub_tipo_3" onchange="cargarCausasSubyacentes(3)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Factores Personales">Factores Personales</option>
                       <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="csub_causa_3" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_causa_3" name="csub_causa_3" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="Fatiga / Estrés laboral">Fatiga / Estrés laboral</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_subyacente_3" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="csub_obs_3" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 4 -->
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">4</td>
                   <td class="p-1">
-                    <select name="csub_tipo_4" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_tipo_4" name="csub_tipo_4" onchange="cargarCausasSubyacentes(4)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Factores Personales">Factores Personales</option>
                       <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="csub_causa_4" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_causa_4" name="csub_causa_4" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="Estándares de trabajo insuficientes">Estándares de trabajo insuficientes</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_subyacente_4" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="csub_obs_4" class="w-full border rounded p-1"></td>
                 </tr>
+                <!-- Fila 5 -->
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">5</td>
                   <td class="p-1">
-                    <select name="csub_tipo_5" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_tipo_5" name="csub_tipo_5" onchange="cargarCausasSubyacentes(5)" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
                       <option value="Factores Personales">Factores Personales</option>
                       <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
                     </select>
                   </td>
                   <td class="p-1">
-                    <select name="csub_causa_5" class="w-full border rounded p-1 bg-white">
+                    <select id="csub_causa_5" name="csub_causa_5" class="w-full border rounded p-1 bg-white">
                       <option value="">-- Opcional --</option>
-                      <option value="Mantenimiento inadecuado de equipos">Mantenimiento inadecuado de equipos</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_subyacente_5" class="w-full border rounded p-1"></td>
@@ -919,6 +916,29 @@
       ]
     };
 
+    // DICCIONARIO DE CAUSAS SUBYACENTES / BÁSICAS
+    const causasSubyacentesData = {
+      "Factores Personales": [
+        "Capacidad física / fisiológica inadecuada",
+        "Capacidad mental / psicológica inadecuada",
+        "Tensión física o fisiológica",
+        "Tensión mental o psicológica",
+        "Falta de conocimiento",
+        "Falta de habilidad",
+        "Motivación inadecuada"
+      ],
+      "Factores Laborales / Trabajo": [
+        "Liderazgo y/o supervisión inadecuada",
+        "Ingeniería inadecuada",
+        "Adquisiciones inadecuadas",
+        "Mantenimiento inadecuado",
+        "Herramientas y equipos inadecuados",
+        "Estándares de trabajo inadecuados",
+        "Uso y desgaste excesivo",
+        "Abuso o mal uso"
+      ]
+    };
+
     function cargarCausasFrecuentes(index) {
       const selectTipo = document.getElementById(`cinm_tipo_${index}`);
       const selectCausa = document.getElementById(`cinm_causa_${index}`);
@@ -932,6 +952,27 @@
       // Agregar las opciones dinámicas
       if (causasInmediatasData[valorSeleccionado]) {
         causasInmediatasData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
+    function cargarCausasSubyacentes(index) {
+      const selectTipo = document.getElementById(`csub_tipo_${index}`);
+      const selectCausa = document.getElementById(`csub_causa_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+
+      // Limpiar opciones previas
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      // Agregar las opciones dinámicas
+      if (causasSubyacentesData[valorSeleccionado]) {
+        causasSubyacentesData[valorSeleccionado].forEach(causa => {
           const option = document.createElement('option');
           option.value = causa;
           option.textContent = causa;
@@ -1047,9 +1088,10 @@
       cambiarTipoInforme();
       evaluarOpcionesEvento();
 
-      // Cargar causas según los tipos predefinidos al iniciar
+      // Cargar causas inmediatas y subyacentes iniciales para las 5 filas
       for (let i = 1; i <= 5; i++) {
         cargarCausasFrecuentes(i);
+        cargarCausasSubyacentes(i);
       }
 
       document.getElementById('ssomaForm').addEventListener('submit', function(e) {
