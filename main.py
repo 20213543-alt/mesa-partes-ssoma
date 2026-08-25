@@ -259,16 +259,16 @@ def generar_pdf_100_porciento(
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
         <tr>
-            <td>{trab.get('paterno','-')}</td>
-            <td>{trab.get('materno','-')}</td>
-            <td>{trab.get('nombres','-')}</td>
-            <td>{trab.get('ocupacion','-')}</td>
-            <td>{trab.get('condicion','-')}</td>
-            <td>{trab.get('sexo','-')}</td>
-            <td>{trab.get('dni','-')}</td>
-            <td>{trab.get('edad','-')}</td>
-            <td>{trab.get('turno','-')}</td>
-            <td>{trab.get('personal','-')}</td>
+            <td style="width: 10%;">{trab.get('paterno','-')}</td>
+            <td style="width: 10%;">{trab.get('materno','-')}</td>
+            <td style="width: 12%;">{trab.get('nombres','-')}</td>
+            <td style="width: 14%;">{trab.get('ocupacion','-')}</td>
+            <td style="width: 10%;">{trab.get('condicion','-')}</td>
+            <td style="width: 6%;">{trab.get('sexo','-')}</td>
+            <td style="width: 9%;">{trab.get('dni','-')}</td>
+            <td style="width: 5%;">{trab.get('edad','-')}</td>
+            <td style="width: 8%;">{trab.get('turno','-')}</td>
+            <td style="width: 16%;">{trab.get('personal','-')}</td>
         </tr>
         """
     if not filas_trabajadores:
@@ -280,10 +280,10 @@ def generar_pdf_100_porciento(
     for ci in f.get("causas_inmediatas_list", []):
         filas_causas_inmediatas += f"""
         <tr>
-            <td style='text-align:center;'>{ci.get('fila','-')}</td>
-            <td>{ci.get('tipo','-')}</td>
-            <td>{ci.get('causa','-')}</td>
-            <td>{ci.get('obs','-')}</td>
+            <td style="text-align:center; width: 6%;">{ci.get('fila','-')}</td>
+            <td style="width: 24%;">{ci.get('tipo','-')}</td>
+            <td style="width: 35%;">{ci.get('causa','-')}</td>
+            <td style="width: 35%;">{ci.get('obs','-')}</td>
         </tr>
         """
     if not filas_causas_inmediatas:
@@ -293,11 +293,11 @@ def generar_pdf_100_porciento(
     for cb in f.get("causas_basicas_list", []):
         filas_causas_basicas += f"""
         <tr>
-            <td style='text-align:center;'>{cb.get('fila','-')}</td>
-            <td>{cb.get('tipo','-')}</td>
-            <td>{cb.get('causa','-')}</td>
-            <td>{cb.get('subyacente','-')}</td>
-            <td>{cb.get('obs','-')}</td>
+            <td style="text-align:center; width: 6%;">{cb.get('fila','-')}</td>
+            <td style="width: 20%;">{cb.get('tipo','-')}</td>
+            <td style="width: 24%;">{cb.get('causa','-')}</td>
+            <td style="width: 25%;">{cb.get('subyacente','-')}</td>
+            <td style="width: 25%;">{cb.get('obs','-')}</td>
         </tr>
         """
     if not filas_causas_basicas:
@@ -307,13 +307,13 @@ def generar_pdf_100_porciento(
     for mc in f.get("medidas_correctivas_list", []):
         filas_medidas += f"""
         <tr>
-            <td style='text-align:center;'>{mc.get('fila','-')}</td>
-            <td>{mc.get('tipo','-')}</td>
-            <td>{mc.get('accion','-')}</td>
-            <td>{mc.get('responsable','-')}</td>
-            <td>{mc.get('fecha','-')}</td>
-            <td>{mc.get('situacion','-')}</td>
-            <td>{mc.get('obs','-')}</td>
+            <td style="text-align:center; width: 6%;">{mc.get('fila','-')}</td>
+            <td style="width: 16%;">{mc.get('tipo','-')}</td>
+            <td style="width: 28%;">{mc.get('accion','-')}</td>
+            <td style="width: 16%;">{mc.get('responsable','-')}</td>
+            <td style="width: 10%;">{mc.get('fecha','-')}</td>
+            <td style="width: 10%;">{mc.get('situacion','-')}</td>
+            <td style="width: 14%;">{mc.get('obs','-')}</td>
         </tr>
         """
     if not filas_medidas:
@@ -338,12 +338,12 @@ def generar_pdf_100_porciento(
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
             .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8pt; padding: 3px; margin-top: 6px; margin-bottom: 3px; }}
             .sec-red {{ background-color: #742a2a; color: #ffffff; }}
-            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; }}
-            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 7pt; vertical-align: middle; }}
+            .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; }}
+            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: middle; word-wrap: break-word; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
         </style>
     </head>
@@ -432,16 +432,16 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <thead>
                 <tr>
-                    <th>A. Paterno</th>
-                    <th>A. Materno</th>
-                    <th>Nombres</th>
-                    <th>Ocupación</th>
-                    <th>Condición</th>
-                    <th>Sexo</th>
-                    <th>DNI</th>
-                    <th>Edad</th>
-                    <th>Turno</th>
-                    <th>Personal</th>
+                    <th style="width: 10%;">A. Paterno</th>
+                    <th style="width: 10%;">A. Materno</th>
+                    <th style="width: 12%;">Nombres</th>
+                    <th style="width: 14%;">Ocupación</th>
+                    <th style="width: 10%;">Condición</th>
+                    <th style="width: 6%;">Sexo</th>
+                    <th style="width: 9%;">DNI</th>
+                    <th style="width: 5%;">Edad</th>
+                    <th style="width: 8%;">Turno</th>
+                    <th style="width: 16%;">Personal</th>
                 </tr>
             </thead>
             <tbody>
@@ -518,10 +518,10 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <thead>
                 <tr>
-                    <th style="width: 8%;">Fila</th>
-                    <th style="width: 25%;">Tipo</th>
+                    <th style="width: 6%;">Fila</th>
+                    <th style="width: 24%;">Tipo</th>
                     <th style="width: 35%;">Causas Frecuentes</th>
-                    <th>Observaciones</th>
+                    <th style="width: 35%;">Observaciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -533,11 +533,11 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <thead>
                 <tr>
-                    <th style="width: 8%;">Fila</th>
-                    <th style="width: 22%;">Tipo</th>
-                    <th style="width: 25%;">Causas Comunes</th>
+                    <th style="width: 6%;">Fila</th>
+                    <th style="width: 20%;">Tipo</th>
+                    <th style="width: 24%;">Causas Comunes</th>
                     <th style="width: 25%;">Causa Subyacente</th>
-                    <th>Observaciones</th>
+                    <th style="width: 25%;">Observaciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -550,12 +550,12 @@ def generar_pdf_100_porciento(
             <thead>
                 <tr>
                     <th style="width: 6%;">Fila</th>
-                    <th style="width: 14%;">Tipo Acción</th>
+                    <th style="width: 16%;">Tipo Acción</th>
                     <th style="width: 28%;">¿Qué se debería hacer?</th>
-                    <th style="width: 18%;">Responsable</th>
-                    <th style="width: 12%;">F. Prog.</th>
+                    <th style="width: 16%;">Responsable</th>
+                    <th style="width: 10%;">F. Prog.</th>
                     <th style="width: 10%;">Situación</th>
-                    <th>Observación</th>
+                    <th style="width: 14%;">Observación</th>
                 </tr>
             </thead>
             <tbody>
