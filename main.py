@@ -11,7 +11,7 @@ from io import BytesIO
 
 from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from PIL import Image, ImageOps  # Importado ImageOps para el encuadre exacto
+from PIL import Image, ImageOps
 import requests
 import resend
 from xhtml2pdf import pisa
@@ -43,8 +43,6 @@ def optimizar_imagen_base64(bytes_imagen, target_size=(600, 360)):
     try:
         img = Image.open(io.BytesIO(bytes_imagen))
         img = img.convert("RGB")
-        
-        # ImageOps.fit realiza un recorte inteligente centrado sin deformar
         img = ImageOps.fit(img, target_size, Image.Resampling.LANCZOS)
 
         buffer = io.BytesIO()
@@ -65,7 +63,6 @@ def enviar_correo_con_pdf(
         )
         return
 
-    # Asignar API Key eliminando espacios invisibles
     resend.api_key = api_key.strip()
 
     try:
@@ -119,7 +116,6 @@ def generar_pdf_preliminar(
     pdf_path: str,
     fotos_base64: list = None,
 ):
-    # Acomoda las imágenes en celdas de tabla (máximo 2 por fila) ajustadas al contenedor PDF
     if fotos_base64 and len(fotos_base64) > 0:
         celdas = []
         for b64 in fotos_base64:
@@ -380,7 +376,7 @@ def generar_pdf_100_porciento(
             </tr>
             <tr>
                 <td class="lbl">N° Trab. Centro Laboral:</td>
-                <td class="val">{g(f, 'emp_num_trab')}</td>
+                <td class="val">{g(f, 'emp_num_trabajadores', g(f, 'emp_num_trab'))}</td>
                 <td class="lbl">N° Afiliados SCTR:</td>
                 <td class="val">{g(f, 'emp_num_sctr')}</td>
                 <td class="lbl">Aseguradora SCTR:</td>
@@ -404,7 +400,7 @@ def generar_pdf_100_porciento(
             </tr>
             <tr>
                 <td class="lbl">N° Trab. Centro Laboral:</td>
-                <td class="val">{g(f, 'ter_num_trab')}</td>
+                <td class="val">{g(f, 'ter_num_trabajadores', g(f, 'ter_num_trab'))}</td>
                 <td class="lbl">N° Afiliados SCTR:</td>
                 <td class="val">{g(f, 'ter_num_sctr')}</td>
                 <td class="lbl">Aseguradora:</td>
@@ -428,7 +424,7 @@ def generar_pdf_100_porciento(
                 <td class="lbl">Clasificación Evento:</td>
                 <td class="val">{g(f, 'fin_clasificacion')}</td>
                 <td class="lbl">Solo Incidente:</td>
-                <td class="val">{g(f, 'fin_solo_incidente')}</td>
+                <td class="val">{g(f, 'fin_incidente_peligro', g(f, 'fin_solo_incidente'))}</td>
             </tr>
         </table>
 
@@ -457,7 +453,7 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Gravedad Accidente:</td>
-                <td class="val">{g(f, 'fin_gravedad_evento')}</td>
+                <td class="val">{g(f, 'acc_gravedad', g(f, 'fin_gravedad_evento'))}</td>
                 <td class="lbl">Grado Incapacitante:</td>
                 <td class="val">{g(f, 'acc_grado_incapacitante')}</td>
                 <td class="lbl">Días Descanso Médico:</td>
@@ -473,26 +469,26 @@ def generar_pdf_100_porciento(
 
         <div class="sec-header">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
         <div class="text-box">
-            <b>Tipo de Atención en Primeros Auxilios:</b> {g(f, 'pa_tipo_atencion')}
+            <b>Tipo de Atención en Primeros Auxilios:</b> {g(f, 'inc_primeros_auxilios', g(f, 'pa_tipo_atencion'))}
         </div>
 
         <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
         <table class="grid-table">
             <tr>
                 <td class="lbl">Forma Accidente/Incidente:</td>
-                <td class="val">{g(f, 'les_forma')}</td>
+                <td class="val">{g(f, 'les_forma_evento', g(f, 'les_forma'))}</td>
                 <td class="lbl">Tipo de Lesión:</td>
-                <td class="val" colspan="3">{g(f, 'les_tipo')}</td>
+                <td class="val" colspan="3">{g(f, 'les_tipo_lesion', g(f, 'les_tipo'))}</td>
             </tr>
             <tr>
                 <td class="lbl">Agente Causante:</td>
-                <td class="val">{g(f, 'les_agente')}</td>
+                <td class="val">{g(f, 'les_agente_causante', g(f, 'les_agente'))}</td>
                 <td class="lbl">Parte Cuerpo Afectada:</td>
                 <td class="val" colspan="3">{g(f, 'les_parte_cuerpo')}</td>
             </tr>
             <tr>
                 <td class="lbl">Hospital / Clínica / Tópico:</td>
-                <td class="val" colspan="5">{g(f, 'les_hospital')}</td>
+                <td class="val" colspan="5">{g(f, 'les_hospital_atencion', g(f, 'les_hospital'))}</td>
             </tr>
         </table>
 
@@ -502,11 +498,11 @@ def generar_pdf_100_porciento(
                 <td class="lbl">Daño Material:</td>
                 <td class="val">{g(f, 'dan_material')}</td>
                 <td class="lbl">Agente Causante del Daño:</td>
-                <td class="val">{g(f, 'dan_agente')}</td>
+                <td class="val">{g(f, 'dan_agente_causante', g(f, 'dan_agente'))}</td>
             </tr>
         </table>
         <div class="text-box">
-            <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion')}
+            <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion_evento', g(f, 'dan_descripcion'))}
         </div>
 
         <div class="sec-header">ANÁLISIS DEL ACCIDENTE</div>
@@ -634,7 +630,7 @@ async def enviar_reporte(
 
         tz_peru = zoneinfo.ZoneInfo("America/Lima")
         ahora_peru = datetime.now(tz_peru)
-        fecha_registro_str = me_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
+        fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
 
         tipo_informe_raw = str(form_data.get("tipo_informe", "")).strip()
         es_preliminar = "PRELIMINAR" in tipo_informe_raw.upper()
@@ -646,7 +642,6 @@ async def enviar_reporte(
 
         fotos_base64 = []
 
-        # Procesamiento de múltiples imágenes mediante List[UploadFile]
         if fotografia_pre:
             for foto in fotografia_pre:
                 if foto and hasattr(foto, "filename") and foto.filename:
@@ -659,7 +654,6 @@ async def enviar_reporte(
                     except Exception as err_img:
                         print(f"Error procesando la fotografía: {err_img}")
 
-        # Respaldo si las imágenes vienen registradas bajo otras claves de form_data
         if not fotos_base64:
             archivos_alt = form_data.getlist("foto_evento_pre") or form_data.getlist("foto_evento")
             for foto in archivos_alt:
@@ -673,7 +667,7 @@ async def enviar_reporte(
                     except Exception as err_img:
                         print(f"Error procesando la imagen alternativa: {err_img}")
 
-        # Extracción segura de trabajadores usando zip_longest
+        # Extracción de trabajadores
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist("trab_paterno")
         materno_list = form_data.getlist("trab_materno[]") or form_data.getlist("trab_materno")
@@ -727,82 +721,81 @@ async def enviar_reporte(
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
+        # 1. Causas Inmediatas (Soporta sintaxis de index.html cinm_* y arreglos ci_*)
         causas_inmediatas_list = []
-        for f_num, t, c, o in zip_longest(
-            form_data.getlist("ci_fila[]") or form_data.getlist("ci_fila"),
-            form_data.getlist("ci_tipo[]") or form_data.getlist("ci_tipo"),
-            form_data.getlist("ci_causa[]") or form_data.getlist("ci_causa"),
-            form_data.getlist("ci_obs[]") or form_data.getlist("ci_obs"),
-            fillvalue="",
-        ):
-            f_num, t, c, o = (
-                str(f_num or ""),
-                str(t or ""),
-                str(c or ""),
-                str(o or ""),
-            )
+        for i in range(1, 6):
+            t = str(form_data.get(f"cinm_tipo_{i}", "")).strip()
+            c = str(form_data.get(f"cinm_causa_{i}", "")).strip()
+            o = str(form_data.get(f"cinm_obs_{i}", "")).strip()
             if t or c or o:
-                causas_inmediatas_list.append(
-                    {"fila": f_num, "tipo": t, "causa": c, "obs": o}
-                )
+                causas_inmediatas_list.append({"fila": str(i), "tipo": t, "causa": c, "obs": o})
+
+        if not causas_inmediatas_list:
+            for f_num, t, c, o in zip_longest(
+                form_data.getlist("ci_fila[]") or form_data.getlist("ci_fila"),
+                form_data.getlist("ci_tipo[]") or form_data.getlist("ci_tipo"),
+                form_data.getlist("ci_causa[]") or form_data.getlist("ci_causa"),
+                form_data.getlist("ci_obs[]") or form_data.getlist("ci_obs"),
+                fillvalue="",
+            ):
+                f_num, t, c, o = str(f_num or ""), str(t or ""), str(c or ""), str(o or "")
+                if t or c or o:
+                    causas_inmediatas_list.append({"fila": f_num, "tipo": t, "causa": c, "obs": o})
+
         form_dict["causas_inmediatas_list"] = causas_inmediatas_list
 
+        # 2. Causas Básicas (Soporta sintaxis de index.html csub_* y arreglos cb_*)
         causas_basicas_list = []
-        for f_num, t, c, s, o in zip_longest(
-            form_data.getlist("cb_fila[]") or form_data.getlist("cb_fila"),
-            form_data.getlist("cb_tipo[]") or form_data.getlist("cb_tipo"),
-            form_data.getlist("cb_causa[]") or form_data.getlist("cb_causa"),
-            form_data.getlist("cb_subyacente[]") or form_data.getlist("cb_subyacente"),
-            form_data.getlist("cb_obs[]") or form_data.getlist("cb_obs"),
-            fillvalue="",
-        ):
-            f_num, t, c, s, o = (
-                str(f_num or ""),
-                str(t or ""),
-                str(c or ""),
-                str(s or ""),
-                str(o or ""),
-            )
+        for i in range(1, 6):
+            t = str(form_data.get(f"csub_tipo_{i}", "")).strip()
+            c = str(form_data.get(f"csub_causa_{i}", "")).strip()
+            s = str(form_data.get(f"csub_subyacente_{i}", "")).strip()
+            o = str(form_data.get(f"csub_obs_{i}", "")).strip()
             if t or c or s or o:
-                causas_basicas_list.append({
-                    "fila": f_num,
-                    "tipo": t,
-                    "causa": c,
-                    "subyacente": s,
-                    "obs": o,
-                })
+                causas_basicas_list.append({"fila": str(i), "tipo": t, "causa": c, "subyacente": s, "obs": o})
+
+        if not causas_basicas_list:
+            for f_num, t, c, s, o in zip_longest(
+                form_data.getlist("cb_fila[]") or form_data.getlist("cb_fila"),
+                form_data.getlist("cb_tipo[]") or form_data.getlist("cb_tipo"),
+                form_data.getlist("cb_causa[]") or form_data.getlist("cb_causa"),
+                form_data.getlist("cb_subyacente[]") or form_data.getlist("cb_subyacente"),
+                form_data.getlist("cb_obs[]") or form_data.getlist("cb_obs"),
+                fillvalue="",
+            ):
+                f_num, t, c, s, o = str(f_num or ""), str(t or ""), str(c or ""), str(s or ""), str(o or "")
+                if t or c or s or o:
+                    causas_basicas_list.append({"fila": f_num, "tipo": t, "causa": c, "subyacente": s, "obs": o})
+
         form_dict["causas_basicas_list"] = causas_basicas_list
 
+        # 3. Medidas Correctivas (Soporta sintaxis de index.html acc_* y arreglos mc_*)
         medidas_correctivas_list = []
-        for f_num, t, a, r, fe, si, o in zip_longest(
-            form_data.getlist("mc_fila[]") or form_data.getlist("mc_fila"),
-            form_data.getlist("mc_tipo[]") or form_data.getlist("mc_tipo"),
-            form_data.getlist("mc_accion[]") or form_data.getlist("mc_accion"),
-            form_data.getlist("mc_responsable[]") or form_data.getlist("mc_responsable"),
-            form_data.getlist("mc_fecha[]") or form_data.getlist("mc_fecha"),
-            form_data.getlist("mc_situacion[]") or form_data.getlist("mc_situacion"),
-            form_data.getlist("mc_obs[]") or form_data.getlist("mc_obs"),
-            fillvalue="",
-        ):
-            f_num, t, a, r, fe, si, o = (
-                str(f_num or ""),
-                str(t or ""),
-                str(a or ""),
-                str(r or ""),
-                str(fe or ""),
-                str(si or ""),
-                str(o or ""),
-            )
-            if t or a or r or fe:
-                medidas_correctivas_list.append({
-                    "fila": f_num,
-                    "tipo": t,
-                    "accion": a,
-                    "responsable": r,
-                    "fecha": fe,
-                    "situacion": si,
-                    "obs": o,
-                })
+        for i in range(1, 10):
+            t = str(form_data.get(f"acc_tipo_{i}", "")).strip()
+            a = str(form_data.get(f"acc_control_{i}", "")).strip()
+            r = str(form_data.get(f"acc_resp_{i}", "")).strip()
+            fe = str(form_data.get(f"acc_fecha_{i}", "")).strip()
+            si = str(form_data.get(f"acc_sit_{i}", "")).strip()
+            o = str(form_data.get(f"acc_obs_{i}", "")).strip()
+            if t or a or r or fe or si or o:
+                medidas_correctivas_list.append({"fila": str(i), "tipo": t, "accion": a, "responsable": r, "fecha": fe, "situacion": si, "obs": o})
+
+        if not medidas_correctivas_list:
+            for f_num, t, a, r, fe, si, o in zip_longest(
+                form_data.getlist("mc_fila[]") or form_data.getlist("mc_fila"),
+                form_data.getlist("mc_tipo[]") or form_data.getlist("mc_tipo"),
+                form_data.getlist("mc_accion[]") or form_data.getlist("mc_accion"),
+                form_data.getlist("mc_responsable[]") or form_data.getlist("mc_responsable"),
+                form_data.getlist("mc_fecha[]") or form_data.getlist("mc_fecha"),
+                form_data.getlist("mc_situacion[]") or form_data.getlist("mc_situacion"),
+                form_data.getlist("mc_obs[]") or form_data.getlist("mc_obs"),
+                fillvalue="",
+            ):
+                f_num, t, a, r, fe, si, o = str(f_num or ""), str(t or ""), str(a or ""), str(r or ""), str(fe or ""), str(si or ""), str(o or "")
+                if t or a or r or fe:
+                    medidas_correctivas_list.append({"fila": f_num, "tipo": t, "accion": a, "responsable": r, "fecha": fe, "situacion": si, "obs": o})
+
         form_dict["medidas_correctivas_list"] = medidas_correctivas_list
 
         if es_preliminar:
@@ -882,7 +875,6 @@ async def enviar_reporte(
                     or "No especificado"
                 )
 
-        # Envío del correo con el PDF para ambos casos
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: {tipo_informe} - {nombre_afectado}"
         cuerpo = f"Se ha generado un {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_afectado}\n\nAdjunto encontrará el archivo PDF correspondiente."
 
