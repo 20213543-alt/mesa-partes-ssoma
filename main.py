@@ -807,7 +807,9 @@ async def enviar_reporte(
         if es_preliminar:
             codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
         else:
-            codigo_comprobante = f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
+            cadena_area_interna = ", ".join([
+                t["area_interna"] for t in lista_trabajadores if t.get("area_interna")
+            ])
             datos_sheet = {
                 "fin_fecha_evento": form_data.get("fin_fecha_evento", ""),
                 "fin_hora_evento": form_data.get("fin_hora_evento", ""),
@@ -827,9 +829,10 @@ async def enviar_reporte(
                 ]),
                 "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
                 "inv_nombre": form_data.get("inv_nombre", ""),
-                "trab_area_interna[]": ", ".join([
-                    t["area_interna"] for t in lista_trabajadores if t.get("area_interna")
-                ]),
+                # Envío de variaciones de claves para asegurar recepción en Google Apps Script
+                "trab_area_interna[]": cadena_area_interna,
+                "trab_area_interna": cadena_area_interna,
+                "trab_area": cadena_area_interna,
             }
 
             try:
