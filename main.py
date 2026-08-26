@@ -6,11 +6,12 @@ from itertools import zip_longest
 import os
 import socket
 import traceback
-from typing import List, Optional
+from typing import List
 import zoneinfo
 
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles  # <-- Importado para archivos estáticos
 from PIL import Image, ImageOps
 import requests
 import resend
@@ -27,36 +28,38 @@ def new_getaddrinfo(*args, **kwargs):
 
 socket.getaddrinfo = new_getaddrinfo
 
-app = FastAPI(title="Sistema SSOMA - EMAPE S.A.")
+app = FastAPI()
+
+# Configuración de carpeta y ruta estática para archivos JS/CSS
+os.makedirs("static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
-CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe"]
-PDF_DIR = "pdf_reports"
 
+# Correo único de destino automatizado
+CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe"]
+
+PDF_DIR = "pdf_reports"
 os.makedirs(PDF_DIR, exist_ok=True)
 
 
-def optimizar_imagen_base64(
-    bytes_imagen: bytes, target_size=(600, 360)
-) -> Optional[str]:
+def optimizar_imagen_base64(bytes_imagen, target_size=(600, 360)):
     """Recorta y escala la imagen manteniendo la proporción fija centrada para el cuadro del PDF."""
     try:
-        with Image.open(io.BytesIO(bytes_imagen)) as img:
-            img = img.convert("RGB")
-            img = ImageOps.fit(img, target_size, Image.Resampling.LANCZOS)
-            buffer = io.BytesIO()
-            img.save(buffer, format="JPEG", quality=80)
-            return base64.b64encode(buffer.getvalue()).decode("utf-8")
+        img = Image.open(io.BytesIO(bytes_imagen))
+        img = img.convert("RGB")
+        img = ImageOps.fit(img, target_size, Image.Resampling.LANCZOS)
+
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=80)
+        return base64.b64encode(buffer.getvalue()).decode("utf-8")
     except Exception as e:
-        print(f"⚠️ Error optimizando la fotografía: {e}")
+        print(f"Error optimizando la fotografía: {e}")
         return None
 
 
 def enviar_correo_con_pdf(
-    destinatarios: list,
-    asunto: str,
-    cuerpo: str,
-    pdf_path: Optional[str] = None,
+    destinatarios: list, asunto: str, cuerpo: str, pdf_path: str = None
 ):
     api_key = os.getenv("RESEND_API_KEY")
     if not api_key:
@@ -72,15 +75,16 @@ def enviar_correo_con_pdf(
         if pdf_path and os.path.exists(pdf_path):
             with open(pdf_path, "rb") as f:
                 pdf_bytes = list(f.read())
-            attachments.append(
-                {"filename": os.path.basename(pdf_path), "content": pdf_bytes}
-            )
+            filename = os.path.basename(pdf_path)
+            attachments.append({"filename": filename, "content": pdf_bytes})
+
+        cuerpo_html = f"<p>{cuerpo.replace('\n', '<br>')}</p>"
 
         payload = {
             "from": "Sistema SSOMA <onboarding@resend.dev>",
             "to": destinatarios,
             "subject": asunto,
-            "html": f"<p>{cuerpo.replace(chr(10), '<br>')}</p>",
+            "html": cuerpo_html,
         }
 
         if attachments:
@@ -88,20 +92,21 @@ def enviar_correo_con_pdf(
 
         response = resend.Emails.send(payload)
         print(
-            f"✅ Correo enviado a {destinatarios} mediante Resend. ID: {response.get('id', 'OK')}"
+            f"✅ Correo enviado a {destinatarios} mediante Resend. ID: {response.get('id')}"
         )
+
     except Exception as e:
         print(f"❌ Error al enviar correo mediante Resend: {e}")
 
 
-def g(form_dict: dict, key: str, default: str = "-") -> str:
+def g(form_dict, key, default="-"):
     val = form_dict.get(key)
     if val is None or str(val).strip() == "":
         return default
     return str(val).strip()
 
 
-def html_to_pdf_file(html_string: str, pdf_path: str) -> bool:
+def html_to_pdf_file(html_string: str, pdf_path: str):
     with open(pdf_path, "wb") as pdf_file:
         pisa_status = pisa.CreatePDF(
             BytesIO(html_string.encode("utf-8")), dest=pdf_file
@@ -114,18 +119,21 @@ def generar_pdf_preliminar(
     codigo: str,
     fecha_registro: str,
     pdf_path: str,
-    fotos_base64: Optional[list] = None,
+    fotos_base64: list = None,
 ):
-    if fotos_base64:
-        celdas = [
-            f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
-            f'<img src="data:image/jpeg;base64,{b64}" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 3px;" />'
-            f"</td>"
-            for b64 in fotos_base64
-        ]
-        filas_html = "".join(
-            f"<tr>{''.join(celdas[i:i+2])}</tr>" for i in range(0, len(celdas), 2)
-        )
+    if fotos_base64 and len(fotos_base64) > 0:
+        celdas = []
+        for b64 in fotos_base64:
+            celdas.append(
+                f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
+                f'<img src="data:image/jpeg;base64,{b64}" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 3px;" />'
+                f"</td>"
+            )
+
+        filas_html = ""
+        for i in range(0, len(celdas), 2):
+            filas_html += f"<tr>{''.join(celdas[i:i+2])}</tr>"
+
         img_html = f'<table style="width: 100%; border-collapse: collapse; margin: 0 auto;">{filas_html}</table>'
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px; text-align: center;">Sin fotografía adjunta</p>'
@@ -252,8 +260,9 @@ def generar_pdf_preliminar(
 def generar_pdf_100_porciento(
     f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str
 ):
-    filas_trabajadores = "".join(
-        f"""
+    filas_trabajadores = ""
+    for trab in f.get("lista_trabajadores", []):
+        filas_trabajadores += f"""
         <tr>
             <td style="width: 9%;">{trab.get('paterno','-')}</td>
             <td style="width: 9%;">{trab.get('materno','-')}</td>
@@ -268,11 +277,14 @@ def generar_pdf_100_porciento(
             <td style="width: 14%;">{trab.get('personal','-')}</td>
         </tr>
         """
-        for trab in f.get("lista_trabajadores", [])
-    ) or "<tr><td colspan='11'>No se registraron trabajadores</td></tr>"
+    if not filas_trabajadores:
+        filas_trabajadores = (
+            "<tr><td colspan='11'>No se registraron trabajadores</td></tr>"
+        )
 
-    filas_causas_inmediatas = "".join(
-        f"""
+    filas_causas_inmediatas = ""
+    for ci in f.get("causas_inmediatas_list", []):
+        filas_causas_inmediatas += f"""
         <tr>
             <td style="text-align:center; width: 6%;">{ci.get('fila','-')}</td>
             <td style="width: 24%;">{ci.get('tipo','-')}</td>
@@ -280,11 +292,12 @@ def generar_pdf_100_porciento(
             <td style="width: 35%;">{ci.get('obs','-')}</td>
         </tr>
         """
-        for ci in f.get("causas_inmediatas_list", [])
-    ) or "<tr><td colspan='4'>Sin registros</td></tr>"
+    if not filas_causas_inmediatas:
+        filas_causas_inmediatas = "<tr><td colspan='4'>Sin registros</td></tr>"
 
-    filas_causas_basicas = "".join(
-        f"""
+    filas_causas_basicas = ""
+    for cb in f.get("causas_basicas_list", []):
+        filas_causas_basicas += f"""
         <tr>
             <td style="text-align:center; width: 6%;">{cb.get('fila','-')}</td>
             <td style="width: 20%;">{cb.get('tipo','-')}</td>
@@ -293,11 +306,12 @@ def generar_pdf_100_porciento(
             <td style="width: 25%;">{cb.get('obs','-')}</td>
         </tr>
         """
-        for cb in f.get("causas_basicas_list", [])
-    ) or "<tr><td colspan='5'>Sin registros</td></tr>"
+    if not filas_causas_basicas:
+        filas_causas_basicas = "<tr><td colspan='5'>Sin registros</td></tr>"
 
-    filas_medidas = "".join(
-        f"""
+    filas_medidas = ""
+    for mc in f.get("medidas_correctivas_list", []):
+        filas_medidas += f"""
         <tr>
             <td style="text-align:center; width: 6%;">{mc.get('fila','-')}</td>
             <td style="width: 16%;">{mc.get('tipo','-')}</td>
@@ -308,12 +322,12 @@ def generar_pdf_100_porciento(
             <td style="width: 14%;">{mc.get('obs','-')}</td>
         </tr>
         """
-        for mc in f.get("medidas_correctivas_list", [])
-    ) or "<tr><td colspan='7'>Sin registros</td></tr>"
+    if not filas_medidas:
+        filas_medidas = "<tr><td colspan='7'>Sin registros</td></tr>"
 
-    firma_inv_text = g(
-        f, "firma_inv_text", f"<b>[REGISTRADO POR: {g(f, 'inv_nombre')}]</b>"
-    )
+    inv_nombre_val = g(f, "inv_nombre")
+    firma_inv_default = f"<b>[REGISTRADO POR: {inv_nombre_val}]</b>"
+    firma_inv_text = g(f, "firma_inv_text", firma_inv_default)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -611,16 +625,14 @@ def descargar_pdf(filename: str):
 
 @app.post("/enviar-reporte", response_class=HTMLResponse)
 async def enviar_reporte(
-    request: Request, fotografia_pre: Optional[List[UploadFile]] = File(None)
+    request: Request, fotografia_pre: List[UploadFile] = File(None)
 ):
     try:
         form_data = await request.form()
-        form_dict = {
-            k: form_data.getlist(k)[0]
-            if len(form_data.getlist(k)) == 1
-            else form_data.getlist(k)
-            for k in form_data.keys()
-        }
+        form_dict = {}
+        for key in form_data.keys():
+            val = form_data.getlist(key)
+            form_dict[key] = val[0] if len(val) == 1 else val
 
         tz_peru = zoneinfo.ZoneInfo("America/Lima")
         ahora_peru = datetime.now(tz_peru)
@@ -636,28 +648,36 @@ async def enviar_reporte(
 
         fotos_base64 = []
 
-        async def procesar_fotos(fotos):
-            for foto in fotos:
-                if hasattr(foto, "filename") and foto.filename:
+        if fotografia_pre:
+            for foto in fotografia_pre:
+                if foto and hasattr(foto, "filename") and foto.filename:
                     try:
                         contenido = await foto.read()
-                        if contenido:
+                        if contenido and len(contenido) > 0:
                             encoded = optimizar_imagen_base64(contenido)
                             if encoded:
                                 fotos_base64.append(encoded)
                     except Exception as err_img:
-                        print(f"⚠️ Error procesando la fotografía: {err_img}")
-
-        if fotografia_pre:
-            await procesar_fotos(fotografia_pre)
+                        print(f"Error procesando la fotografía: {err_img}")
 
         if not fotos_base64:
             archivos_alt = form_data.getlist(
                 "foto_evento_pre"
             ) or form_data.getlist("foto_evento")
-            await procesar_fotos(archivos_alt)
+            for foto in archivos_alt:
+                if hasattr(foto, "filename") and foto.filename:
+                    try:
+                        contenido = await foto.read()
+                        if contenido and len(contenido) > 0:
+                            encoded = optimizar_imagen_base64(contenido)
+                            if encoded:
+                                fotos_base64.append(encoded)
+                    except Exception as err_img:
+                        print(
+                            f"Error procesando la imagen alternativa: {err_img}"
+                        )
 
-        # Extracción de trabajadores
+        # Extracción de trabajadores (con soporte para Área Interna)
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist(
             "trab_paterno"
@@ -710,8 +730,18 @@ async def enviar_reporte(
             personal_list,
             fillvalue="",
         ):
-            p, m, n, oc, ar, co, sx, d, ed, tu, pe = map(
-                lambda x: str(x or ""), [p, m, n, oc, ar, co, sx, d, ed, tu, pe]
+            p, m, n, oc, ar, co, sx, d, ed, tu, pe = (
+                str(p or ""),
+                str(m or ""),
+                str(n or ""),
+                str(oc or ""),
+                str(ar or ""),
+                str(co or ""),
+                str(sx or ""),
+                str(d or ""),
+                str(ed or ""),
+                str(tu or ""),
+                str(pe or ""),
             )
             if any([p, m, n, d]):
                 lista_trabajadores.append({
@@ -750,8 +780,11 @@ async def enviar_reporte(
                 form_data.getlist("ci_obs[]") or form_data.getlist("ci_obs"),
                 fillvalue="",
             ):
-                f_num, t, c, o = map(
-                    lambda x: str(x or ""), [f_num, t, c, o]
+                f_num, t, c, o = (
+                    str(f_num or ""),
+                    str(t or ""),
+                    str(c or ""),
+                    str(o or ""),
                 )
                 if t or c or o:
                     causas_inmediatas_list.append(
@@ -787,8 +820,12 @@ async def enviar_reporte(
                 form_data.getlist("cb_obs[]") or form_data.getlist("cb_obs"),
                 fillvalue="",
             ):
-                f_num, t, c, s, o = map(
-                    lambda x: str(x or ""), [f_num, t, c, s, o]
+                f_num, t, c, s, o = (
+                    str(f_num or ""),
+                    str(t or ""),
+                    str(c or ""),
+                    str(s or ""),
+                    str(o or ""),
                 )
                 if t or c or s or o:
                     causas_basicas_list.append({
@@ -836,8 +873,14 @@ async def enviar_reporte(
                 form_data.getlist("mc_obs[]") or form_data.getlist("mc_obs"),
                 fillvalue="",
             ):
-                f_num, t, a, r, fe, si, o = map(
-                    lambda x: str(x or ""), [f_num, t, a, r, fe, si, o]
+                f_num, t, a, r, fe, si, o = (
+                    str(f_num or ""),
+                    str(t or ""),
+                    str(a or ""),
+                    str(r or ""),
+                    str(fe or ""),
+                    str(si or ""),
+                    str(o or ""),
                 )
                 if t or a or r or fe:
                     medidas_correctivas_list.append({
@@ -856,30 +899,31 @@ async def enviar_reporte(
         if es_preliminar:
             codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
         else:
+            # Fallback predeterminado por si falla el Webhook de Google
             codigo_comprobante = f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
-            cadena_area_interna = ", ".join(
-                filter(
-                    None, [t.get("area_interna") for t in lista_trabajadores]
-                )
-            )
+            cadena_area_interna = ", ".join([
+                t["area_interna"]
+                for t in lista_trabajadores
+                if t.get("area_interna")
+            ])
             datos_sheet = {
                 "fin_fecha_evento": form_data.get("fin_fecha_evento", ""),
                 "fin_hora_evento": form_data.get("fin_hora_evento", ""),
                 "fin_lugar_exacto": form_data.get("fin_lugar_exacto", ""),
                 "fin_tipo_evento": form_data.get("fin_tipo_evento", ""),
-                "trab_nombres": ", ".join(
-                    filter(None, [t.get("nombres") for t in lista_trabajadores])
-                ),
-                "trab_paterno": ", ".join(
-                    filter(None, [t.get("paterno") for t in lista_trabajadores])
-                ),
-                "trab_materno": ", ".join(
-                    filter(None, [t.get("materno") for t in lista_trabajadores])
-                ),
-                "trab_dni": ", ".join(
-                    filter(None, [t.get("dni") for t in lista_trabajadores])
-                ),
+                "trab_nombres": ", ".join([
+                    t["nombres"] for t in lista_trabajadores if t.get("nombres")
+                ]),
+                "trab_paterno": ", ".join([
+                    t["paterno"] for t in lista_trabajadores if t.get("paterno")
+                ]),
+                "trab_materno": ", ".join([
+                    t["materno"] for t in lista_trabajadores if t.get("materno")
+                ]),
+                "trab_dni": ", ".join([
+                    t["dni"] for t in lista_trabajadores if t.get("dni")
+                ]),
                 "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
                 "inv_nombre": form_data.get("inv_nombre", ""),
                 "trab_area_interna[]": cadena_area_interna,
@@ -899,7 +943,7 @@ async def enviar_reporte(
                     ):
                         codigo_comprobante = res_json["codigo_comprobante"]
             except Exception as err_sheet:
-                print(f"⚠️ Error Google Sheets Webhook: {err_sheet}")
+                print(f"Error Google Sheets Webhook: {err_sheet}")
 
         pdf_filename = f"Reporte_{codigo_comprobante}.pdf"
         pdf_filepath = os.path.join(PDF_DIR, pdf_filename)
@@ -930,24 +974,17 @@ async def enviar_reporte(
                 for t in lista_trabajadores
                 if t.get("nombres") or t.get("paterno")
             ]
-            nombre_afectado = (
-                ", ".join(nombres_trabajadores)
-                if nombres_trabajadores
-                else (
+            if nombres_trabajadores:
+                nombre_afectado = ", ".join(nombres_trabajadores)
+            else:
+                nombre_afectado = (
                     form_data.get("fin_nombre_lesionado")
                     or form_data.get("nombre_lesionado")
                     or "No especificado"
                 )
-            )
 
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: {tipo_informe} - {nombre_afectado}"
-        cuerpo = (
-            f"Se ha generado un {tipo_informe}.\n\n"
-            f"Código: {codigo_comprobante}\n"
-            f"Fecha/Hora: {fecha_registro_str}\n"
-            f"Afectado: {nombre_afectado}\n\n"
-            f"Adjunto encontrará el archivo PDF correspondiente."
-        )
+        cuerpo = f"Se ha generado un {tipo_informe}.\n\nCódigo: {codigo_comprobante}\nFecha/Hora: {fecha_registro_str}\nAfectado: {nombre_afectado}\n\nAdjunto encontrará el archivo PDF correspondiente."
 
         enviar_correo_con_pdf(
             CORREOS_PREDETERMINADOS, asunto, cuerpo, pdf_filepath
