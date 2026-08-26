@@ -1,889 +1,1201 @@
-<!-- ENCABEZADO PRINCIPAL -->
-<div class="bg-blue-900 text-white p-5 border-b-4 border-amber-500 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-  <div>
-    <h1 class="text-xl md:text-2xl font-black tracking-wider flex items-center gap-2">
-      <span>🏛️</span> EMAPE S.A.
-    </h1>
-    <h2 class="text-xs md:text-sm font-bold text-amber-400 uppercase tracking-wide">
-      Mesa de Partes SSOMA - Registro de Eventos e Incidentes
-    </h2>
-  </div>
-  <span class="bg-blue-950 text-blue-200 text-xs px-3 py-1 rounded-full font-semibold border border-blue-700">
-    Sistema Oficial
-  </span>
-</div>
+<!-- Mapeos corregidos dentro del HTML de generar_pdf_100_porciento:
+{g(f, 'emp_num_trabajadores')}  # N° Trab. Empleador Principal
+{g(f, 'ter_num_trabajadores')}  # N° Trab. Tercerización
+{g(f, 'fin_incidente_peligro')} # Solo Incidente
+{g(f, 'acc_gravedad')}          # Gravedad Accidente
+{g(f, 'inc_primeros_auxilios')} # Tipo Atención Primeros Auxilios
+{g(f, 'les_forma_evento')}      # Forma Accidente
+{g(f, 'les_tipo_lesion')}       # Tipo Lesión
+{g(f, 'les_agente_causante')}   # Agente Causante
+{g(f, 'les_hospital_atencion')} # Hospital / Clínica
+{g(f, 'dan_agente_causante')}   # Agente Causante Daño
+{g(f, 'dan_descripcion_evento')}# Descripción Daños
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MESA DE PARTES SSOMA - EMAPE S.A.</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans p-2 md:p-6 min-h-screen">
 
-<form id="ssomaForm" action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-4 md:p-6 space-y-6 text-xs">
-
-  <!-- SELECCIÓN DE TIPO DE INFORME -->
-  <div class="bg-amber-50 p-4 rounded-xl border-2 border-amber-400 shadow-sm">
-    <label for="tipo_informe" class="font-extrabold text-sm block text-slate-800 mb-2 uppercase tracking-wide">
-      📋 Seleccione el Tipo de Informe a Registrar:
-    </label>
-    <select id="tipo_informe" name="tipo_informe" onchange="cambiarTipoInforme()" class="w-full md:w-1/2 border-2 border-amber-500 rounded-lg p-2.5 text-sm font-bold bg-white text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none transition cursor-pointer shadow-sm">
-      <option value="PRELIMINAR">Informe Preliminar</option>
-      <option value="FINAL">Informe Final de Accidente / Incidente</option>
-    </select>
-  </div>
-
-  <!-- ================================================================= -->
-  <!-- SECCIÓN 1: INFORME PRELIMINAR                                     -->
-  <!-- ================================================================= -->
-  <div id="seccion_preliminar" class="space-y-6">
-
-    <div class="bg-slate-100 p-4 rounded-lg border border-slate-300 grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-300">
+    
+    <!-- ENCABEZADO PRINCIPAL -->
+    <div class="bg-blue-900 text-white p-5 border-b-4 border-amber-500 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
       <div>
-        <label class="font-bold text-slate-600 block mb-1">Razón Social:</label>
-        <input type="text" value="EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A." readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
+        <h1 class="text-xl md:text-2xl font-black tracking-wider flex items-center gap-2">
+          <span>🏛️</span> EMAPE S.A.
+        </h1>
+        <h2 class="text-xs md:text-sm font-bold text-amber-400 uppercase tracking-wide">
+          Mesa de Partes SSOMA - Registro de Eventos e Incidentes
+        </h2>
       </div>
-      <div>
-        <label class="font-bold text-slate-600 block mb-1">RUC:</label>
-        <input type="text" value="20100063337" readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
-      </div>
+      <span class="bg-blue-950 text-blue-200 text-xs px-3 py-1 rounded-full font-semibold border border-blue-700">
+        Sistema Oficial
+      </span>
     </div>
 
-    <div class="bg-slate-50 p-4 rounded-lg border border-slate-300">
-      <label class="font-bold block text-slate-800 mb-1 text-sm">Tipo de Evento:</label>
-      <select name="tipo_evento_pre" class="w-full md:w-1/2 border rounded p-2 bg-white font-medium text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        <option value="Accidente">Accidente</option>
-        <option value="Incidente">Incidente</option>
-        <option value="Incidente Peligroso">Incidente Peligroso</option>
-        <option value="Daño Ambiental">Daño Ambiental</option>
-      </select>
-    </div>
+    <form id="ssomaForm" action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-4 md:p-6 space-y-6 text-xs">
 
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ANTECEDENTES</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Fecha de Evento:</label>
-          <input type="date" name="fecha_evento_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Hora de Ocurrencia:</label>
-          <input type="time" name="hora_ocurrencia_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Lugar de Ocurrencia:</label>
-          <input type="text" name="lugar_ocurrencia_pre" placeholder="Ej. Av. Javier Prado Este N° 123" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Fecha de Reporte:</label>
-          <input type="date" name="fecha_reporte_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div class="md:col-span-2">
-          <label class="font-bold block text-slate-700 mb-1">Trabajo que se Realizaba:</label>
-          <input type="text" name="trabajo_realizaba_pre" placeholder="Descripción de las labores desarrolladas" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-      </div>
-    </div>
-
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DESCRIPCIÓN DE LOS LESIONADOS</div>
-      <div class="p-4 bg-slate-50 space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">Nombre Completo:</label>
-            <input type="text" name="nombre_lesionado_pre" placeholder="Apellidos y Nombres" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">Edad:</label>
-            <input type="number" name="edad_lesionado_pre" placeholder="Ej. 35" min="18" max="100" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
-            <input type="text" name="cargo_lesionado_pre" placeholder="Ej. Operario de campo" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-          </div>
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Breve Descripción:</label>
-          <textarea name="breve_descripcion_pre" rows="3" placeholder="Detalle breve de cómo ocurrió el suceso..." class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- REGISTRO FOTOGRÁFICO CON PREVISUALIZACIÓN -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">REGISTRO FOTOGRÁFICO</div>
-      <div class="p-4 bg-slate-50">
-        <label class="font-bold block text-slate-700 mb-1">Adjuntar Fotografía(s) del Evento (puedes seleccionar varias):</label>
-        <input type="file" id="fotografia_pre" name="fotografia_pre[]" accept="image/*" multiple onchange="previsualizarImagenes(event)" class="w-full border rounded p-2 bg-white file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-        <div id="preview_fotos_pre" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4 hidden"></div>
-      </div>
-    </div>
-
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DEL REPORTE</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Nombre y Apellido:</label>
-          <input type="text" id="resp_nombre_pre" name="resp_nombre_pre" oninput="actualizarFirmaPre()" placeholder="Nombre del responsable" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
-          <input type="text" name="resp_cargo_pre" placeholder="Ej. Supervisor SSOMA" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Fecha:</label>
-          <input type="date" name="resp_fecha_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div class="md:col-span-3 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
-          <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma Digital Registrada:</label>
-          <p id="vista_firma_pre" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-            [AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]
-          </p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ================================================================= -->
-  <!-- SECCIÓN 2: INFORME FINAL DE ACCIDENTE                            -->
-  <!-- ================================================================= -->
-  <div id="seccion_final" class="hidden space-y-6">
-
-    <!-- DATOS DEL EMPLEADOR PRINCIPAL -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DATOS DEL EMPLEADOR PRINCIPAL</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="md:col-span-2">
-          <label class="font-bold block text-slate-600 mb-1">Razón Social:</label>
-          <input type="text" value="EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A." readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
-        </div>
-        <div>
-          <label class="font-bold text-slate-600 block mb-1">RUC:</label>
-          <input type="text" value="20100063337" readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Sede:</label>
-          <input type="text" name="emp_sede" placeholder="Ej. Sede Central / Vía Expresa" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div class="md:col-span-2">
-          <label class="font-bold block text-slate-700 mb-1">Dirección:</label>
-          <input type="text" name="emp_direccion" placeholder="Ej. Jr. Ancash N° 229, Lima" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">N° Trabajadores Centro Laboral:</label>
-          <input type="number" name="emp_num_trabajadores" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">N° Trabajadores Afiliados SCTR:</label>
-          <input type="number" name="emp_num_sctr" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Nombre Aseguradora SCTR:</label>
-          <input type="text" name="emp_aseguradora" placeholder="Ej. La Positiva / Rímac" class="w-full border rounded p-2 bg-white">
-        </div>
-      </div>
-    </div>
-
-    <!-- DATOS DEL EMPLEADOR DE TERCERIZACIÓN, CONTRATISTA U OTROS -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DATOS DEL EMPLEADOR DE TERCERIZACIÓN, CONTRATISTA U OTROS</div>
-      <div class="p-4 bg-slate-50 space-y-4">
-        
-        <!-- Selector principal -->
-        <div>
-          <label for="tipoPersona" class="font-bold block text-slate-800 mb-1">Tipo de Vínculo / Entidad:</label>
-          <select id="tipoPersona" name="tipo_persona" onchange="evaluarTipoPersona()" class="w-full md:w-1/2 border-2 border-blue-800 rounded p-2 bg-white font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            <option value="">-- Seleccione una opción --</option>
-            <option value="contratista">Empresa Contratista / Tercerización</option>
-            <option value="locador">Locador de Servicios</option>
-          </select>
-        </div>
-
-        <!-- Bloque 1: Contratista / Tercerización -->
-        <div id="seccion-contratista" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-300 pt-4">
-          <div class="md:col-span-2">
-            <label class="font-bold block text-slate-700 mb-1">Razón Social o Nombre:</label>
-            <input type="text" id="ter_razon_social" name="ter_razon_social" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">RUC:</label>
-            <input type="text" id="ter_ruc" name="ter_ruc" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div class="md:col-span-2">
-            <label class="font-bold block text-slate-700 mb-1">Domicilio:</label>
-            <input type="text" id="ter_domicilio" name="ter_domicilio" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">Actividad Económica:</label>
-            <input type="text" id="ter_actividad" name="ter_actividad" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">N° Trabajadores Centro Laboral:</label>
-            <input type="number" id="ter_num_trabajadores" name="ter_num_trabajadores" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">N° Afiliados SCTR:</label>
-            <input type="number" id="ter_num_sctr" name="ter_num_sctr" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">Nombre Aseguradora:</label>
-            <input type="text" id="ter_aseguradora" name="ter_aseguradora" placeholder="Ej. La Positiva / Rímac" class="w-full border rounded p-2 bg-white">
-          </div>
-        </div>
-
-        <!-- Bloque 2: Locador de Servicios -->
-        <div id="seccion-locador" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-300 pt-4">
-          <div class="md:col-span-2">
-            <label class="font-bold block text-slate-700 mb-1">Nombres / Razón Social:</label>
-            <input type="text" id="loc_nombre_razon" name="loc_nombre_razon" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div>
-            <label class="font-bold block text-slate-700 mb-1">DNI / RUC:</label>
-            <input type="text" id="loc_dni_ruc" name="loc_dni_ruc" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div class="md:col-span-3">
-            <label class="font-bold block text-slate-700 mb-1">Domicilio:</label>
-            <input type="text" id="loc_domicilio" name="loc_domicilio" class="w-full border rounded p-2 bg-white">
-          </div>
-          <div class="md:col-span-3">
-            <label class="font-bold block text-slate-700 mb-1">Descripción del Servicio:</label>
-            <textarea id="loc_descripcion_servicio" name="loc_descripcion_servicio" rows="2" placeholder="Detalle breve de las labores o contrato de locación..." class="w-full border rounded p-2 bg-white"></textarea>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- 1) OCURRENCIA DEL EVENTO -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">1) OCURRENCIA DEL EVENTO</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Fecha del Evento:</label>
-          <input type="date" name="fin_fecha_evento" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Hora del Evento:</label>
-          <input type="time" name="fin_hora_evento" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Lugar Exacto de Ocurrencia:</label>
-          <input type="text" name="fin_lugar_exacto" class="w-full border rounded p-2 bg-white">
-        </div>
-      </div>
-    </div>
-
-    <!-- 2) TIPO Y CLASIFICACIÓN DEL EVENTO -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">2) TIPO Y CLASIFICACIÓN DEL EVENTO</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Tipo de Evento:</label>
-          <select name="fin_tipo_evento" id="fin_tipo_evento" onchange="evaluarOpcionesEvento()" class="w-full border rounded p-2 bg-white">
-            <option value="ACCIDENTE">Accidente</option>
-            <option value="INCIDENTE">Incidente</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Clasificación del Evento:</label>
-          <select name="fin_clasificacion" class="w-full border rounded p-2 bg-white">
-            <option value="INC_CON_CONTACTO">Incidente con Contacto</option>
-            <option value="INC_SIN_CONTACTO">Incidente sin Contacto</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Solo Incidente (Peligrosidad):</label>
-          <select name="fin_incidente_peligro" class="w-full border rounded p-2 bg-white">
-            <option value="INC_PELIGROSO">Incidente Peligroso</option>
-            <option value="INC_NO_PELIGROSO">Incidente No Peligroso</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- TABLA DINÁMICA: DATOS DEL TRABAJADOR AFECTADO E INVOLUCRADO -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider flex justify-between items-center flex-wrap gap-2">
-        <span>DATOS DEL TRABAJADOR AFECTADO E INVOLUCRADO EN EL EVENTO</span>
-        <button type="button" onclick="agregarFilaTrabajador()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3 py-1.5 rounded text-xs uppercase transition shadow-sm cursor-pointer">
-          + Agregar Trabajador
-        </button>
-      </div>
-      <div class="p-4 bg-slate-50 overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[1100px]" id="tabla_trabajadores">
-          <thead>
-            <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
-              <th class="p-2">A. Paterno</th>
-              <th class="p-2">A. Materno</th>
-              <th class="p-2">Nombres</th>
-              <th class="p-2">Ocupación</th>
-              <th class="p-2">Área Interna de Responsabilidad</th>
-              <th class="p-2">Condición</th>
-              <th class="p-2">Sexo</th>
-              <th class="p-2">DNI</th>
-              <th class="p-2">Edad</th>
-              <th class="p-2">Turno</th>
-              <th class="p-2">Personal</th>
-              <th class="p-2 text-center">Acción</th>
-            </tr>
-          </thead>
-          <tbody id="body_trabajadores">
-            <tr class="border-b bg-white hover:bg-slate-50 transition">
-              <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
-              <td class="p-1">
-                <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Seleccionar Área --</option>
-                  <option value="Gerencia de logística">Gerencia de logística</option>
-                  <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
-                  <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
-                  <option value="Gerencia de tesorería">Gerencia de tesorería</option>
-                  <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
-                  <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
-                  <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
-                  <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
-                  <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
-                  <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
-                  <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
-                  <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
-                  <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
-                  <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
-              <td class="p-1">
-                <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
-                  <option value="M">M</option>
-                  <option value="F">F</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="trab_dni[]" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="number" name="trab_edad[]" class="w-full border rounded p-1"></td>
-              <td class="p-1">
-                <select name="trab_turno[]" class="w-full border rounded p-1 bg-white">
-                  <option value="D">D</option>
-                  <option value="T">T</option>
-                  <option value="N">N</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select name="trab_personal[]" class="w-full border rounded p-1 bg-white">
-                  <option value="Propio">Propio</option>
-                  <option value="Tercero">Tercero</option>
-                  <option value="Contratista">Contratista</option>
-                </select>
-              </td>
-              <td class="p-1 text-center font-bold text-slate-400">-</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- CONDICIONAL: SECCIÓN ACCIDENTE -->
-    <div id="bloque_accidente" class="border border-red-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-red-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ACCIDENTE (EVALUACIÓN DE GRAVEDAD)</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Gravedad del Accidente:</label>
-          <select name="acc_gravedad" class="w-full border rounded p-2 bg-white">
-            <option value="Accidente Leve">Accidente Leve</option>
-            <option value="Accidente Incapacitante">Accidente Incapacitante</option>
-            <option value="Accidente Mortal">Accidente Mortal</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Grado de Accidente Incapacitante:</label>
-          <select name="acc_grado_incapacitante" class="w-full border rounded p-2 bg-white">
-            <option value="Total Temporal">Total Temporal</option>
-            <option value="Parcial Temporal">Parcial Temporal</option>
-            <option value="Parcial Permanente">Parcial Permanente</option>
-            <option value="Total Permanente">Total Permanente</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Días de Descanso Médico:</label>
-          <input type="number" name="acc_dias_descanso" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Días Cargados:</label>
-          <input type="number" name="acc_dias_cargados" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">N° de Trabajadores Afectados:</label>
-          <input type="number" name="acc_num_afectados" class="w-full border rounded p-2 bg-white">
-        </div>
-      </div>
-    </div>
-
-    <!-- SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
-      <div class="p-4 bg-slate-50">
-        <label class="font-bold block text-slate-700 mb-1">Detallar Tipo de Atención en Primeros Auxilios:</label>
-        <textarea name="inc_primeros_auxilios" rows="2" placeholder="Ej. Curación superficial, lavado de herida, aplicación de vendaje..." class="w-full border rounded p-2 bg-white"></textarea>
-      </div>
-    </div>
-
-    <!-- DETALLE DE LESIONES Y LUGAR DE ATENCIÓN -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Forma del Accidente o Incidente:</label>
-          <input type="text" name="les_forma_evento" placeholder="Ej. Caída al mismo nivel, golpe por objeto..." class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Tipo de Lesión:</label>
-          <select name="les_tipo_lesion" class="w-full border rounded p-2 bg-white">
-            <option value="Contusión / Golpe">Contusión / Golpe</option>
-            <option value="Herida Cortante">Herida Cortante</option>
-            <option value="Laceración / Excoriación">Laceración / Excoriación</option>
-            <option value="Quemadura">Quemadura</option>
-            <option value="Esguince / Torcedura">Esguince / Torcedura</option>
-            <option value="Fractura">Fractura</option>
-            <option value="Cuerpo Extraño en Ojo">Cuerpo Extraño en Ojo</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Agente Causante de la Lesión (EMAPE):</label>
-          <select name="les_agente_causante" class="w-full border rounded p-2 bg-white">
-            <option value="Herramientas Manuales (Pala, Pico, Martillo)">Herramientas Manuales (Pala, Pico, Martillo)</option>
-            <option value="Maquinaria Pesada / Vehículo">Maquinaria Pesada / Vehículo</option>
-            <option value="Material de Cantera / Piedras / Escombros">Material de Cantera / Piedras / Escombros</option>
-            <option value="Estructuras Metálicas / Barreras de Seguridad">Estructuras Metálicas / Barreras de Seguridad</option>
-            <option value="Superficie de Trabajo / Calzada / Pista">Superficie de Trabajo / Calzada / Pista</option>
-            <option value="Productos Químicos / Asfalto">Productos Químicos / Asfalto</option>
-          </select>
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Parte del Cuerpo Afectada:</label>
-          <select name="les_parte_cuerpo" class="w-full border rounded p-2 bg-white">
-            <option value="Cabeza / Rostro">Cabeza / Rostro</option>
-            <option value="Ojos">Ojos</option>
-            <option value="Miembros Superiores (Manos, Dedos, Brazos)">Miembros Superiores (Manos, Dedos, Brazos)</option>
-            <option value="Miembros Inferiores (Pies, Tobillos, Piernas)">Miembros Inferiores (Pies, Tobillos, Piernas)</option>
-            <option value="Tronco / Espalda / Columna">Tronco / Espalda / Columna</option>
-            <option value="Múltiples Partes">Múltiples Partes</option>
-          </select>
-        </div>
-        <div class="md:col-span-2">
-          <label class="font-bold block text-slate-700 mb-1">Hospital / Clínica / Lugar de Atención:</label>
-          <input type="text" name="les_hospital_atencion" placeholder="Ej. Clínica Javier Prado / Tópico de Obra" class="w-full border rounded p-2 bg-white">
-        </div>
-      </div>
-    </div>
-
-    <!-- DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider flex justify-between items-center">
-        <span>DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE</span>
-        <label class="flex items-center gap-1.5 text-xs font-bold cursor-pointer normal-case bg-blue-950 px-2.5 py-1 rounded border border-blue-700 hover:bg-blue-800 transition">
-          <input type="checkbox" id="chk_dano_no_precisa" onchange="toggleDanoPropiedad(this)" class="w-4 h-4 rounded accent-amber-500 cursor-pointer">
-          <span class="text-amber-300 font-bold">No precisa</span>
+      <!-- SELECCIÓN DE TIPO DE INFORME -->
+      <div class="bg-amber-50 p-4 rounded-xl border-2 border-amber-400 shadow-sm">
+        <label for="tipo_informe" class="font-extrabold text-sm block text-slate-800 mb-2 uppercase tracking-wide">
+          📋 Seleccione el Tipo de Informe a Registrar:
         </label>
+        <select id="tipo_informe" name="tipo_informe" onchange="cambiarTipoInforme()" class="w-full md:w-1/2 border-2 border-amber-500 rounded-lg p-2.5 text-sm font-bold bg-white text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none transition cursor-pointer shadow-sm">
+          <option value="PRELIMINAR">Informe Preliminar</option>
+          <option value="FINAL">Informe Final de Accidente / Incidente</option>
+        </select>
       </div>
-      <div id="sec_dano_propiedad" class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Daño Material (Máquinas, Equipos, Inmuebles, M.A.):</label>
-          <input type="text" name="dan_material" placeholder="Ej. Rotura de parabrisas, derrame de aceite..." class="w-full border rounded p-2 bg-white">
+
+      <!-- SECCIÓN 1: INFORME PRELIMINAR -->
+      <div id="seccion_preliminar" class="space-y-6">
+
+        <div class="bg-slate-100 p-4 rounded-lg border border-slate-300 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">Razón Social:</label>
+            <input type="text" value="EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A." readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
+          </div>
+          <div>
+            <label class="font-bold text-slate-600 block mb-1">RUC:</label>
+            <input type="text" value="20100063337" readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
+          </div>
         </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Agente Causante del Daño:</label>
-          <select name="dan_agente_causante" class="w-full border rounded p-2 bg-white">
-            <option value="Colisión de Vehículos">Colisión de Vehículos</option>
-            <option value="Falla Mecánica / Hidráulica">Falla Mecánica / Hidráulica</option>
-            <option value="Derrame de Combustible / Sustancia">Derrame de Combustible / Sustancia</option>
-            <option value="Maniobra Inadecuada de Equipo">Maniobra Inadecuada de Equipo</option>
-            <option value="Caída de Objetos / Estructura">Caída de Objetos / Estructura</option>
+
+        <div class="bg-slate-50 p-4 rounded-lg border border-slate-300">
+          <label class="font-bold block text-slate-800 mb-1 text-sm">Tipo de Evento:</label>
+          <select name="tipo_evento_pre" class="w-full md:w-1/2 border rounded p-2 bg-white font-medium text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="Accidente">Accidente</option>
+            <option value="Incidente">Incidente</option>
+            <option value="Incidente Peligroso">Incidente Peligroso</option>
+            <option value="Daño Ambiental">Daño Ambiental</option>
           </select>
         </div>
-        <div class="md:col-span-2">
-          <label class="font-bold block text-slate-700 mb-1">Descripción del Evento (Daños Materiales/M.A.):</label>
-          <textarea name="dan_descripcion_evento" rows="3" class="w-full border rounded p-2 bg-white"></textarea>
-        </div>
-      </div>
-    </div>
 
-    <!-- ANÁLISIS DEL ACCIDENTE -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ANÁLISIS DEL ACCIDENTE</div>
-      <div class="p-4 bg-slate-50 space-y-3">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">¿Qué sucedió?</label>
-          <textarea name="ana_que_sucedio" rows="2" class="w-full border rounded p-2 bg-white"></textarea>
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ANTECEDENTES</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Fecha de Evento:</label>
+              <input type="date" name="fecha_evento_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Hora de Ocurrencia:</label>
+              <input type="time" name="hora_ocurrencia_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Lugar de Ocurrencia:</label>
+              <input type="text" name="lugar_ocurrencia_pre" placeholder="Ej. Av. Javier Prado Este N° 123" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Fecha de Reporte:</label>
+              <input type="date" name="fecha_reporte_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div class="md:col-span-2">
+              <label class="font-bold block text-slate-700 mb-1">Trabajo que se Realizaba:</label>
+              <input type="text" name="trabajo_realizaba_pre" placeholder="Descripción de las labores desarrolladas" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Tipo de Contacto:</label>
-          <input type="text" name="ana_tipo_contacto" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Causa Inmediata:</label>
-          <input type="text" name="ana_causa_inmediata" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Causa Básica:</label>
-          <input type="text" name="ana_causa_basica" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Falta de Control:</label>
-          <input type="text" name="ana_falta_control" class="w-full border rounded p-2 bg-white">
-        </div>
-      </div>
-    </div>
 
-    <!-- CAUSAS INMEDIATAS O DIRECTAS -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS INMEDIATAS O DIRECTAS</div>
-      <div class="p-4 bg-slate-50 overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[700px]">
-          <thead>
-            <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
-              <th class="p-2 text-center w-12">#</th>
-              <th class="p-2">Tipo</th>
-              <th class="p-2">Causas Frecuentes</th>
-              <th class="p-2">Observaciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b bg-white">
-              <td class="p-2 font-bold text-center">1</td>
-              <td class="p-1">
-                <select id="cinm_tipo_1" name="cinm_tipo_1" onchange="cargarCausasFrecuentes(1)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Acto Subestandar" selected>Acto Subestandar</option>
-                  <option value="Condición Subestandar">Condición Subestandar</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="cinm_causa_1" name="cinm_causa_1" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="cinm_obs_1" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-slate-50">
-              <td class="p-2 text-center">2</td>
-              <td class="p-1">
-                <select id="cinm_tipo_2" name="cinm_tipo_2" onchange="cargarCausasFrecuentes(2)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Acto Subestandar">Acto Subestandar</option>
-                  <option value="Condición Subestandar">Condición Subestandar</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="cinm_causa_2" name="cinm_causa_2" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="cinm_obs_2" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-white">
-              <td class="p-2 text-center">3</td>
-              <td class="p-1">
-                <select id="cinm_tipo_3" name="cinm_tipo_3" onchange="cargarCausasFrecuentes(3)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Acto Subestandar">Acto Subestandar</option>
-                  <option value="Condición Subestandar">Condición Subestandar</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="cinm_causa_3" name="cinm_causa_3" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="cinm_obs_3" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-slate-50">
-              <td class="p-2 text-center">4</td>
-              <td class="p-1">
-                <select id="cinm_tipo_4" name="cinm_tipo_4" onchange="cargarCausasFrecuentes(4)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Acto Subestandar">Acto Subestandar</option>
-                  <option value="Condición Subestandar">Condición Subestandar</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="cinm_causa_4" name="cinm_causa_4" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="cinm_obs_4" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-white">
-              <td class="p-2 text-center">5</td>
-              <td class="p-1">
-                <select id="cinm_tipo_5" name="cinm_tipo_5" onchange="cargarCausasFrecuentes(5)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Acto Subestandar">Acto Subestandar</option>
-                  <option value="Condición Subestandar">Condición Subestandar</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="cinm_causa_5" name="cinm_causa_5" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="cinm_obs_5" class="w-full border rounded p-1"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DESCRIPCIÓN DE LOS LESIONADOS</div>
+          <div class="p-4 bg-slate-50 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Nombre Completo:</label>
+                <input type="text" name="nombre_lesionado_pre" placeholder="Apellidos y Nombres" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Edad:</label>
+                <input type="number" name="edad_lesionado_pre" placeholder="Ej. 35" min="18" max="100" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
+                <input type="text" name="cargo_lesionado_pre" placeholder="Ej. Operario de campo" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Breve Descripción:</label>
+              <textarea name="breve_descripcion_pre" rows="3" placeholder="Detalle breve de cómo ocurrió el suceso..." class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            </div>
+          </div>
+        </div>
 
-    <!-- CAUSAS SUBYACENTES / BÁSICAS -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS SUBYACENTES / BÁSICAS</div>
-      <div class="p-4 bg-slate-50 overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[700px]">
-          <thead>
-            <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
-              <th class="p-2 text-center w-12">#</th>
-              <th class="p-2">Tipo</th>
-              <th class="p-2">Causas Comunes</th>
-              <th class="p-2">Causa Subyacente</th>
-              <th class="p-2">Observaciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b bg-white">
-              <td class="p-2 font-bold text-center">1</td>
-              <td class="p-1">
-                <select id="csub_tipo_1" name="csub_tipo_1" onchange="cargarCausasSubyacentes(1)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Factores Personales" selected>Factores Personales</option>
-                  <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="csub_causa_1" name="csub_causa_1" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="csub_subyacente_1" placeholder="Causa raíz" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="csub_obs_1" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-slate-50">
-              <td class="p-2 text-center">2</td>
-              <td class="p-1">
-                <select id="csub_tipo_2" name="csub_tipo_2" onchange="cargarCausasSubyacentes(2)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Factores Personales">Factores Personales</option>
-                  <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="csub_causa_2" name="csub_causa_2" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="csub_subyacente_2" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="csub_obs_2" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-white">
-              <td class="p-2 text-center">3</td>
-              <td class="p-1">
-                <select id="csub_tipo_3" name="csub_tipo_3" onchange="cargarCausasSubyacentes(3)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Factores Personales">Factores Personales</option>
-                  <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="csub_causa_3" name="csub_causa_3" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="csub_subyacente_3" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="csub_obs_3" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-slate-50">
-              <td class="p-2 text-center">4</td>
-              <td class="p-1">
-                <select id="csub_tipo_4" name="csub_tipo_4" onchange="cargarCausasSubyacentes(4)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Factores Personales">Factores Personales</option>
-                  <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="csub_causa_4" name="csub_causa_4" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="csub_subyacente_4" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="csub_obs_4" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-white">
-              <td class="p-2 text-center">5</td>
-              <td class="p-1">
-                <select id="csub_tipo_5" name="csub_tipo_5" onchange="cargarCausasSubyacentes(5)" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Factores Personales">Factores Personales</option>
-                  <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
-                </select>
-              </td>
-              <td class="p-1">
-                <select id="csub_causa_5" name="csub_causa_5" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="csub_subyacente_5" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="csub_obs_5" class="w-full border rounded p-1"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">REGISTRO FOTOGRÁFICO</div>
+          <div class="p-4 bg-slate-50">
+            <label class="font-bold block text-slate-700 mb-1">Adjuntar Fotografía(s) del Evento (puedes seleccionar varias):</label>
+            <input type="file" id="fotografia_pre" name="fotografia_pre[]" accept="image/*" multiple onchange="previsualizarImagenes(event)" class="w-full border rounded p-2 bg-white file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+            <div id="preview_fotos_pre" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4 hidden"></div>
+          </div>
+        </div>
 
-    <!-- ACCIONES CORRECTIVAS Y/O PREVENTIVAS -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ACCIONES CORRECTIVAS Y/O PREVENTIVAS PARA EVITAR REPETICIÓN</div>
-      <div class="p-4 bg-slate-50 overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[800px]">
-          <thead>
-            <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
-              <th class="p-2 text-center w-12">#</th>
-              <th class="p-2">Tipo de Acción</th>
-              <th class="p-2">¿Qué se debería hacer para controlar las causas?</th>
-              <th class="p-2">Responsable</th>
-              <th class="p-2">Fecha Programada</th>
-              <th class="p-2">Situación</th>
-              <th class="p-2">Observación</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b bg-white">
-              <td class="p-2 font-bold text-center">1</td>
-              <td class="p-1">
-                <select name="acc_tipo_1" class="w-full border rounded p-1 bg-white">
-                  <option value="Correctiva">Correctiva</option>
-                  <option value="Preventiva">Preventiva</option>
-                  <option value="Mejora Continua">Mejora Continua</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_control_1" placeholder="Acción a realizar" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="acc_resp_1" placeholder="Nombre responsable" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="date" name="acc_fecha_1" class="w-full border rounded p-1"></td>
-              <td class="p-1">
-                <select name="acc_sit_1" class="w-full border rounded p-1 bg-white">
-                  <option value="Pendiente">Pendiente</option>
-                  <option value="En Proceso">En Proceso</option>
-                  <option value="Ejecutado">Ejecutado</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_obs_1" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-slate-50">
-              <td class="p-2 text-center">2</td>
-              <td class="p-1">
-                <select name="acc_tipo_2" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Correctiva">Correctiva</option>
-                  <option value="Preventiva">Preventiva</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_control_2" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="acc_resp_2" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="date" name="acc_fecha_2" class="w-full border rounded p-1"></td>
-              <td class="p-1">
-                <select name="acc_sit_2" class="w-full border rounded p-1 bg-white">
-                  <option value="Pendiente">Pendiente</option>
-                  <option value="En Proceso">En Proceso</option>
-                  <option value="Ejecutado">Ejecutado</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_obs_2" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-white">
-              <td class="p-2 text-center">3</td>
-              <td class="p-1">
-                <select name="acc_tipo_3" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Correctiva">Correctiva</option>
-                  <option value="Preventiva">Preventiva</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_control_3" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="acc_resp_3" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="date" name="acc_fecha_3" class="w-full border rounded p-1"></td>
-              <td class="p-1">
-                <select name="acc_sit_3" class="w-full border rounded p-1 bg-white">
-                  <option value="Pendiente">Pendiente</option>
-                  <option value="En Proceso">En Proceso</option>
-                  <option value="Ejecutado">Ejecutado</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_obs_3" class="w-full border rounded p-1"></td>
-            </tr>
-            <tr class="border-b bg-slate-50">
-              <td class="p-2 text-center">4</td>
-              <td class="p-1">
-                <select name="acc_tipo_4" class="w-full border rounded p-1 bg-white">
-                  <option value="">-- Opcional --</option>
-                  <option value="Correctiva">Correctiva</option>
-                  <option value="Preventiva">Preventiva</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_control_4" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="text" name="acc_resp_4" class="w-full border rounded p-1"></td>
-              <td class="p-1"><input type="date" name="acc_fecha_4" class="w-full border rounded p-1"></td>
-              <td class="p-1">
-                <select name="acc_sit_4" class="w-full border rounded p-1 bg-white">
-                  <option value="Pendiente">Pendiente</option>
-                  <option value="En Proceso">En Proceso</option>
-                  <option value="Ejecutado">Ejecutado</option>
-                </select>
-              </td>
-              <td class="p-1"><input type="text" name="acc_obs_4" class="w-full border rounded p-1"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DEL REPORTE</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Nombre y Apellido:</label>
+              <input type="text" id="resp_nombre_pre" name="resp_nombre_pre" oninput="actualizarFirmaPre()" placeholder="Nombre del responsable" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
+              <input type="text" name="resp_cargo_pre" placeholder="Ej. Supervisor SSOMA" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Fecha:</label>
+              <input type="date" name="resp_fecha_pre" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div class="md:col-span-3 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
+              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma Digital Registrada:</label>
+              <p id="vista_firma_pre" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
+                [AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]
+              </p>
+            </div>
+          </div>
+        </div>
 
-    <!-- RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Nombre Completo:</label>
-          <input type="text" id="inv_nombre" name="inv_nombre" oninput="actualizarFirmaInv()" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
-          <input type="text" name="inv_cargo" class="w-full border rounded p-2 bg-white">
-        </div>
-        <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
-          <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Investigador:</label>
-          <p id="vista_firma_inv" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-            [FIRMA EN NEGRITAS]
-          </p>
-        </div>
       </div>
-    </div>
 
-    <!-- TESTIGOS -->
-    <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-      <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">TESTIGOS</div>
-      <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Nombre Completo del Testigo:</label>
-          <input type="text" id="tes_nombre" name="tes_nombre" oninput="actualizarFirmaTes()" class="w-full border rounded p-2 bg-white">
+      <!-- SECCIÓN 2: INFORME FINAL DE ACCIDENTE -->
+      <div id="seccion_final" class="hidden space-y-6">
+
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DATOS DEL EMPLEADOR PRINCIPAL</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+              <label class="font-bold block text-slate-600 mb-1">Razón Social:</label>
+              <input type="text" value="EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A." readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
+            </div>
+            <div>
+              <label class="font-bold text-slate-600 block mb-1">RUC:</label>
+              <input type="text" value="20100063337" readonly class="w-full border rounded p-2 bg-slate-200 font-semibold text-slate-700 cursor-not-allowed">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Sede:</label>
+              <input type="text" name="emp_sede" placeholder="Ej. Sede Central / Vía Expresa" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div class="md:col-span-2">
+              <label class="font-bold block text-slate-700 mb-1">Dirección:</label>
+              <input type="text" name="emp_direccion" placeholder="Ej. Jr. Ancash N° 229, Lima" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">N° Trabajadores Centro Laboral:</label>
+              <input type="number" name="emp_num_trabajadores" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">N° Trabajadores Afiliados SCTR:</label>
+              <input type="number" name="emp_num_sctr" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Nombre Aseguradora SCTR:</label>
+              <input type="text" name="emp_aseguradora" placeholder="Ej. La Positiva / Rímac" class="w-full border rounded p-2 bg-white">
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="font-bold block text-slate-700 mb-1">Cargo / Vínculo:</label>
-          <input type="text" name="tes_cargo" class="w-full border rounded p-2 bg-white">
+
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DATOS DEL EMPLEADOR DE TERCERIZACIÓN, CONTRATISTA U OTROS</div>
+          <div class="p-4 bg-slate-50 space-y-4">
+            
+            <div>
+              <label for="tipoPersona" class="font-bold block text-slate-800 mb-1">Tipo de Vínculo / Entidad:</label>
+              <select id="tipoPersona" name="tipo_persona" onchange="evaluarTipoPersona()" class="w-full md:w-1/2 border-2 border-blue-800 rounded p-2 bg-white font-bold text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <option value="">-- Seleccione una opción --</option>
+                <option value="contratista">Empresa Contratista / Tercerización</option>
+                <option value="locador">Locador de Servicios</option>
+              </select>
+            </div>
+
+            <!-- Bloque 1: Contratista / Tercerización -->
+            <div id="seccion-contratista" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-300 pt-4">
+              <div class="md:col-span-2">
+                <label class="font-bold block text-slate-700 mb-1">Razón Social o Nombre:</label>
+                <input type="text" id="ter_razon_social" name="ter_razon_social" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">RUC:</label>
+                <input type="text" id="ter_ruc" name="ter_ruc" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div class="md:col-span-2">
+                <label class="font-bold block text-slate-700 mb-1">Domicilio:</label>
+                <input type="text" id="ter_domicilio" name="ter_domicilio" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Actividad Económica:</label>
+                <input type="text" id="ter_actividad" name="ter_actividad" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">N° Trabajadores Centro Laboral:</label>
+                <input type="number" id="ter_num_trabajadores" name="ter_num_trabajadores" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">N° Afiliados SCTR:</label>
+                <input type="number" id="ter_num_sctr" name="ter_num_sctr" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Nombre Aseguradora:</label>
+                <input type="text" id="ter_aseguradora" name="ter_aseguradora" placeholder="Ej. La Positiva / Rímac" class="w-full border rounded p-2 bg-white">
+              </div>
+            </div>
+
+            <!-- Bloque 2: Locador de Servicios -->
+            <div id="seccion-locador" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-300 pt-4">
+              <div class="md:col-span-2">
+                <label class="font-bold block text-slate-700 mb-1">Nombres / Razón Social:</label>
+                <input type="text" id="loc_nombre_razon" name="loc_nombre_razon" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">DNI / RUC:</label>
+                <input type="text" id="loc_dni_ruc" name="loc_dni_ruc" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div class="md:col-span-3">
+                <label class="font-bold block text-slate-700 mb-1">Domicilio:</label>
+                <input type="text" id="loc_domicilio" name="loc_domicilio" class="w-full border rounded p-2 bg-white">
+              </div>
+              <div class="md:col-span-3">
+                <label class="font-bold block text-slate-700 mb-1">Descripción del Servicio:</label>
+                <textarea id="loc_descripcion_servicio" name="loc_descripcion_servicio" rows="2" placeholder="Detalle breve de las labores o contrato de locación..." class="w-full border rounded p-2 bg-white"></textarea>
+              </div>
+            </div>
+
+          </div>
         </div>
-        <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
-          <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Testigo:</label>
-          <p id="vista_firma_tes" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-            [FIRMA EN NEGRITAS]
-          </p>
+
+        <!-- 1) OCURRENCIA DEL EVENTO -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">1) OCURRENCIA DEL EVENTO</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Fecha del Evento:</label>
+              <input type="date" name="fin_fecha_evento" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Hora del Evento:</label>
+              <input type="time" name="fin_hora_evento" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Lugar Exacto de Ocurrencia:</label>
+              <input type="text" name="fin_lugar_exacto" class="w-full border rounded p-2 bg-white">
+            </div>
+          </div>
         </div>
+
+        <!-- 2) TIPO Y CLASIFICACIÓN DEL EVENTO -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">2) TIPO Y CLASIFICACIÓN DEL EVENTO</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Tipo de Evento:</label>
+              <select name="fin_tipo_evento" id="fin_tipo_evento" onchange="evaluarOpcionesEvento()" class="w-full border rounded p-2 bg-white">
+                <option value="ACCIDENTE">Accidente</option>
+                <option value="INCIDENTE">Incidente</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Clasificación del Evento:</label>
+              <select name="fin_clasificacion" class="w-full border rounded p-2 bg-white">
+                <option value="INC_CON_CONTACTO">Incidente con Contacto</option>
+                <option value="INC_SIN_CONTACTO">Incidente sin Contacto</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Solo Incidente (Peligrosidad):</label>
+              <select name="fin_incidente_peligro" class="w-full border rounded p-2 bg-white">
+                <option value="INC_PELIGROSO">Incidente Peligroso</option>
+                <option value="INC_NO_PELIGROSO">Incidente No Peligroso</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLA DINÁMICA: DATOS DEL TRABAJADOR AFECTADO -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider flex justify-between items-center flex-wrap gap-2">
+            <span>DATOS DEL TRABAJADOR AFECTADO E INVOLUCRADO EN EL EVENTO</span>
+            <button type="button" onclick="agregarFilaTrabajador()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3 py-1.5 rounded text-xs uppercase transition shadow-sm cursor-pointer">
+              + Agregar Trabajador
+            </button>
+          </div>
+          <div class="p-4 bg-slate-50 overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[1100px]" id="tabla_trabajadores">
+              <thead>
+                <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
+                  <th class="p-2">A. Paterno</th>
+                  <th class="p-2">A. Materno</th>
+                  <th class="p-2">Nombres</th>
+                  <th class="p-2">Ocupación</th>
+                  <th class="p-2">Área Interna de Responsabilidad</th>
+                  <th class="p-2">Condición</th>
+                  <th class="p-2">Sexo</th>
+                  <th class="p-2">DNI</th>
+                  <th class="p-2">Edad</th>
+                  <th class="p-2">Turno</th>
+                  <th class="p-2">Personal</th>
+                  <th class="p-2 text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="body_trabajadores">
+                <tr class="border-b bg-white hover:bg-slate-50 transition">
+                  <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Seleccionar Área --</option>
+                      <option value="Gerencia de logística">Gerencia de logística</option>
+                      <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
+                      <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
+                      <option value="Gerencia de tesorería">Gerencia de tesorería</option>
+                      <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
+                      <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
+                      <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
+                      <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
+                      <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
+                      <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
+                      <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
+                      <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
+                      <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
+                      <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
+                      <option value="M">M</option>
+                      <option value="F">F</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="trab_dni[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="number" name="trab_edad[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="trab_turno[]" class="w-full border rounded p-1 bg-white">
+                      <option value="D">D</option>
+                      <option value="T">T</option>
+                      <option value="N">N</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select name="trab_personal[]" class="w-full border rounded p-1 bg-white">
+                      <option value="Propio">Propio</option>
+                      <option value="Tercero">Tercero</option>
+                      <option value="Contratista">Contratista</option>
+                    </select>
+                  </td>
+                  <td class="p-1 text-center font-bold text-slate-400">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CONDICIONAL: SECCIÓN ACCIDENTE -->
+        <div id="bloque_accidente" class="border border-red-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-red-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ACCIDENTE (EVALUACIÓN DE GRAVEDAD)</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Gravedad del Accidente:</label>
+              <select name="acc_gravedad" class="w-full border rounded p-2 bg-white">
+                <option value="Accidente Leve">Accidente Leve</option>
+                <option value="Accidente Incapacitante">Accidente Incapacitante</option>
+                <option value="Accidente Mortal">Accidente Mortal</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Grado de Accidente Incapacitante:</label>
+              <select name="acc_grado_incapacitante" class="w-full border rounded p-2 bg-white">
+                <option value="Total Temporal">Total Temporal</option>
+                <option value="Parcial Temporal">Parcial Temporal</option>
+                <option value="Parcial Permanente">Parcial Permanente</option>
+                <option value="Total Permanente">Total Permanente</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Días de Descanso Médico:</label>
+              <input type="number" name="acc_dias_descanso" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Días Cargados:</label>
+              <input type="number" name="acc_dias_cargados" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">N° de Trabajadores Afectados:</label>
+              <input type="number" name="acc_num_afectados" class="w-full border rounded p-2 bg-white">
+            </div>
+          </div>
+        </div>
+
+        <!-- SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
+          <div class="p-4 bg-slate-50">
+            <label class="font-bold block text-slate-700 mb-1">Detallar Tipo de Atención en Primeros Auxilios:</label>
+            <textarea name="inc_primeros_auxilios" rows="2" placeholder="Ej. Curación superficial, lavado de herida, aplicación de vendaje..." class="w-full border rounded p-2 bg-white"></textarea>
+          </div>
+        </div>
+
+        <!-- DETALLE DE LESIONES Y LUGAR DE ATENCIÓN -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Forma del Accidente o Incidente:</label>
+              <input type="text" name="les_forma_evento" placeholder="Ej. Caída al mismo nivel, golpe por objeto..." class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Tipo de Lesión:</label>
+              <select name="les_tipo_lesion" class="w-full border rounded p-2 bg-white">
+                <option value="Contusión / Golpe">Contusión / Golpe</option>
+                <option value="Herida Cortante">Herida Cortante</option>
+                <option value="Laceración / Excoriación">Laceración / Excoriación</option>
+                <option value="Quemadura">Quemadura</option>
+                <option value="Esguince / Torcedura">Esguince / Torcedura</option>
+                <option value="Fractura">Fractura</option>
+                <option value="Cuerpo Extraño en Ojo">Cuerpo Extraño en Ojo</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Agente Causante de la Lesión (EMAPE):</label>
+              <select name="les_agente_causante" class="w-full border rounded p-2 bg-white">
+                <option value="Herramientas Manuales (Pala, Pico, Martillo)">Herramientas Manuales (Pala, Pico, Martillo)</option>
+                <option value="Maquinaria Pesada / Vehículo">Maquinaria Pesada / Vehículo</option>
+                <option value="Material de Cantera / Piedras / Escombros">Material de Cantera / Piedras / Escombros</option>
+                <option value="Estructuras Metálicas / Barreras de Seguridad">Estructuras Metálicas / Barreras de Seguridad</option>
+                <option value="Superficie de Trabajo / Calzada / Pista">Superficie de Trabajo / Calzada / Pista</option>
+                <option value="Productos Químicos / Asfalto">Productos Químicos / Asfalto</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Parte del Cuerpo Afectada:</label>
+              <select name="les_parte_cuerpo" class="w-full border rounded p-2 bg-white">
+                <option value="Cabeza / Rostro">Cabeza / Rostro</option>
+                <option value="Ojos">Ojos</option>
+                <option value="Miembros Superiores (Manos, Dedos, Brazos)">Miembros Superiores (Manos, Dedos, Brazos)</option>
+                <option value="Miembros Inferiores (Pies, Tobillos, Piernas)">Miembros Inferiores (Pies, Tobillos, Piernas)</option>
+                <option value="Tronco / Espalda / Columna">Tronco / Espalda / Columna</option>
+                <option value="Múltiples Partes">Múltiples Partes</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="font-bold block text-slate-700 mb-1">Hospital / Clínica / Lugar de Atención:</label>
+              <input type="text" name="les_hospital_atencion" placeholder="Ej. Clínica Javier Prado / Tópico de Obra" class="w-full border rounded p-2 bg-white">
+            </div>
+          </div>
+        </div>
+
+        <!-- DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider flex justify-between items-center">
+            <span>DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE</span>
+            <label class="flex items-center gap-1.5 text-xs font-bold cursor-pointer normal-case bg-blue-950 px-2.5 py-1 rounded border border-blue-700 hover:bg-blue-800 transition">
+              <input type="checkbox" id="chk_dano_no_precisa" onchange="toggleDanoPropiedad(this)" class="w-4 h-4 rounded accent-amber-500 cursor-pointer">
+              <span class="text-amber-300 font-bold">No precisa</span>
+            </label>
+          </div>
+          <div id="sec_dano_propiedad" class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Daño Material (Máquinas, Equipos, Inmuebles, M.A.):</label>
+              <input type="text" name="dan_material" placeholder="Ej. Rotura de parabrisas, derrame de aceite..." class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Agente Causante del Daño:</label>
+              <select name="dan_agente_causante" class="w-full border rounded p-2 bg-white">
+                <option value="Colisión de Vehículos">Colisión de Vehículos</option>
+                <option value="Falla Mecánica / Hidráulica">Falla Mecánica / Hidráulica</option>
+                <option value="Derrame de Combustible / Sustancia">Derrame de Combustible / Sustancia</option>
+                <option value="Maniobra Inadecuada de Equipo">Maniobra Inadecuada de Equipo</option>
+                <option value="Caída de Objetos / Estructura">Caída de Objetos / Estructura</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="font-bold block text-slate-700 mb-1">Descripción del Evento (Daños Materiales/M.A.):</label>
+              <textarea name="dan_descripcion_evento" rows="3" class="w-full border rounded p-2 bg-white"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANÁLISIS DEL ACCIDENTE -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ANÁLISIS DEL ACCIDENTE</div>
+          <div class="p-4 bg-slate-50 space-y-3">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">¿Qué sucedió?</label>
+              <textarea name="ana_que_sucedio" rows="2" class="w-full border rounded p-2 bg-white"></textarea>
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Tipo de Contacto:</label>
+              <input type="text" name="ana_tipo_contacto" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Causa Inmediata:</label>
+              <input type="text" name="ana_causa_inmediata" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Causa Básica:</label>
+              <input type="text" name="ana_causa_basica" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">¿Por qué? / Falta de Control:</label>
+              <input type="text" name="ana_falta_control" class="w-full border rounded p-2 bg-white">
+            </div>
+          </div>
+        </div>
+
+        <!-- CAUSAS INMEDIATAS O DIRECTAS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS INMEDIATAS O DIRECTAS</div>
+          <div class="p-4 bg-slate-50 overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[700px]">
+              <thead>
+                <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
+                  <th class="p-2 text-center w-12">#</th>
+                  <th class="p-2">Tipo</th>
+                  <th class="p-2">Causas Frecuentes</th>
+                  <th class="p-2">Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b bg-white">
+                  <td class="p-2 font-bold text-center">1</td>
+                  <td class="p-1">
+                    <select id="cinm_tipo_1" name="cinm_tipo_1" onchange="cargarCausasFrecuentes(1)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Acto Subestandar" selected>Acto Subestandar</option>
+                      <option value="Condición Subestandar">Condición Subestandar</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="cinm_causa_1" name="cinm_causa_1" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="cinm_obs_1" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-slate-50">
+                  <td class="p-2 text-center">2</td>
+                  <td class="p-1">
+                    <select id="cinm_tipo_2" name="cinm_tipo_2" onchange="cargarCausasFrecuentes(2)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Acto Subestandar">Acto Subestandar</option>
+                      <option value="Condición Subestandar">Condición Subestandar</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="cinm_causa_2" name="cinm_causa_2" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="cinm_obs_2" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-white">
+                  <td class="p-2 text-center">3</td>
+                  <td class="p-1">
+                    <select id="cinm_tipo_3" name="cinm_tipo_3" onchange="cargarCausasFrecuentes(3)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Acto Subestandar">Acto Subestandar</option>
+                      <option value="Condición Subestandar">Condición Subestandar</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="cinm_causa_3" name="cinm_causa_3" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="cinm_obs_3" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-slate-50">
+                  <td class="p-2 text-center">4</td>
+                  <td class="p-1">
+                    <select id="cinm_tipo_4" name="cinm_tipo_4" onchange="cargarCausasFrecuentes(4)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Acto Subestandar">Acto Subestandar</option>
+                      <option value="Condición Subestandar">Condición Subestandar</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="cinm_causa_4" name="cinm_causa_4" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="cinm_obs_4" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-white">
+                  <td class="p-2 text-center">5</td>
+                  <td class="p-1">
+                    <select id="cinm_tipo_5" name="cinm_tipo_5" onchange="cargarCausasFrecuentes(5)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Acto Subestandar">Acto Subestandar</option>
+                      <option value="Condición Subestandar">Condición Subestandar</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="cinm_causa_5" name="cinm_causa_5" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="cinm_obs_5" class="w-full border rounded p-1"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CAUSAS SUBYACENTES / BÁSICAS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">CAUSAS SUBYACENTES / BÁSICAS</div>
+          <div class="p-4 bg-slate-50 overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[700px]">
+              <thead>
+                <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
+                  <th class="p-2 text-center w-12">#</th>
+                  <th class="p-2">Tipo</th>
+                  <th class="p-2">Causas Comunes</th>
+                  <th class="p-2">Causa Subyacente</th>
+                  <th class="p-2">Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b bg-white">
+                  <td class="p-2 font-bold text-center">1</td>
+                  <td class="p-1">
+                    <select id="csub_tipo_1" name="csub_tipo_1" onchange="cargarCausasSubyacentes(1)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Factores Personales" selected>Factores Personales</option>
+                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="csub_causa_1" name="csub_causa_1" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="csub_subyacente_1" placeholder="Causa raíz" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_obs_1" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-slate-50">
+                  <td class="p-2 text-center">2</td>
+                  <td class="p-1">
+                    <select id="csub_tipo_2" name="csub_tipo_2" onchange="cargarCausasSubyacentes(2)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Factores Personales">Factores Personales</option>
+                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="csub_causa_2" name="csub_causa_2" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="csub_subyacente_2" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_obs_2" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-white">
+                  <td class="p-2 text-center">3</td>
+                  <td class="p-1">
+                    <select id="csub_tipo_3" name="csub_tipo_3" onchange="cargarCausasSubyacentes(3)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Factores Personales">Factores Personales</option>
+                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="csub_causa_3" name="csub_causa_3" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="csub_subyacente_3" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_obs_3" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-slate-50">
+                  <td class="p-2 text-center">4</td>
+                  <td class="p-1">
+                    <select id="csub_tipo_4" name="csub_tipo_4" onchange="cargarCausasSubyacentes(4)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Factores Personales">Factores Personales</option>
+                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="csub_causa_4" name="csub_causa_4" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="csub_subyacente_4" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_obs_4" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-white">
+                  <td class="p-2 text-center">5</td>
+                  <td class="p-1">
+                    <select id="csub_tipo_5" name="csub_tipo_5" onchange="cargarCausasSubyacentes(5)" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Factores Personales">Factores Personales</option>
+                      <option value="Factores Laborales / Trabajo">Factores Laborales / Trabajo</option>
+                    </select>
+                  </td>
+                  <td class="p-1">
+                    <select id="csub_causa_5" name="csub_causa_5" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="csub_subyacente_5" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="csub_obs_5" class="w-full border rounded p-1"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ACCIONES CORRECTIVAS Y/O PREVENTIVAS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">ACCIONES CORRECTIVAS Y/O PREVENTIVAS PARA EVITAR REPETICIÓN</div>
+          <div class="p-4 bg-slate-50 overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[800px]">
+              <thead>
+                <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
+                  <th class="p-2 text-center w-12">#</th>
+                  <th class="p-2">Tipo de Acción</th>
+                  <th class="p-2">¿Qué se debería hacer para controlar las causas?</th>
+                  <th class="p-2">Responsable</th>
+                  <th class="p-2">Fecha Programada</th>
+                  <th class="p-2">Situación</th>
+                  <th class="p-2">Observación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b bg-white">
+                  <td class="p-2 font-bold text-center">1</td>
+                  <td class="p-1">
+                    <select name="acc_tipo_1" class="w-full border rounded p-1 bg-white">
+                      <option value="Correctiva">Correctiva</option>
+                      <option value="Preventiva">Preventiva</option>
+                      <option value="Mejora Continua">Mejora Continua</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_control_1" placeholder="Acción a realizar" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_resp_1" placeholder="Nombre responsable" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="date" name="acc_fecha_1" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="acc_sit_1" class="w-full border rounded p-1 bg-white">
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="En Proceso">En Proceso</option>
+                      <option value="Ejecutado">Ejecutado</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_obs_1" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-slate-50">
+                  <td class="p-2 text-center">2</td>
+                  <td class="p-1">
+                    <select name="acc_tipo_2" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Correctiva">Correctiva</option>
+                      <option value="Preventiva">Preventiva</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_control_2" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_resp_2" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="date" name="acc_fecha_2" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="acc_sit_2" class="w-full border rounded p-1 bg-white">
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="En Proceso">En Proceso</option>
+                      <option value="Ejecutado">Ejecutado</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_obs_2" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-white">
+                  <td class="p-2 text-center">3</td>
+                  <td class="p-1">
+                    <select name="acc_tipo_3" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Correctiva">Correctiva</option>
+                      <option value="Preventiva">Preventiva</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_control_3" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_resp_3" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="date" name="acc_fecha_3" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="acc_sit_3" class="w-full border rounded p-1 bg-white">
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="En Proceso">En Proceso</option>
+                      <option value="Ejecutado">Ejecutado</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_obs_3" class="w-full border rounded p-1"></td>
+                </tr>
+                <tr class="border-b bg-slate-50">
+                  <td class="p-2 text-center">4</td>
+                  <td class="p-1">
+                    <select name="acc_tipo_4" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Opcional --</option>
+                      <option value="Correctiva">Correctiva</option>
+                      <option value="Preventiva">Preventiva</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_control_4" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="text" name="acc_resp_4" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="date" name="acc_fecha_4" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="acc_sit_4" class="w-full border rounded p-1 bg-white">
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="En Proceso">En Proceso</option>
+                      <option value="Ejecutado">Ejecutado</option>
+                    </select>
+                  </td>
+                  <td class="p-1"><input type="text" name="acc_obs_4" class="w-full border rounded p-1"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Nombre Completo:</label>
+              <input type="text" id="inv_nombre" name="inv_nombre" oninput="actualizarFirmaInv()" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
+              <input type="text" name="inv_cargo" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
+              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Investigador:</label>
+              <p id="vista_firma_inv" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
+                [FIRMA EN NEGRITAS]
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TESTIGOS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">TESTIGOS</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Nombre Completo del Testigo:</label>
+              <input type="text" id="tes_nombre" name="tes_nombre" oninput="actualizarFirmaTes()" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Cargo / Vínculo:</label>
+              <input type="text" name="tes_cargo" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
+              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Testigo:</label>
+              <p id="vista_firma_tes" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
+                [FIRMA EN NEGRITAS]
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
-    </div>
 
+      <button type="submit" id="btnGuardar" class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-900 font-black py-4 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer">
+        <span>💾</span> GENERAR Y GUARDAR REGISTRO EN EXCEL
+      </button>
+
+    </form>
   </div>
 
-  <button type="submit" id="btnGuardar" class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-900 font-black py-4 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer">
-    <span>💾</span> GENERAR Y GUARDAR REGISTRO EN EXCEL
-  </button>
+  <script>
+    const causasInmediatasData = {
+      "Acto Subestandar": [
+        "Operar equipo sin autorización",
+        "Omisión de informar/ advertir",
+        "Omisión de Sujetar/Bloquear/Contener",
+        "Operar Equipo /Sistema a Velocidad Inadecuada",
+        "Desactivar o Anular Dispositivos Críticos de Seguridad",
+        "Usar Herramientas /Equipos/ Máquina /Dispositivo Defectuoso",
+        "Operación inadecuada de Herramientas / equipo / Maquina /Dispositivo /Instalación de Proceso",
+        "Mantenimiento Inadecuado de Equipo / Maquina / Instalación de proceso en funcionamiento",
+        "Uso de Material Incorrecto / Inadecuado",
+        "No usar correctamente el equipo de protección personal (EPP).",
+        "Operación incorrecta de carga",
+        "Operación incorrecta de colocación",
+        "Operación incorrecta de izado",
+        "Posición inadecuada para el trabajo o la tarea.",
+        "Comportamiento incorrecto/ inadecuado.",
+        "Trabajar bajo la influencia de medicación/ alcohol/ drogas.",
+        "No seguir procedimiento/ instrucciones.",
+        "Falla al identificar peligro",
+        "Acto sub estándar por parte de terceros (que no está bajo control propio).",
+        "No identificar requisitos de clientes/ partes interesadas",
+        "No cumplir requisitos de clientes/ partes interesadas",
+        "Disturbios civiles (motines, revueltas, guerra)",
+        "Actividad Delictivas"
+      ],
+      "Condición Subestandar": [
+        "Condiciones inadecuadas de pisos/superficie",
+        "Herramienta/ equipo defectuoso",
+        "Herramientas/ equipo incorrecto/ Inadecuado.",
+        "Integridad inadecuada de herramientas/ equipo de proceso",
+        "Falla en detectar/ medir",
+        "Medida /medida de señal inadecuada",
+        "Material incorrecto",
+        "Composición incorrecta de material / gas/ líquido",
+        "Protección/ barrera inadecuada",
+        "Equipo de Protección Personal (EPP) inadecuado/ incorrecto",
+        "Espacio para actuar limitado/ restringido.",
+        "Sistema de advertencia inadecuado",
+        "Presencia de atmosfera explosiva /Inflamable",
+        "Presencia no autorizada de materiales peligrosos",
+        "Orden y limpieza deficiente",
+        "Nivel de ruido por encima del umbral",
+        "Radiación por encima del umbral",
+        "Iluminación excesiva / deficiente",
+        "Vibración por encima del umbral.",
+        "Exposición a altas temperaturas",
+        "Exposición a bajas temperaturas",
+        "Presión excede los límites",
+        "Ventilación inadecuada",
+        "Información inadecuada",
+        "Exposición a condiciones climáticas adversas"
+      ]
+    };
 
-</form>
+    const causasSubyacentesData = {
+      "Factores Personales": [
+        "Capacidad física / fisiológica inadecuada",
+        "Capacidad mental / psicológica inadecuada",
+        "Tensión física o fisiológica",
+        "Tensión mental o psicológica",
+        "Falta de conocimiento",
+        "Falta de habilidad",
+        "Motivación inadecuada"
+      ],
+      "Factores Laborales / Trabajo": [
+        "Liderazgo y/o supervisión inadecuada",
+        "Ingeniería inadecuada",
+        "Adquisiciones inadecuadas",
+        "Mantenimiento inadecuado",
+        "Herramientas y equipos inadecuados",
+        "Estándares de trabajo inadecuados",
+        "Uso y desgaste excesivo",
+        "Abuso o mal uso"
+      ]
+    };
+
+    function evaluarTipoPersona() {
+      const valor = document.getElementById('tipoPersona').value;
+      const secContratista = document.getElementById('seccion-contratista');
+      const secLocador = document.getElementById('seccion-locador');
+
+      if (valor === 'contratista') {
+        secContratista.classList.remove('hidden');
+        secLocador.classList.add('hidden');
+      } else if (valor === 'locador') {
+        secContratista.classList.add('hidden');
+        secLocador.classList.remove('hidden');
+      } else {
+        secContratista.classList.add('hidden');
+        secLocador.classList.add('hidden');
+      }
+    }
+
+    function toggleDanoPropiedad(checkbox) {
+      const contenedor = document.getElementById('sec_dano_propiedad');
+      if (!contenedor) return;
+      const elementos = contenedor.querySelectorAll('input, select, textarea');
+
+      elementos.forEach(elem => {
+        if (checkbox.checked) {
+          elem.value = '';
+          elem.disabled = true;
+          elem.classList.add('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+          elem.classList.remove('bg-white');
+        } else {
+          elem.disabled = false;
+          elem.classList.remove('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+          elem.classList.add('bg-white');
+        }
+      });
+    }
+
+    function cargarCausasFrecuentes(index) {
+      const selectTipo = document.getElementById(`cinm_tipo_${index}`);
+      const selectCausa = document.getElementById(`cinm_causa_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      if (causasInmediatasData[valorSeleccionado]) {
+        causasInmediatasData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
+    function cargarCausasSubyacentes(index) {
+      const selectTipo = document.getElementById(`csub_tipo_${index}`);
+      const selectCausa = document.getElementById(`csub_causa_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      if (causasSubyacentesData[valorSeleccionado]) {
+        causasSubyacentesData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
+    function cambiarTipoInforme() {
+      const tipo = document.getElementById('tipo_informe').value;
+      const secPreliminar = document.getElementById('seccion_preliminar');
+      const secFinal = document.getElementById('seccion_final');
+
+      if (tipo === 'PRELIMINAR') {
+        secPreliminar.classList.remove('hidden');
+        secFinal.classList.add('hidden');
+      } else {
+        secPreliminar.classList.add('hidden');
+        secFinal.classList.remove('hidden');
+      }
+    }
+
+    function evaluarOpcionesEvento() {
+      const tipoEv = document.getElementById('fin_tipo_evento').value;
+      const bloqueAcc = document.getElementById('bloque_accidente');
+      if (tipoEv === 'ACCIDENTE') {
+        bloqueAcc.classList.remove('hidden');
+      } else {
+        bloqueAcc.classList.add('hidden');
+      }
+    }
+
+    function actualizarFirmaPre() {
+      const nom = document.getElementById('resp_nombre_pre').value;
+      document.getElementById('vista_firma_pre').textContent = nom ? nom.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
+    }
+
+    function actualizarFirmaInv() {
+      const nom = document.getElementById('inv_nombre').value;
+      document.getElementById('vista_firma_inv').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
+    }
+
+    function actualizarFirmaTes() {
+      const nom = document.getElementById('tes_nombre').value;
+      document.getElementById('vista_firma_tes').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
+    }
+
+    function previsualizarImagenes(event) {
+      const container = document.getElementById('preview_fotos_pre');
+      container.innerHTML = '';
+      const files = event.target.files;
+
+      if (files.length > 0) {
+        container.classList.remove('hidden');
+        Array.from(files).forEach(file => {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const imgDiv = document.createElement('div');
+              imgDiv.className = 'relative rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white aspect-square';
+              imgDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+              container.appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function agregarFilaTrabajador() {
+      const body = document.getElementById('body_trabajadores');
+      const tr = document.createElement('tr');
+      tr.className = 'border-b bg-white hover:bg-slate-50 transition';
+      tr.innerHTML = `
+        <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
+        <td class="p-1">
+          <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
+            <option value="">-- Seleccionar Área --</option>
+            <option value="Gerencia de logística">Gerencia de logística</option>
+            <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
+            <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
+            <option value="Gerencia de tesorería">Gerencia de tesorería</option>
+            <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
+            <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
+            <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
+            <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
+            <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
+            <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
+            <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
+            <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
+            <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
+            <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
+          </select>
+        </td>
+        <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
+        <td class="p-1">
+          <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
+            <option value="M">M</option>
+            <option value="F">F</option>
+          </select>
+        </td>
+        <td class="p-1"><input type="text" name="trab_dni[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="number" name="trab_edad[]" class="w-full border rounded p-1"></td>
+        <td class="p-1">
+          <select name="trab_turno[]" class="w-full border rounded p-1 bg-white">
+            <option value="D">D</option>
+            <option value="T">T</option>
+            <option value="N">N</option>
+          </select>
+        </td>
+        <td class="p-1">
+          <select name="trab_personal[]" class="w-full border rounded p-1 bg-white">
+            <option value="Propio">Propio</option>
+            <option value="Tercero">Tercero</option>
+            <option value="Contratista">Contratista</option>
+          </select>
+        </td>
+        <td class="p-1 text-center">
+          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 hover:text-red-800 font-extrabold text-sm px-2 py-0.5 rounded hover:bg-red-50 transition" title="Eliminar fila">✕</button>
+        </td>
+      `;
+      body.appendChild(tr);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      cambiarTipoInforme();
+      evaluarOpcionesEvento();
+      evaluarTipoPersona();
+
+      for (let i = 1; i <= 5; i++) {
+        cargarCausasFrecuentes(i);
+        cargarCausasSubyacentes(i);
+      }
+
+      document.getElementById('ssomaForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('btnGuardar');
+        btn.disabled = true;
+        btn.classList.add('opacity-60', 'cursor-not-allowed');
+        btn.innerHTML = '⏳ GENERANDO Y GUARDANDO REGISTRO...';
+      });
+    });
+  </script>
+
+</body>
+</html>
