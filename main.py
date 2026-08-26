@@ -259,21 +259,22 @@ def generar_pdf_100_porciento(
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
         <tr>
-            <td style="width: 10%;">{trab.get('paterno','-')}</td>
-            <td style="width: 10%;">{trab.get('materno','-')}</td>
-            <td style="width: 12%;">{trab.get('nombres','-')}</td>
-            <td style="width: 14%;">{trab.get('ocupacion','-')}</td>
-            <td style="width: 10%;">{trab.get('condicion','-')}</td>
-            <td style="width: 6%;">{trab.get('sexo','-')}</td>
-            <td style="width: 9%;">{trab.get('dni','-')}</td>
+            <td style="width: 9%;">{trab.get('paterno','-')}</td>
+            <td style="width: 9%;">{trab.get('materno','-')}</td>
+            <td style="width: 11%;">{trab.get('nombres','-')}</td>
+            <td style="width: 11%;">{trab.get('ocupacion','-')}</td>
+            <td style="width: 13%;">{trab.get('area_interna','-')}</td>
+            <td style="width: 9%;">{trab.get('condicion','-')}</td>
+            <td style="width: 5%;">{trab.get('sexo','-')}</td>
+            <td style="width: 8%;">{trab.get('dni','-')}</td>
             <td style="width: 5%;">{trab.get('edad','-')}</td>
-            <td style="width: 8%;">{trab.get('turno','-')}</td>
-            <td style="width: 16%;">{trab.get('personal','-')}</td>
+            <td style="width: 6%;">{trab.get('turno','-')}</td>
+            <td style="width: 14%;">{trab.get('personal','-')}</td>
         </tr>
         """
     if not filas_trabajadores:
         filas_trabajadores = (
-            "<tr><td colspan='10'>No se registraron trabajadores</td></tr>"
+            "<tr><td colspan='11'>No se registraron trabajadores</td></tr>"
         )
 
     filas_causas_inmediatas = ""
@@ -432,16 +433,17 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <thead>
                 <tr>
-                    <th style="width: 10%;">A. Paterno</th>
-                    <th style="width: 10%;">A. Materno</th>
-                    <th style="width: 12%;">Nombres</th>
-                    <th style="width: 14%;">Ocupación</th>
-                    <th style="width: 10%;">Condición</th>
-                    <th style="width: 6%;">Sexo</th>
-                    <th style="width: 9%;">DNI</th>
+                    <th style="width: 9%;">A. Paterno</th>
+                    <th style="width: 9%;">A. Materno</th>
+                    <th style="width: 11%;">Nombres</th>
+                    <th style="width: 11%;">Ocupación</th>
+                    <th style="width: 13%;">Área Interna</th>
+                    <th style="width: 9%;">Condición</th>
+                    <th style="width: 5%;">Sexo</th>
+                    <th style="width: 8%;">DNI</th>
                     <th style="width: 5%;">Edad</th>
-                    <th style="width: 8%;">Turno</th>
-                    <th style="width: 16%;">Personal</th>
+                    <th style="width: 6%;">Turno</th>
+                    <th style="width: 14%;">Personal</th>
                 </tr>
             </thead>
             <tbody>
@@ -667,12 +669,13 @@ async def enviar_reporte(
                     except Exception as err_img:
                         print(f"Error procesando la imagen alternativa: {err_img}")
 
-        # Extracción de trabajadores
+        # Extracción de trabajadores (con soporte para Área Interna)
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist("trab_paterno")
         materno_list = form_data.getlist("trab_materno[]") or form_data.getlist("trab_materno")
         nombres_list = form_data.getlist("trab_nombres[]") or form_data.getlist("trab_nombres")
         ocupacion_list = form_data.getlist("trab_ocupacion[]") or form_data.getlist("trab_ocupacion")
+        area_list = form_data.getlist("trab_area_interna[]") or form_data.getlist("trab_area_interna") or form_data.getlist("trab_area[]") or form_data.getlist("trab_area")
         condicion_list = form_data.getlist("trab_condicion[]") or form_data.getlist("trab_condicion")
         sexo_list = form_data.getlist("trab_sexo[]") or form_data.getlist("trab_sexo")
         dni_list = form_data.getlist("trab_dni[]") or form_data.getlist("trab_dni")
@@ -680,11 +683,12 @@ async def enviar_reporte(
         turno_list = form_data.getlist("trab_turno[]") or form_data.getlist("trab_turno")
         personal_list = form_data.getlist("trab_personal[]") or form_data.getlist("trab_personal")
 
-        for p, m, n, oc, co, sx, d, ed, tu, pe in zip_longest(
+        for p, m, n, oc, ar, co, sx, d, ed, tu, pe in zip_longest(
             paterno_list,
             materno_list,
             nombres_list,
             ocupacion_list,
+            area_list,
             condicion_list,
             sexo_list,
             dni_list,
@@ -693,11 +697,12 @@ async def enviar_reporte(
             personal_list,
             fillvalue="",
         ):
-            p, m, n, oc, co, sx, d, ed, tu, pe = (
+            p, m, n, oc, ar, co, sx, d, ed, tu, pe = (
                 str(p or ""),
                 str(m or ""),
                 str(n or ""),
                 str(oc or ""),
+                str(ar or ""),
                 str(co or ""),
                 str(sx or ""),
                 str(d or ""),
@@ -711,6 +716,7 @@ async def enviar_reporte(
                     "materno": m,
                     "nombres": n,
                     "ocupacion": oc,
+                    "area_interna": ar,
                     "condicion": co,
                     "sexo": sx,
                     "dni": d,
@@ -721,7 +727,7 @@ async def enviar_reporte(
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
-        # 1. Causas Inmediatas (Soporta sintaxis de index.html cinm_* y arreglos ci_*)
+        # 1. Causas Inmediatas
         causas_inmediatas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"cinm_tipo_{i}", "")).strip()
@@ -744,7 +750,7 @@ async def enviar_reporte(
 
         form_dict["causas_inmediatas_list"] = causas_inmediatas_list
 
-        # 2. Causas Básicas (Soporta sintaxis de index.html csub_* y arreglos cb_*)
+        # 2. Causas Básicas
         causas_basicas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"csub_tipo_{i}", "")).strip()
@@ -769,7 +775,7 @@ async def enviar_reporte(
 
         form_dict["causas_basicas_list"] = causas_basicas_list
 
-        # 3. Medidas Correctivas (Soporta sintaxis de index.html acc_* y arreglos mc_*)
+        # 3. Medidas Correctivas
         medidas_correctivas_list = []
         for i in range(1, 10):
             t = str(form_data.get(f"acc_tipo_{i}", "")).strip()
