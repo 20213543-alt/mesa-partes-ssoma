@@ -827,6 +827,9 @@ async def enviar_reporte(
                 ]),
                 "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
                 "inv_nombre": form_data.get("inv_nombre", ""),
+                "trab_area_interna[]": ", ".join([
+                    t["area_interna"] for t in lista_trabajadores if t.get("area_interna")
+                ]),
             }
 
             try:
