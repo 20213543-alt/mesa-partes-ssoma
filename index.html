@@ -1189,6 +1189,16 @@
       }
 
       document.getElementById('ssomaForm').addEventListener('submit', function(e) {
+        const tipoPersona = document.getElementById('tipoPersona').value;
+
+        // Si es locador, sincroniza sus datos a las variables del PDF (ter_*) antes de enviar
+        if (tipoPersona === 'locador') {
+          document.getElementById('ter_razon_social').value = document.getElementById('loc_nombre_razon').value;
+          document.getElementById('ter_ruc').value = document.getElementById('loc_dni_ruc').value;
+          document.getElementById('ter_domicilio').value = document.getElementById('loc_domicilio').value;
+          document.getElementById('ter_actividad').value = document.getElementById('loc_descripcion_servicio').value;
+        }
+
         const btn = document.getElementById('btnGuardar');
         btn.disabled = true;
         btn.classList.add('opacity-60', 'cursor-not-allowed');
