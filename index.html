@@ -294,13 +294,14 @@
             </button>
           </div>
           <div class="p-4 bg-slate-50 overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[900px]" id="tabla_trabajadores">
+            <table class="w-full text-left border-collapse min-w-[1100px]" id="tabla_trabajadores">
               <thead>
                 <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
                   <th class="p-2">A. Paterno</th>
                   <th class="p-2">A. Materno</th>
                   <th class="p-2">Nombres</th>
                   <th class="p-2">Ocupación</th>
+                  <th class="p-2">Área Interna de Responsabilidad</th>
                   <th class="p-2">Condición</th>
                   <th class="p-2">Sexo</th>
                   <th class="p-2">DNI</th>
@@ -316,6 +317,25 @@
                   <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
                   <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
+                  <td class="p-1">
+                    <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
+                      <option value="">-- Seleccionar Área --</option>
+                      <option value="Gerencia de logística">Gerencia de logística</option>
+                      <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
+                      <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
+                      <option value="Gerencia de tesorería">Gerencia de tesorería</option>
+                      <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
+                      <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
+                      <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
+                      <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
+                      <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
+                      <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
+                      <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
+                      <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
+                      <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
+                      <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
+                    </select>
+                  </td>
                   <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
                   <td class="p-1">
                     <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
@@ -1053,6 +1073,25 @@
         <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
+        <td class="p-1">
+          <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
+            <option value="">-- Seleccionar Área --</option>
+            <option value="Gerencia de logística">Gerencia de logística</option>
+            <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
+            <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
+            <option value="Gerencia de tesorería">Gerencia de tesorería</option>
+            <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
+            <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
+            <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
+            <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
+            <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
+            <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
+            <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
+            <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
+            <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
+            <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
+          </select>
+        </td>
         <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
         <td class="p-1">
           <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
