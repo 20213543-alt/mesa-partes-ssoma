@@ -11,7 +11,7 @@ import zoneinfo
 
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.staticfiles import StaticFiles  # <-- Importado para archivos estáticos
 from PIL import Image, ImageOps
 import requests
 import resend
@@ -32,59 +32,11 @@ app = FastAPI()
 
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
-
-# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
-SCRIPT_JS_PATH = os.path.join("static", "script.js")
-JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
-    const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
-    const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
-
-    const camposAccidente = [
-        'acc_gravedad',
-        'acc_grado_incapacitante',
-        'acc_dias_descanso',
-        'acc_dias_cargados',
-        'acc_num_afectados'
-    ];
-
-    function evaluarBloqueoAccidente() {
-        const valTipo = selectTipo ? selectTipo.value.toLowerCase() : '';
-        const valClasif = selectClasificacion ? selectClasificacion.value.toLowerCase() : '';
-
-        const esIncidente = valTipo.includes('incidente') || valClasif.includes('incidente');
-
-        camposAccidente.forEach(nombre => {
-            const elementos = document.querySelectorAll(`[name="${nombre}"]`);
-            elementos.forEach(el => {
-                el.disabled = esIncidente;
-                if (esIncidente) {
-                    el.value = '';
-                    el.removeAttribute('required');
-                }
-            });
-        });
-
-        const contenedor = document.getElementById('seccion_accidente');
-        if (contenedor) {
-            contenedor.style.opacity = esIncidente ? '0.4' : '1';
-            contenedor.style.pointerEvents = esIncidente ? 'none' : 'auto';
-        }
-    }
-
-    if (selectTipo) selectTipo.addEventListener('change', evaluarBloqueoAccidente);
-    if (selectClasificacion) selectClasificacion.addEventListener('change', evaluarBloqueoAccidente);
-
-    evaluarBloqueoAccidente();
-});
-"""
-
-with open(SCRIPT_JS_PATH, "w", encoding="utf-8") as js_file:
-    js_file.write(JS_CONTENT)
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
 
+# Correo único de destino automatizado
 CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe"]
 
 PDF_DIR = "pdf_reports"
@@ -682,17 +634,6 @@ async def enviar_reporte(
             val = form_data.getlist(key)
             form_dict[key] = val[0] if len(val) == 1 else val
 
-        # Control de seguridad backend para Incidentes: borra los valores si el evento es un Incidente
-        tipo_evt = str(form_dict.get("fin_tipo_evento", "")).lower()
-        clasif_evt = str(form_dict.get("fin_clasificacion", "")).lower()
-
-        if "incidente" in tipo_evt or "incidente" in clasif_evt:
-            form_dict["acc_gravedad"] = "-"
-            form_dict["acc_grado_incapacitante"] = "-"
-            form_dict["acc_dias_descanso"] = "-"
-            form_dict["acc_dias_cargados"] = "-"
-            form_dict["acc_num_afectados"] = "-"
-
         tz_peru = zoneinfo.ZoneInfo("America/Lima")
         ahora_peru = datetime.now(tz_peru)
         fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
@@ -958,6 +899,7 @@ async def enviar_reporte(
         if es_preliminar:
             codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
         else:
+            # Fallback predeterminado por si falla el Webhook de Google
             codigo_comprobante = f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
             cadena_area_interna = ", ".join([
