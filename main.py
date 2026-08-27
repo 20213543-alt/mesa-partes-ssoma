@@ -11,7 +11,7 @@ import zoneinfo
 
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles  # <-- Importado para archivos estáticos
+from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 import requests
 import resend
@@ -32,11 +32,59 @@ app = FastAPI()
 
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
+
+# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
+SCRIPT_JS_PATH = os.path.join("static", "script.js")
+JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
+    const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
+    const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
+
+    const camposAccidente = [
+        'acc_gravedad',
+        'acc_grado_incapacitante',
+        'acc_dias_descanso',
+        'acc_dias_cargados',
+        'acc_num_afectados'
+    ];
+
+    function evaluarBloqueoAccidente() {
+        const valTipo = selectTipo ? selectTipo.value.toLowerCase() : '';
+        const valClasif = selectClasificacion ? selectClasificacion.value.toLowerCase() : '';
+
+        const esIncidente = valTipo.includes('incidente') || valClasif.includes('incidente');
+
+        camposAccidente.forEach(nombre => {
+            const elementos = document.querySelectorAll(`[name="${nombre}"]`);
+            elementos.forEach(el => {
+                el.disabled = esIncidente;
+                if (esIncidente) {
+                    el.value = '';
+                    el.removeAttribute('required');
+                }
+            });
+        });
+
+        const contenedor = document.getElementById('seccion_accidente');
+        if (contenedor) {
+            contenedor.style.opacity = esIncidente ? '0.4' : '1';
+            contenedor.style.pointerEvents = esIncidente ? 'none' : 'auto';
+        }
+    }
+
+    if (selectTipo) selectTipo.addEventListener('change', evaluarBloqueoAccidente);
+    if (selectClasificacion) selectClasificacion.addEventListener('change', evaluarBloqueoAccidente);
+
+    evaluarBloqueoAccidente();
+});
+"""
+
+with open(SCRIPT_JS_PATH, "w", encoding="utf-8") as js_file:
+    js_file.write(JS_CONTENT)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxaliz82ArStXwK5OH2lAn_wK0rp23CIvWy4cglATNt5AhV90VeucsJ7GrB1sFHYANhRw/exec"
 
-# Correo único de destino automatizado
 CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe"]
 
 PDF_DIR = "pdf_reports"
@@ -44,7 +92,6 @@ os.makedirs(PDF_DIR, exist_ok=True)
 
 
 def optimizar_imagen_base64(bytes_imagen, target_size=(600, 360)):
-    """Recorta y escala la imagen manteniendo la proporción fija centrada para el cuadro del PDF."""
     try:
         img = Image.open(io.BytesIO(bytes_imagen))
         img = img.convert("RGB")
@@ -344,6 +391,7 @@ def generar_pdf_100_porciento(
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
             .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8pt; padding: 3px; margin-top: 6px; margin-bottom: 3px; }}
             .sec-red {{ background-color: #742a2a; color: #ffffff; }}
+            .sec-green {{ background-color: #276749; color: #ffffff; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: middle; word-wrap: break-word; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
@@ -512,6 +560,29 @@ def generar_pdf_100_porciento(
             <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion_evento', g(f, 'dan_descripcion'))}
         </div>
 
+        <!-- SECCIÓN DE IMPACTO ECONÓMICO Y COSTOS -->
+        <div class="sec-header sec-green">COSTOS ESTIMADOS DEL EVENTO (IMPACTO ECONÓMICO)</div>
+        <table class="grid-table">
+            <tr>
+                <td class="lbl">Atención Médica y Tratamiento:</td>
+                <td class="val">S/ {g(f, 'costo_medico', '0.00')}</td>
+                <td class="lbl">Daños Materiales / Equipos:</td>
+                <td class="val">S/ {g(f, 'costo_dano_material', '0.00')}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Días / Horas Hombre Perdidas:</td>
+                <td class="val">S/ {g(f, 'costo_dias_perdidos', '0.00')}</td>
+                <td class="lbl">Costos Indirectos:</td>
+                <td class="val">S/ {g(f, 'costo_indirecto', '0.00')}</td>
+            </tr>
+            <tr>
+                <td class="lbl" style="background-color: #edf2f7;"><strong>COSTO TOTAL ESTIMADO:</strong></td>
+                <td class="val" colspan="3" style="font-size: 7.5pt; font-weight: bold; color: #276749;">
+                    S/ {g(f, 'costo_total', '0.00')}
+                </td>
+            </tr>
+        </table>
+
         <div class="sec-header">ANÁLISIS DEL ACCIDENTE</div>
         <table class="grid-table">
             <tr><td class="lbl">¿Qué sucedió?:</td><td class="val" colspan="5">{g(f, 'ana_que_sucedio')}</td></tr>
@@ -634,6 +705,17 @@ async def enviar_reporte(
             val = form_data.getlist(key)
             form_dict[key] = val[0] if len(val) == 1 else val
 
+        # Control de seguridad backend para Incidentes
+        tipo_evt = str(form_dict.get("fin_tipo_evento", "")).lower()
+        clasif_evt = str(form_dict.get("fin_clasificacion", "")).lower()
+
+        if "incidente" in tipo_evt or "incidente" in clasif_evt:
+            form_dict["acc_gravedad"] = "-"
+            form_dict["acc_grado_incapacitante"] = "-"
+            form_dict["acc_dias_descanso"] = "-"
+            form_dict["acc_dias_cargados"] = "-"
+            form_dict["acc_num_afectados"] = "-"
+
         tz_peru = zoneinfo.ZoneInfo("America/Lima")
         ahora_peru = datetime.now(tz_peru)
         fecha_registro_str = ahora_peru.strftime("%d/%m/%Y %H:%M:%S")
@@ -677,7 +759,7 @@ async def enviar_reporte(
                             f"Error procesando la imagen alternativa: {err_img}"
                         )
 
-        # Extracción de trabajadores (con soporte para Área Interna)
+        # Extracción de trabajadores
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist(
             "trab_paterno"
@@ -899,7 +981,6 @@ async def enviar_reporte(
         if es_preliminar:
             codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
         else:
-            # Fallback predeterminado por si falla el Webhook de Google
             codigo_comprobante = f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
             cadena_area_interna = ", ".join([
@@ -929,6 +1010,16 @@ async def enviar_reporte(
                 "trab_area_interna[]": cadena_area_interna,
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
+                # Inclusión de Costos en el Webhook
+                "costo_medico": form_data.get("costo_medico", "0.00"),
+                "costo_dano_material": form_data.get(
+                    "costo_dano_material", "0.00"
+                ),
+                "costo_dias_perdidos": form_data.get(
+                    "costo_dias_perdidos", "0.00"
+                ),
+                "costo_indirecto": form_data.get("costo_indirecto", "0.00"),
+                "costo_total": form_data.get("costo_total", "0.00"),
             }
 
             try:
