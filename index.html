@@ -1230,28 +1230,23 @@
     }
 
     function calcularCostesDanos() {
-      // 2.1 Edificios e Instalaciones
       const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
       const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
       const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
       const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
 
-      // 2.2 Máquinas, equipos y herramientas
       const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
       const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
       const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
       const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
       const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
 
-      // 2.3 Materias primas
       const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
       const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
 
-      // 2.4 Productos terminados o semitransformados
       const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
       const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
 
-      // 2.5 Tiempo perdido por parada de máquina
       const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
       const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
 
@@ -1356,7 +1351,9 @@
     }
 
     function evaluarOpcionesEvento() {
-      const tipoEv = document.getElementById('fin_tipo_evento').value;
+      const el = document.getElementById('fin_tipo_evento');
+      if (!el) return;
+      const tipoEv = el.value;
       const bloqueAcc = document.getElementById('bloque_accidente');
       if (!bloqueAcc) return;
 
