@@ -1071,6 +1071,144 @@
           </div>
         </div>
 
+        <!-- 3. OTROS COSTES -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
+            3. OTROS COSTES
+          </div>
+          <div class="p-4 bg-slate-50 space-y-4">
+
+            <!-- 3.1. Materiales de primeros auxilios y traslado -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.1. Valoración económica de los costos por empleo de materiales de primeros auxilios y traslado del accidentado:</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Materiales de primeros auxilios (S/.):</label>
+                  <input type="number" step="0.01" min="0" id="oc_mat_auxilios" name="oc_mat_auxilios" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Traslado del accidentado (transporte) (S/.):</label>
+                  <input type="number" step="0.01" min="0" id="oc_traslado" name="oc_traslado" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.2. Sanciones plazos de entrega -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.2. Valoración económica de sanciones por no cumplir plazos de entrega (bienes, servicios, documentación):</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor conforme al contrato (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_sanciones_contrato" name="oc_sanciones_contrato" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.3. Costos por implicaciones legales -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.3. Costos por implicaciones legales:</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Multas de acuerdo a Ley (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_multas_ley" name="oc_multas_ley" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.4. Responsabilidad Civil, Indemnizaciones -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.4. Responsabilidad Civil, Indemnizaciones:</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_resp_civil" name="oc_resp_civil" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.5. Daños a terceros y/o Medio Ambiente -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.5. Daños a terceros y/o al Medio ambiente (empleo de útiles de limpieza y control de derrames):</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_danos_terceros_ma" name="oc_danos_terceros_ma" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.6. Baja del rendimiento del trabajador -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.6. Valoración económica de la baja del rendimiento del trabajador a su regreso.</span>
+              <p class="text-[11px] font-bold text-slate-600 bg-amber-50 p-2 rounded border border-amber-200">
+                📌 30% en la primera semana (5 días) de reincorporación:
+              </p>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[500px]">
+                  <thead>
+                    <tr class="bg-slate-200 font-bold border-b text-[10px] text-slate-700">
+                      <th class="p-2 w-1/2">horas/día</th>
+                      <th class="p-2 w-1/2">Coste horario (S/./h)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b bg-white">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_1" name="oc_rend_hrs_1" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_1" name="oc_rend_costo_1" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                    <tr class="border-b bg-slate-50">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_2" name="oc_rend_hrs_2" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_2" name="oc_rend_costo_2" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                    <tr class="border-b bg-white">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_3" name="oc_rend_hrs_3" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_3" name="oc_rend_costo_3" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- SUB-TOTAL OTROS COSTES -->
+            <div class="bg-blue-900 text-white p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span class="font-black text-xs md:text-sm uppercase tracking-wide">SUB - TOTAL OTROS COSTES (S/.):</span>
+              <div class="flex items-center gap-1">
+                <span class="font-black text-base text-amber-400">S/</span>
+                <input type="number" step="0.01" id="coste_subtotal_otros" name="coste_subtotal_otros" readonly placeholder="0.00" class="border-2 border-amber-500 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 4. GASTOS DIVERSOS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
+            4. GASTOS DIVERSOS (INFORMES, INVESTIGACIONES, ETC.)
+          </div>
+          <div class="p-4 bg-slate-50 space-y-4">
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-3">
+              <span class="font-extrabold text-slate-700 text-xs">2% del total anterior (Personal + Daños Materiales + Otros Costes):</span>
+              <div class="flex items-center gap-1 w-full md:w-auto">
+                <span class="font-black text-sm text-slate-700">S/</span>
+                <input type="number" step="0.01" id="coste_gastos_diversos" name="coste_gastos_diversos" readonly placeholder="0.00" class="w-full md:w-40 border-2 border-slate-400 rounded p-2 bg-slate-100 text-slate-900 font-bold text-sm text-right cursor-not-allowed">
+              </div>
+            </div>
+
+            <!-- COSTO TOTAL DEL ACCIDENTE -->
+            <div class="bg-slate-950 text-white p-4 rounded-xl border-4 border-amber-500 shadow-md flex flex-col md:flex-row justify-between items-center gap-3">
+              <span class="font-black text-sm md:text-base text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                <span>🚨</span> COSTO TOTAL DEL ACCIDENTE (S/.):
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-xl text-amber-400">S/</span>
+                <input type="number" step="0.01" id="coste_total_accidente" name="coste_total_accidente" readonly placeholder="0.00" class="border-2 border-amber-500 rounded-lg p-2.5 bg-white text-slate-950 font-black text-xl w-48 text-right cursor-not-allowed shadow-inner">
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN -->
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN</div>
@@ -1227,26 +1365,33 @@
       if (elemTotal) {
         elemTotal.value = totalCoste.toFixed(2);
       }
+
+      calcularMasterTotales();
     }
 
     function calcularCostesDanos() {
+      // 2.1 Edificios e Instalaciones
       const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
       const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
       const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
       const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
 
+      // 2.2 Máquinas, equipos y herramientas
       const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
       const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
       const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
       const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
       const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
 
+      // 2.3 Materias primas
       const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
       const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
 
+      // 2.4 Productos terminados o semitransformados
       const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
       const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
 
+      // 2.5 Tiempo perdido por parada de máquina
       const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
       const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
 
@@ -1261,6 +1406,58 @@
       const elemTotal = document.getElementById('coste_total_danos_materiales');
       if (elemTotal) {
         elemTotal.value = totalDanos.toFixed(2);
+      }
+
+      calcularMasterTotales();
+    }
+
+    function calcularOtrosCostes() {
+      const matAux = parseFloat(document.getElementById('oc_mat_auxilios')?.value) || 0;
+      const traslado = parseFloat(document.getElementById('oc_traslado')?.value) || 0;
+      const sanciones = parseFloat(document.getElementById('oc_sanciones_contrato')?.value) || 0;
+      const multas = parseFloat(document.getElementById('oc_multas_ley')?.value) || 0;
+      const respCivil = parseFloat(document.getElementById('oc_resp_civil')?.value) || 0;
+      const danosTer = parseFloat(document.getElementById('oc_danos_terceros_ma')?.value) || 0;
+
+      // 3.6 Baja de rendimiento: (hrs/día * coste/hora) * 5 días * 30%
+      const rHrs1 = parseFloat(document.getElementById('oc_rend_hrs_1')?.value) || 0;
+      const rCos1 = parseFloat(document.getElementById('oc_rend_costo_1')?.value) || 0;
+
+      const rHrs2 = parseFloat(document.getElementById('oc_rend_hrs_2')?.value) || 0;
+      const rCos2 = parseFloat(document.getElementById('oc_rend_costo_2')?.value) || 0;
+
+      const rHrs3 = parseFloat(document.getElementById('oc_rend_hrs_3')?.value) || 0;
+      const rCos3 = parseFloat(document.getElementById('oc_rend_costo_3')?.value) || 0;
+
+      const subRend = ((rHrs1 * rCos1) + (rHrs2 * rCos2) + (rHrs3 * rCos3)) * 5 * 0.30;
+
+      const subtotalOtros = matAux + traslado + sanciones + multas + respCivil + danosTer + subRend;
+
+      const elemSubOtros = document.getElementById('coste_subtotal_otros');
+      if (elemSubOtros) {
+        elemSubOtros.value = subtotalOtros.toFixed(2);
+      }
+
+      calcularMasterTotales();
+    }
+
+    function calcularMasterTotales() {
+      const totalPersonal = parseFloat(document.getElementById('coste_total_personal')?.value) || 0;
+      const totalDanos = parseFloat(document.getElementById('coste_total_danos_materiales')?.value) || 0;
+      const subtotalOtros = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
+
+      const totalAnterior = totalPersonal + totalDanos + subtotalOtros;
+      const gastosDiversos = totalAnterior * 0.02; // 2% del total anterior
+
+      const elemGastosDiv = document.getElementById('coste_gastos_diversos');
+      if (elemGastosDiv) {
+        elemGastosDiv.value = gastosDiversos.toFixed(2);
+      }
+
+      const costoTotalAccidente = totalAnterior + gastosDiversos;
+      const elemTotalAcc = document.getElementById('coste_total_accidente');
+      if (elemTotalAcc) {
+        elemTotalAcc.value = costoTotalAccidente.toFixed(2);
       }
     }
 
@@ -1351,9 +1548,7 @@
     }
 
     function evaluarOpcionesEvento() {
-      const el = document.getElementById('fin_tipo_evento');
-      if (!el) return;
-      const tipoEv = el.value;
+      const tipoEv = document.getElementById('fin_tipo_evento').value;
       const bloqueAcc = document.getElementById('bloque_accidente');
       if (!bloqueAcc) return;
 
