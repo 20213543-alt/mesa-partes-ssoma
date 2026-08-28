@@ -861,38 +861,49 @@
         <!-- VALORACIÓN DE LOS COSTES DEL PERSONAL -->
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">VALORACIÓN DE LOS COSTES DEL PERSONAL</div>
-          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Salario Mensual (S/):</label>
-              <input type="number" step="0.01" min="0" name="coste_salario_mensual" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <div class="p-4 bg-slate-50 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Salario Mensual (S/):</label>
+                <input type="number" step="0.01" min="0" id="coste_salario_mensual" name="coste_salario_mensual" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Coste Horario (S/.h) [Calculado]:</label>
+                <input type="number" step="0.01" min="0" id="coste_horario" name="coste_horario" readonly placeholder="0.00" class="w-full border rounded p-2 bg-slate-200 text-slate-700 font-bold cursor-not-allowed">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por el Accidentado:</label>
+                <input type="number" step="0.5" min="0" id="coste_hrs_accidentado" name="coste_hrs_accidentado" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por Otros Trabajadores:</label>
+                <input type="number" step="0.5" min="0" id="coste_hrs_otros_trabajadores" name="coste_hrs_otros_trabajadores" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Valoración Económica para Socorrer y Transportar (S/):</label>
+                <input type="number" step="0.01" min="0" id="coste_socorro_transporte" name="coste_socorro_transporte" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por el Supervisor:</label>
+                <input type="number" step="0.5" min="0" id="coste_hrs_supervisor" name="coste_hrs_supervisor" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por el SSOMA:</label>
+                <input type="number" step="0.5" min="0" id="coste_hrs_ssoma" name="coste_hrs_ssoma" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Valoración Económica Días Descanso Médico (S/):</label>
+                <input type="number" step="0.01" min="0" id="coste_dias_descanso_medico" name="coste_dias_descanso_medico" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
             </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Coste Horario (S/.h):</label>
-              <input type="number" step="0.01" min="0" name="coste_horario" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por el Accidentado:</label>
-              <input type="number" step="0.5" min="0" name="coste_hrs_accidentado" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por Otros Trabajadores:</label>
-              <input type="number" step="0.5" min="0" name="coste_hrs_otros_trabajadores" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Valoración Económica para Socorrer y Transportar (S/):</label>
-              <input type="number" step="0.01" min="0" name="coste_socorro_transporte" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por el Supervisor:</label>
-              <input type="number" step="0.5" min="0" name="coste_hrs_supervisor" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Horas Perdidas por el SSOMA:</label>
-              <input type="number" step="0.5" min="0" name="coste_hrs_ssoma" placeholder="0" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Valoración Económica Días Descanso Médico (S/):</label>
-              <input type="number" step="0.01" min="0" name="coste_dias_descanso_medico" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+
+            <!-- TOTALIZADOR FINAL DE COSTES -->
+            <div class="bg-amber-100 p-3 rounded-lg border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span class="font-black text-slate-800 text-sm uppercase">💰 COSTO DEL PERSONAL TOTAL (S/):</span>
+              <div class="flex items-center gap-1">
+                <span class="font-black text-base text-amber-900">S/</span>
+                <input type="number" step="0.01" id="coste_total_personal" name="coste_total_personal" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+              </div>
             </div>
           </div>
         </div>
@@ -1025,6 +1036,33 @@
         "Abuso o mal uso"
       ]
     };
+
+    function calcularCostesPersonal() {
+      const salarioMensual = parseFloat(document.getElementById('coste_salario_mensual').value) || 0;
+      
+      // Coste Horario = (Salario Mensual / 30) / 8
+      const costeHorario = (salarioMensual / 30) / 8;
+      document.getElementById('coste_horario').value = costeHorario.toFixed(2);
+
+      // Obtención de horas e importes fijos
+      const hrsAccidentado = parseFloat(document.getElementById('coste_hrs_accidentado').value) || 0;
+      const hrsOtros = parseFloat(document.getElementById('coste_hrs_otros_trabajadores').value) || 0;
+      const socorroTransporte = parseFloat(document.getElementById('coste_socorro_transporte').value) || 0;
+      const hrsSupervisor = parseFloat(document.getElementById('coste_hrs_supervisor').value) || 0;
+      const hrsSsoma = parseFloat(document.getElementById('coste_hrs_ssoma').value) || 0;
+      const descansoMedico = parseFloat(document.getElementById('coste_dias_descanso_medico').value) || 0;
+
+      // Cálculos parciales en función de las horas pérdidas
+      const costeAccidentado = hrsAccidentado * costeHorario;
+      const costeOtros = hrsOtros * costeHorario;
+      const costeSupervisor = hrsSupervisor * costeHorario;
+      const costeSsoma = hrsSsoma * costeHorario;
+
+      // Suma total del costo del personal
+      const totalCoste = costeAccidentado + costeOtros + socorroTransporte + costeSupervisor + costeSsoma + descansoMedico;
+
+      document.getElementById('coste_total_personal').value = totalCoste.toFixed(2);
+    }
 
     function evaluarTipoPersona() {
       const valor = document.getElementById('tipoPersona').value;
