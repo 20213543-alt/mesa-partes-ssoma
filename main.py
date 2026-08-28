@@ -174,7 +174,7 @@ def generar_pdf_preliminar(
             celdas.append(
                 f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
                 f'<img src="data:image/jpeg;base64,{b64}" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 3px;" />'
-                f"</td>"
+                f"td>"
             )
 
         filas_html = ""
