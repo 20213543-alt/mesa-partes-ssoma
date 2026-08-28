@@ -916,7 +916,7 @@
               </div>
             </div>
 
-            <!-- TOTALIZADOR FINAL DE COSTES -->
+            <!-- TOTALIZADOR FINAL DE COSTES DE PERSONAL -->
             <div class="bg-amber-100 p-3 rounded-lg border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-2">
               <span class="font-black text-slate-800 text-sm uppercase">💰 COSTO DEL PERSONAL TOTAL (S/):</span>
               <div class="flex items-center gap-1">
@@ -924,6 +924,150 @@
                 <input type="number" step="0.01" id="coste_total_personal" name="coste_total_personal" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- 2. VALORACIÓN DE LOS COSTES DE DAÑOS MATERIALES -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
+            2. VALORACIÓN DE LOS COSTES DE DAÑOS MATERIALES
+          </div>
+          <div class="p-4 bg-slate-50 space-y-4">
+
+            <!-- 2.1. Edificios e Instalaciones -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.1. Edificios e Instalaciones:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Propio (mano de obra):</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas</label>
+                    <input type="number" step="0.5" min="0" id="dm_edif_propio_hrs" name="dm_edif_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste horario (S/./h)</label>
+                    <input type="number" step="0.01" min="0" id="dm_edif_propio_costo" name="dm_edif_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Externo (mano de obra):</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_edif_externo_costo" name="dm_edif_externo_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Materiales:</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_edif_mat_costo" name="dm_edif_mat_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.2. Máquinas, equipos y herramientas -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.2. Máquinas, equipos y herramientas:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Propio (mano de obra):</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas</label>
+                    <input type="number" step="0.5" min="0" id="dm_maq_propio_hrs" name="dm_maq_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste horario (S/./h)</label>
+                    <input type="number" step="0.01" min="0" id="dm_maq_propio_costo" name="dm_maq_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Externo (mano de obra):</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_externo_costo" name="dm_maq_externo_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Repuestos:</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_repuestos_costo" name="dm_maq_repuestos_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Reposición (en caso de inutilización):</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_reposicion_costo" name="dm_maq_reposicion_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.3. Materias primas -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.3. Materias primas:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Materias primas:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                    <input type="number" step="1" min="0" id="dm_mat_primas_cant" name="dm_mat_primas_cant" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.) / Cantidad</label>
+                    <input type="number" step="0.01" min="0" id="dm_mat_primas_costo" name="dm_mat_primas_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.4. Productos terminados o semitransformados -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.4. Productos terminados o semitransformados:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Productos terminados o semitransformados:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                    <input type="number" step="1" min="0" id="dm_prod_terminados_cant" name="dm_prod_terminados_cant" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.) / Cantidad</label>
+                    <input type="number" step="0.01" min="0" id="dm_prod_terminados_costo" name="dm_prod_terminados_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.5. Valoración económica del tiempo perdido por parada de máquina -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.5. Valoración económica del tiempo perdido por parada de máquina:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Tiempo perdido por parada de máquina:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas de parada</label>
+                    <input type="number" step="0.5" min="0" id="dm_parada_hrs" name="dm_parada_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste de máquina (S/.) / hora</label>
+                    <input type="number" step="0.01" min="0" id="dm_parada_costo_hora" name="dm_parada_costo_hora" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TOTALIZADOR DAÑOS MATERIALES -->
+            <div class="bg-amber-100 p-3 rounded-lg border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span class="font-black text-slate-800 text-sm uppercase">🏗️ COSTO DE DAÑOS MATERIALES TOTAL (S/):</span>
+              <div class="flex items-center gap-1">
+                <span class="font-black text-base text-amber-900">S/</span>
+                <input type="number" step="0.01" id="coste_total_danos_materiales" name="coste_total_danos_materiales" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1082,6 +1226,46 @@
       const elemTotal = document.getElementById('coste_total_personal');
       if (elemTotal) {
         elemTotal.value = totalCoste.toFixed(2);
+      }
+    }
+
+    function calcularCostesDanos() {
+      // 2.1 Edificios e Instalaciones
+      const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
+      const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
+      const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
+      const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
+
+      // 2.2 Máquinas, equipos y herramientas
+      const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
+      const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
+      const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
+      const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
+      const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
+
+      // 2.3 Materias primas
+      const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
+      const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
+
+      // 2.4 Productos terminados o semitransformados
+      const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
+      const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
+
+      // 2.5 Tiempo perdido por parada de máquina
+      const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
+      const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
+
+      const subtotal21 = (edifPropHrs * edifPropCosto) + edifExtCosto + edifMatCosto;
+      const subtotal22 = (maqPropHrs * maqPropCosto) + maqExtCosto + maqRepCosto + maqRepoCosto;
+      const subtotal23 = matPrimCant * matPrimCosto;
+      const subtotal24 = prodTermCant * prodTermCosto;
+      const subtotal25 = paradaHrs * paradaCostoHora;
+
+      const totalDanos = subtotal21 + subtotal22 + subtotal23 + subtotal24 + subtotal25;
+
+      const elemTotal = document.getElementById('coste_total_danos_materiales');
+      if (elemTotal) {
+        elemTotal.value = totalDanos.toFixed(2);
       }
     }
 
