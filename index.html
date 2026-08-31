@@ -845,170 +845,367 @@
           </div>
         </div>
 
-        <!-- SECCIÓN INTEGRADA: VALORACIÓN COMPLETA DE COSTES DEL ACCIDENTE -->
-        <div class="border border-green-900 rounded-lg overflow-hidden shadow-sm">
-          <div class="bg-green-800 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
-            VALORACIÓN DE LOS COSTES DEL ACCIDENTE (IMPACTO ECONÓMICO DETALLADO)
+        <!-- VALORACIÓN DE LOS COSTES DEL ACCIDENTE -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">VALORACIÓN DE LOS COSTES DEL ACCIDENTE</div>
+          <div class="p-4 bg-slate-50 space-y-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- Accidentado -->
+              <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">👷 Valoración económica de las horas perdidas por el accidentado(s) el día del evento:</span>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Salario Mensual (S/):</label>
+                  <input type="number" step="0.01" min="0" id="salario_accidentado" name="salario_accidentado" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Horas Perdidas:</label>
+                  <input type="number" step="0.5" min="0" id="coste_hrs_accidentado" name="coste_hrs_accidentado" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+
+              <!-- Otros Trabajadores -->
+              <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">👥 Valoración económica de las horas perdidas por otros trabajadores el día del evento:</span>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Salario Mensual (S/):</label>
+                  <input type="number" step="0.01" min="0" id="salario_otros" name="salario_otros" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Horas Perdidas Total:</label>
+                  <input type="number" step="0.5" min="0" id="coste_hrs_otros_trabajadores" name="coste_hrs_otros_trabajadores" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+
+              <!-- Supervisor -->
+              <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">👔 Valoración económica de las horas empleadas por el Supervisor para atender al accidentado y/o culminar el reporte respectivo: </span>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Salario Mensual (S/):</label>
+                  <input type="number" step="0.01" min="0" id="salario_supervisor" name="salario_supervisor" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Horas Perdidas:</label>
+                  <input type="number" step="0.5" min="0" id="coste_hrs_supervisor" name="coste_hrs_supervisor" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+
+              <!-- SSOMA -->
+              <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">🪖 Valoración económica de las horas empleadas por Seguridad (Supervisor) para asesorar en el análisis del accidente y el seguimiento respectivo.</span>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Salario Mensual (S/):</label>
+                  <input type="number" step="0.01" min="0" id="salario_ssoma" name="salario_ssoma" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Horas Perdidas:</label>
+                  <input type="number" step="0.5" min="0" id="coste_hrs_ssoma" name="coste_hrs_ssoma" oninput="calcularCostesPersonal()" placeholder="0" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- Gastos Directos / Fijos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-200 pt-3">
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Valoración Económica para Socorrer y Transportar (S/):</label>
+                <input type="number" step="0.01" min="0" id="coste_socorro_transporte" name="coste_socorro_transporte" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="font-bold block text-slate-700 mb-1">Valoración Económica Días Descanso Médico (S/):</label>
+                <input type="number" step="0.01" min="0" id="coste_dias_descanso_medico" name="coste_dias_descanso_medico" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <!-- TOTALIZADOR FINAL DE COSTES DE PERSONAL -->
+            <div class="bg-amber-100 p-3 rounded-lg border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span class="font-black text-slate-800 text-sm uppercase">💰 COSTO DEL PERSONAL TOTAL (S/):</span>
+              <div class="flex items-center gap-1">
+                <span class="font-black text-base text-amber-900">S/</span>
+                <input type="number" step="0.01" id="coste_total_personal" name="coste_total_personal" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+              </div>
+            </div>
           </div>
-          
-          <div class="p-4 bg-slate-50 space-y-6">
+        </div>
 
-            <!-- 1. COSTES DE PERSONAL -->
-            <div class="border border-slate-300 rounded-lg p-3 bg-white space-y-3">
-              <h3 class="font-extrabold text-green-900 text-xs uppercase border-b pb-1">1. Valoración de Costes del Accidente</h3>
-              <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Salario Mensual del Accidentado(S/):</label>
-                  <input type="number" step="0.01" name="costo_per_acc_salario" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
+        <!-- 2. VALORACIÓN DE LOS COSTES DE DAÑOS MATERIALES -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
+            2. VALORACIÓN DE LOS COSTES DE DAÑOS MATERIALES
+          </div>
+          <div class="p-4 bg-slate-50 space-y-4">
+
+            <!-- 2.1. Edificios e Instalaciones -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.1. Edificios e Instalaciones:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Propio (mano de obra):</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas</label>
+                    <input type="number" step="0.5" min="0" id="dm_edif_propio_hrs" name="dm_edif_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste horario (S/./h)</label>
+                    <input type="number" step="0.01" min="0" id="dm_edif_propio_costo" name="dm_edif_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
                 </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Horas Perdidas del Accidentado :</label>
-                  <input type="number" step="0.5" name="costo_per_acc_horas" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0">
+
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Externo (mano de obra):</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_edif_externo_costo" name="dm_edif_externo_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Salario de Otros Trab (S/):</label>
-                  <input type="number" step="0.01" name="costo_per_otr_salario" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Horas Perdidas de Otros Trab:</label>
-                  <input type="number" step="0.5" name="costo_per_otr_horas" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Salario del Supervisor (S/):</label>
-                  <input type="number" step="0.01" name="costo_per_sup_salario" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Horas Perdidas del Supervisor:</label>
-                  <input type="number" step="0.5" name="costo_per_sup_horas" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Salario del encargado de Seguridad (S/):</label>
-                  <input type="number" step="0.01" name="costo_per_seg_salario" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Horas Perdidas del Encargado de Seguridad:</label>
-                  <input type="number" step="0.5" name="costo_per_seg_horas" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Costo de Transporte (S/):</label>
-                  <input type="number" step="0.01" name="costo_per_socorrer" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Costo de Dias de Descanso Medico(S/):</label>
-                  <input type="number" step="0.01" name="costo_per_descanso" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div class="md:col-span-2 bg-emerald-50 p-2 rounded border border-emerald-300">
-                  <label class="font-extrabold text-green-900 block mb-1">TOTAL COSTO PERSONAL (S/):</label>
-                  <input type="text" name="costo_personal_total" readonly class="w-full border rounded p-1.5 font-bold bg-white text-green-900 text-sm" value="0.00">
+
+                <span class="font-bold text-slate-700 text-xs">Materiales:</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_edif_mat_costo" name="dm_edif_mat_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
             </div>
 
-            <!-- 2. DAÑOS MATERIALES -->
-            <div class="border border-slate-300 rounded-lg p-3 bg-white space-y-3">
-              <h3 class="font-extrabold text-green-900 text-xs uppercase border-b pb-1">2. Valoración de Costes de Daños Materiales</h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Reparación de Infraestructura con Personal Propio(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_edf_propio" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
+            <!-- 2.2. Máquinas, equipos y herramientas -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.2. Máquinas, equipos y herramientas:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Propio (mano de obra):</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas</label>
+                    <input type="number" step="0.5" min="0" id="dm_maq_propio_hrs" name="dm_maq_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste horario (S/./h)</label>
+                    <input type="number" step="0.01" min="0" id="dm_maq_propio_costo" name="dm_maq_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
                 </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Reparación de Infraestructura por Contratistas Externos(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_edf_externo" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
+
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Externo (mano de obra):</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_externo_costo" name="dm_maq_externo_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Materiales e Insumos para Reparar el Edificio(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_edf_mat" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
+
+                <span class="font-bold text-slate-700 text-xs">Repuestos:</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_repuestos_costo" name="dm_maq_repuestos_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Reparación de Maquinaria/Equipos por Personal Propio(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_maq_propio" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Máquinas - Reparación de Maquinaria por Servicio Técnico Externo(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_maq_externo" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Compra de Repuestos y Piezas de Recambio(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_maq_rep" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Compra por Reposición Total de Equipos(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_maq_repo" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Pérdida de Materias Primas e Insumos(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_primas" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Pérdida de Productos Terminados o en Proceso(S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_prod_term" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Pérdida Económica por Parada de Maquinaria (S/):</label>
-                  <input type="number" step="0.01" name="costo_mat_parada_maq" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div class="md:col-span-2 bg-emerald-50 p-2 rounded border border-emerald-300">
-                  <label class="font-extrabold text-green-900 block mb-1">TOTAL DAÑOS MATERIALES (S/):</label>
-                  <input type="text" name="costo_materiales_total" readonly class="w-full border rounded p-1.5 font-bold bg-white text-green-900 text-sm" value="0.00">
+
+                <span class="font-bold text-slate-700 text-xs">Reposición (en caso de inutilización):</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_reposicion_costo" name="dm_maq_reposicion_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
             </div>
 
-            <!-- 3. OTROS COSTES -->
-            <div class="border border-slate-300 rounded-lg p-3 bg-white space-y-3">
-              <h3 class="font-extrabold text-green-900 text-xs uppercase border-b pb-1">3. Otros Costes</h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Gastos en Insumos de Primeros Auxilios (S/):</label>
-                  <input type="number" step="0.01" name="costo_otr_auxilios" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Gastos de Transporte y Traslado de Emergencia (S/):</label>
-                  <input type="number" step="0.01" name="costo_otr_traslado" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Sanciones y Penalidades por Retraso en Entregas (S/):</label>
-                  <input type="number" step="0.01" name="costo_otr_sanciones" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Multas Legales e Infracciones Administrativas (S/):</label>
-                  <input type="number" step="0.01" name="costo_otr_legales" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Indemnizaciones y Pagos por Responsabilidad Civil (S/):</label>
-                  <input type="number" step="0.01" name="costo_otr_indemnizacion" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Remediación Ambiental y Daños a Terceros (S/):</label>
-                  <input type="number" step="0.01" name="costo_otr_terceros_ma" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Pérdida por Menor Rendimiento Laboral al Retornar (S/):</label>
-                  <input type="number" step="0.01" name="costo_otr_baja_rendimiento" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div class="md:col-span-2 bg-emerald-50 p-2 rounded border border-emerald-300">
-                  <label class="font-extrabold text-green-900 block mb-1">SUB-TOTAL OTROS COSTES (S/):</label>
-                  <input type="text" name="costo_otros_total" readonly class="w-full border rounded p-1.5 font-bold bg-white text-green-900 text-sm" value="0.00">
+            <!-- 2.3. Materias primas -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.3. Materias primas:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Materias primas:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                    <input type="number" step="1" min="0" id="dm_mat_primas_cant" name="dm_mat_primas_cant" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.) / Cantidad</label>
+                    <input type="number" step="0.01" min="0" id="dm_mat_primas_costo" name="dm_mat_primas_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- 4. RESUMEN Y GASTOS DIVERSOS -->
-            <div class="border border-red-300 bg-red-50 rounded-lg p-3 space-y-3">
-              <h3 class="font-extrabold text-red-900 text-xs uppercase border-b border-red-200 pb-1">4. Gastos Diversos y Resumen General</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                <div>
-                  <label class="font-bold text-slate-700 block mb-1">Gastos Diversos (Informes/Investigaciones) (S/):</label>
-                  <input type="number" step="0.01" name="costo_gastos_diversos" oninput="calcularCostosSSOMA()" class="w-full border rounded p-1.5 input-costo" placeholder="0.00">
-                </div>
-                <div>
-                  <label class="font-extrabold text-red-900 block mb-1 text-sm">COSTO TOTAL DEL ACCIDENTE (S/):</label>
-                  <input type="text" name="costo_total_accidente" readonly class="w-full border-2 border-red-600 rounded p-2 font-black text-red-700 text-base bg-white" value="0.00">
+            <!-- 2.4. Productos terminados o semitransformados -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.4. Productos terminados o semitransformados:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Productos terminados o semitransformados:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                    <input type="number" step="1" min="0" id="dm_prod_terminados_cant" name="dm_prod_terminados_cant" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.) / Cantidad</label>
+                    <input type="number" step="0.01" min="0" id="dm_prod_terminados_costo" name="dm_prod_terminados_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
                 </div>
               </div>
             </div>
 
+            <!-- 2.5. Valoración económica del tiempo perdido por parada de máquina -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.5. Valoración económica del tiempo perdido por parada de máquina:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Tiempo perdido por parada de máquina:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas de parada</label>
+                    <input type="number" step="0.5" min="0" id="dm_parada_hrs" name="dm_parada_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste de máquina (S/.) / hora</label>
+                    <input type="number" step="0.01" min="0" id="dm_parada_costo_hora" name="dm_parada_costo_hora" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TOTALIZADOR DAÑOS MATERIALES -->
+            <div class="bg-amber-100 p-3 rounded-lg border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span class="font-black text-slate-800 text-sm uppercase">🏗️ COSTO DE DAÑOS MATERIALES TOTAL (S/):</span>
+              <div class="flex items-center gap-1">
+                <span class="font-black text-base text-amber-900">S/</span>
+                <input type="number" step="0.01" id="coste_total_danos_materiales" name="coste_total_danos_materiales" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3. OTROS COSTES -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
+            3. OTROS COSTES
+          </div>
+          <div class="p-4 bg-slate-50 space-y-4">
+
+            <!-- 3.1. Materiales de primeros auxilios y traslado -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.1. Valoración económica de los costos por empleo de materiales de primeros auxilios y traslado del accidentado:</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Materiales de primeros auxilios (S/.):</label>
+                  <input type="number" step="0.01" min="0" id="oc_mat_auxilios" name="oc_mat_auxilios" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Traslado del accidentado (transporte) (S/.):</label>
+                  <input type="number" step="0.01" min="0" id="oc_traslado" name="oc_traslado" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.2. Sanciones plazos de entrega -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.2. Valoración económica de sanciones por no cumplir plazos de entrega (bienes, servicios, documentación):</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor conforme al contrato (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_sanciones_contrato" name="oc_sanciones_contrato" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.3. Costos por implicaciones legales -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.3. Costos por implicaciones legales:</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Multas de acuerdo a Ley (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_multas_ley" name="oc_multas_ley" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.4. Responsabilidad Civil, Indemnizaciones -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.4. Responsabilidad Civil, Indemnizaciones:</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_resp_civil" name="oc_resp_civil" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.5. Daños a terceros y/o Medio Ambiente -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.5. Daños a terceros y/o al Medio ambiente (empleo de útiles de limpieza y control de derrames):</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_danos_terceros_ma" name="oc_danos_terceros_ma" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.6. Baja del rendimiento del trabajador -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.6. Valoración económica de la baja del rendimiento del trabajador a su regreso.</span>
+              <p class="text-[11px] font-bold text-slate-600 bg-amber-50 p-2 rounded border border-amber-200">
+                📌 30% en la primera semana (5 días) de reincorporación:
+              </p>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[500px]">
+                  <thead>
+                    <tr class="bg-slate-200 font-bold border-b text-[10px] text-slate-700">
+                      <th class="p-2 w-1/2">horas/día</th>
+                      <th class="p-2 w-1/2">Coste horario (S/./h)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b bg-white">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_1" name="oc_rend_hrs_1" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_1" name="oc_rend_costo_1" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                    <tr class="border-b bg-slate-50">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_2" name="oc_rend_hrs_2" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_2" name="oc_rend_costo_2" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                    <tr class="border-b bg-white">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_3" name="oc_rend_hrs_3" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_3" name="oc_rend_costo_3" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- SUB-TOTAL OTROS COSTES -->
+            <div class="bg-blue-900 text-white p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span class="font-black text-xs md:text-sm uppercase tracking-wide">SUB - TOTAL OTROS COSTES (S/.):</span>
+              <div class="flex items-center gap-1">
+                <span class="font-black text-base text-amber-400">S/</span>
+                <input type="number" step="0.01" id="coste_subtotal_otros" name="coste_subtotal_otros" readonly placeholder="0.00" class="border-2 border-amber-500 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 4. GASTOS DIVERSOS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
+            4. GASTOS DIVERSOS (INFORMES, INVESTIGACIONES, ETC.)
+          </div>
+          <div class="p-4 bg-slate-50 space-y-4">
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-3">
+              <span class="font-extrabold text-slate-700 text-xs">2% del total anterior (Personal + Daños Materiales + Otros Costes):</span>
+              <div class="flex items-center gap-1 w-full md:w-auto">
+                <span class="font-black text-sm text-slate-700">S/</span>
+                <input type="number" step="0.01" id="coste_gastos_diversos" name="coste_gastos_diversos" readonly placeholder="0.00" class="w-full md:w-40 border-2 border-slate-400 rounded p-2 bg-slate-100 text-slate-900 font-bold text-sm text-right cursor-not-allowed">
+              </div>
+            </div>
+
+            <!-- COSTO TOTAL DEL ACCIDENTE -->
+            <div class="bg-slate-950 text-white p-4 rounded-xl border-4 border-amber-500 shadow-md flex flex-col md:flex-row justify-between items-center gap-3">
+              <span class="font-black text-sm md:text-base text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                <span>🚨</span> COSTO TOTAL DEL ACCIDENTE (S/.):
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-xl text-amber-400">S/</span>
+                <input type="number" step="0.01" id="coste_total_accidente" name="coste_total_accidente" readonly placeholder="0.00" class="border-2 border-amber-500 rounded-lg p-2.5 bg-white text-slate-950 font-black text-xl w-48 text-right cursor-not-allowed shadow-inner">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1141,6 +1338,201 @@
       ]
     };
 
+    function calcularCostesPersonal() {
+      const salAcc = parseFloat(document.getElementById('salario_accidentado')?.value) || 0;
+      const hrsAcc = parseFloat(document.getElementById('coste_hrs_accidentado')?.value) || 0;
+
+      const salOtros = parseFloat(document.getElementById('salario_otros')?.value) || 0;
+      const hrsOtros = parseFloat(document.getElementById('coste_hrs_otros_trabajadores')?.value) || 0;
+
+      const salSup = parseFloat(document.getElementById('salario_supervisor')?.value) || 0;
+      const hrsSup = parseFloat(document.getElementById('coste_hrs_supervisor')?.value) || 0;
+
+      const salSsoma = parseFloat(document.getElementById('salario_ssoma')?.value) || 0;
+      const hrsSsoma = parseFloat(document.getElementById('coste_hrs_ssoma')?.value) || 0;
+
+      const socorro = parseFloat(document.getElementById('coste_socorro_transporte')?.value) || 0;
+      const descansoMed = parseFloat(document.getElementById('coste_dias_descanso_medico')?.value) || 0;
+
+      const subtotalAcc = (salAcc / 240) * hrsAcc;
+      const subtotalOtros = (salOtros / 240) * hrsOtros;
+      const subtotalSup = (salSup / 240) * hrsSup;
+      const subtotalSsoma = (salSsoma / 240) * hrsSsoma;
+
+      const totalCoste = subtotalAcc + subtotalOtros + subtotalSup + subtotalSsoma + socorro + descansoMed;
+
+      const elemTotal = document.getElementById('coste_total_personal');
+      if (elemTotal) {
+        elemTotal.value = totalCoste.toFixed(2);
+      }
+
+      calcularMasterTotales();
+    }
+
+    function calcularCostesDanos() {
+      // 2.1 Edificios e Instalaciones
+      const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
+      const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
+      const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
+      const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
+
+      // 2.2 Máquinas, equipos y herramientas
+      const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
+      const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
+      const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
+      const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
+      const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
+
+      // 2.3 Materias primas
+      const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
+      const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
+
+      // 2.4 Productos terminados o semitransformados
+      const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
+      const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
+
+      // 2.5 Tiempo perdido por parada de máquina
+      const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
+      const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
+
+      const subtotal21 = (edifPropHrs * edifPropCosto) + edifExtCosto + edifMatCosto;
+      const subtotal22 = (maqPropHrs * maqPropCosto) + maqExtCosto + maqRepCosto + maqRepoCosto;
+      const subtotal23 = matPrimCant * matPrimCosto;
+      const subtotal24 = prodTermCant * prodTermCosto;
+      const subtotal25 = paradaHrs * paradaCostoHora;
+
+      const totalDanos = subtotal21 + subtotal22 + subtotal23 + subtotal24 + subtotal25;
+
+      const elemTotal = document.getElementById('coste_total_danos_materiales');
+      if (elemTotal) {
+        elemTotal.value = totalDanos.toFixed(2);
+      }
+
+      calcularMasterTotales();
+    }
+
+    function calcularOtrosCostes() {
+      const matAux = parseFloat(document.getElementById('oc_mat_auxilios')?.value) || 0;
+      const traslado = parseFloat(document.getElementById('oc_traslado')?.value) || 0;
+      const sanciones = parseFloat(document.getElementById('oc_sanciones_contrato')?.value) || 0;
+      const multas = parseFloat(document.getElementById('oc_multas_ley')?.value) || 0;
+      const respCivil = parseFloat(document.getElementById('oc_resp_civil')?.value) || 0;
+      const danosTer = parseFloat(document.getElementById('oc_danos_terceros_ma')?.value) || 0;
+
+      // 3.6 Baja de rendimiento: (hrs/día * coste/hora) * 5 días * 30%
+      const rHrs1 = parseFloat(document.getElementById('oc_rend_hrs_1')?.value) || 0;
+      const rCos1 = parseFloat(document.getElementById('oc_rend_costo_1')?.value) || 0;
+
+      const rHrs2 = parseFloat(document.getElementById('oc_rend_hrs_2')?.value) || 0;
+      const rCos2 = parseFloat(document.getElementById('oc_rend_costo_2')?.value) || 0;
+
+      const rHrs3 = parseFloat(document.getElementById('oc_rend_hrs_3')?.value) || 0;
+      const rCos3 = parseFloat(document.getElementById('oc_rend_costo_3')?.value) || 0;
+
+      const subRend = ((rHrs1 * rCos1) + (rHrs2 * rCos2) + (rHrs3 * rCos3)) * 5 * 0.30;
+
+      const subtotalOtros = matAux + traslado + sanciones + multas + respCivil + danosTer + subRend;
+
+      const elemSubOtros = document.getElementById('coste_subtotal_otros');
+      if (elemSubOtros) {
+        elemSubOtros.value = subtotalOtros.toFixed(2);
+      }
+
+      calcularMasterTotales();
+    }
+
+    function calcularMasterTotales() {
+      const totalPersonal = parseFloat(document.getElementById('coste_total_personal')?.value) || 0;
+      const totalDanos = parseFloat(document.getElementById('coste_total_danos_materiales')?.value) || 0;
+      const subtotalOtros = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
+
+      const totalAnterior = totalPersonal + totalDanos + subtotalOtros;
+      const gastosDiversos = totalAnterior * 0.02; // 2% del total anterior
+
+      const elemGastosDiv = document.getElementById('coste_gastos_diversos');
+      if (elemGastosDiv) {
+        elemGastosDiv.value = gastosDiversos.toFixed(2);
+      }
+
+      const costoTotalAccidente = totalAnterior + gastosDiversos;
+      const elemTotalAcc = document.getElementById('coste_total_accidente');
+      if (elemTotalAcc) {
+        elemTotalAcc.value = costoTotalAccidente.toFixed(2);
+      }
+    }
+
+    function evaluarTipoPersona() {
+      const valor = document.getElementById('tipoPersona').value;
+      const secContratista = document.getElementById('seccion-contratista');
+      const secLocador = document.getElementById('seccion-locador');
+
+      if (valor === 'contratista') {
+        secContratista.classList.remove('hidden');
+        secLocador.classList.add('hidden');
+      } else if (valor === 'locador') {
+        secContratista.classList.add('hidden');
+        secLocador.classList.remove('hidden');
+      } else {
+        secContratista.classList.add('hidden');
+        secLocador.classList.add('hidden');
+      }
+    }
+
+    function toggleDanoPropiedad(checkbox) {
+      const contenedor = document.getElementById('sec_dano_propiedad');
+      if (!contenedor) return;
+      const elementos = contenedor.querySelectorAll('input, select, textarea');
+
+      elementos.forEach(elem => {
+        if (checkbox.checked) {
+          elem.value = '';
+          elem.disabled = true;
+          elem.classList.add('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+          elem.classList.remove('bg-white');
+        } else {
+          elem.disabled = false;
+          elem.classList.remove('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+          elem.classList.add('bg-white');
+        }
+      });
+    }
+
+    function cargarCausasFrecuentes(index) {
+      const selectTipo = document.getElementById(`cinm_tipo_${index}`);
+      const selectCausa = document.getElementById(`cinm_causa_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      if (causasInmediatasData[valorSeleccionado]) {
+        causasInmediatasData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
+    function cargarCausasSubyacentes(index) {
+      const selectTipo = document.getElementById(`csub_tipo_${index}`);
+      const selectCausa = document.getElementById(`csub_causa_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      if (causasSubyacentesData[valorSeleccionado]) {
+        causasSubyacentesData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
     function cambiarTipoInforme() {
       const tipo = document.getElementById('tipo_informe').value;
       const secPreliminar = document.getElementById('seccion_preliminar');
@@ -1155,57 +1547,68 @@
       }
     }
 
-    function evaluarTipoPersona() {
-      const tipo = document.getElementById('tipoPersona').value;
-      const secContratista = document.getElementById('seccion-contratista');
-      const secLocador = document.getElementById('seccion-locador');
-
-      secContratista.classList.add('hidden');
-      secLocador.classList.add('hidden');
-
-      if (tipo === 'contratista') {
-        secContratista.classList.remove('hidden');
-      } else if (tipo === 'locador') {
-        secLocador.classList.remove('hidden');
-      }
-    }
-
     function evaluarOpcionesEvento() {
-      const tipo = document.getElementById('fin_tipo_evento').value;
-      const bloqueAccidente = document.getElementById('bloque_accidente');
-      if (tipo === 'ACCIDENTE') {
-        bloqueAccidente.classList.remove('hidden');
-      } else {
-        bloqueAccidente.classList.add('hidden');
-      }
-    }
+      const tipoEv = document.getElementById('fin_tipo_evento').value;
+      const bloqueAcc = document.getElementById('bloque_accidente');
+      if (!bloqueAcc) return;
 
-    function toggleDanoPropiedad(checkbox) {
-      const sec = document.getElementById('sec_dano_propiedad');
-      if (checkbox.checked) {
-        sec.classList.add('opacity-40', 'pointer-events-none');
+      const camposAccidente = bloqueAcc.querySelectorAll('input, select, textarea');
+
+      if (tipoEv === 'ACCIDENTE') {
+        bloqueAcc.classList.remove('hidden');
+        camposAccidente.forEach(campo => {
+          campo.disabled = false;
+        });
       } else {
-        sec.classList.remove('opacity-40', 'pointer-events-none');
+        bloqueAcc.classList.add('hidden');
+        camposAccidente.forEach(campo => {
+          campo.value = '';
+          campo.disabled = true;
+        });
       }
     }
 
     function actualizarFirmaPre() {
-      const val = document.getElementById('resp_nombre_pre').value;
-      document.getElementById('vista_firma_pre').textContent = val ? val.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
+      const nom = document.getElementById('resp_nombre_pre').value;
+      document.getElementById('vista_firma_pre').textContent = nom ? nom.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
     }
 
     function actualizarFirmaInv() {
-      const val = document.getElementById('inv_nombre').value;
-      document.getElementById('vista_firma_inv').textContent = val ? val.toUpperCase() : '[FIRMA EN NEGRITAS]';
+      const nom = document.getElementById('inv_nombre').value;
+      document.getElementById('vista_firma_inv').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
     }
 
     function actualizarFirmaTes() {
-      const val = document.getElementById('tes_nombre').value;
-      document.getElementById('vista_firma_tes').textContent = val ? val.toUpperCase() : '[FIRMA EN NEGRITAS]';
+      const nom = document.getElementById('tes_nombre').value;
+      document.getElementById('vista_firma_tes').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
+    }
+
+    function previsualizarImagenes(event) {
+      const container = document.getElementById('preview_fotos_pre');
+      container.innerHTML = '';
+      const files = event.target.files;
+
+      if (files && files.length > 0) {
+        container.classList.remove('hidden');
+        Array.from(files).forEach(file => {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const imgDiv = document.createElement('div');
+              imgDiv.className = 'relative rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white aspect-square';
+              imgDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+              container.appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      } else {
+        container.classList.add('hidden');
+      }
     }
 
     function agregarFilaTrabajador() {
-      const tbody = document.getElementById('body_trabajadores');
+      const body = document.getElementById('body_trabajadores');
       const tr = document.createElement('tr');
       tr.className = 'border-b bg-white hover:bg-slate-50 transition';
       tr.innerHTML = `
@@ -1256,119 +1659,39 @@
           </select>
         </td>
         <td class="p-1 text-center">
-          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 font-bold hover:text-red-800">✕</button>
+          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 hover:text-red-800 font-extrabold text-sm px-2 py-0.5 rounded hover:bg-red-50 transition" title="Eliminar fila">✕</button>
         </td>
       `;
-      tbody.appendChild(tr);
+      body.appendChild(tr);
     }
 
-    function cargarCausasFrecuentes(index) {
-      const tipo = document.getElementById(`cinm_tipo_${index}`).value;
-      const selectCausa = document.getElementById(`cinm_causa_${index}`);
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+    document.addEventListener('DOMContentLoaded', function() {
+      cambiarTipoInforme();
+      evaluarOpcionesEvento();
+      evaluarTipoPersona();
 
-      if (causasInmediatasData[tipo]) {
-        causasInmediatasData[tipo].forEach(causa => {
-          const opt = document.createElement('option');
-          opt.value = causa;
-          opt.textContent = causa;
-          selectCausa.appendChild(opt);
-        });
+      for (let i = 1; i <= 5; i++) {
+        cargarCausasFrecuentes(i);
+        cargarCausasSubyacentes(i);
       }
-    }
 
-    function cargarCausasSubyacentes(index) {
-      const tipo = document.getElementById(`csub_tipo_${index}`).value;
-      const selectCausa = document.getElementById(`csub_causa_${index}`);
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+      document.getElementById('ssomaForm').addEventListener('submit', function(e) {
+        const tipoPersona = document.getElementById('tipoPersona').value;
 
-      if (causasSubyacentesData[tipo]) {
-        causasSubyacentesData[tipo].forEach(causa => {
-          const opt = document.createElement('option');
-          opt.value = causa;
-          opt.textContent = causa;
-          selectCausa.appendChild(opt);
-        });
-      }
-    }
+        if (tipoPersona === 'locador') {
+          document.getElementById('ter_razon_social').value = document.getElementById('loc_nombre_razon').value;
+          document.getElementById('ter_ruc').value = document.getElementById('loc_dni_ruc').value;
+          document.getElementById('ter_domicilio').value = document.getElementById('loc_domicilio').value;
+          document.getElementById('ter_actividad').value = document.getElementById('loc_descripcion_servicio').value;
+        }
 
-    function previsualizarImagenes(event) {
-      const container = document.getElementById('preview_fotos_pre');
-      container.innerHTML = '';
-      const files = event.target.files;
-
-      if (files.length > 0) {
-        container.classList.remove('hidden');
-        Array.from(files).forEach(file => {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'w-full h-24 object-cover rounded-lg border shadow-sm';
-            container.appendChild(img);
-          };
-          reader.readAsDataURL(file);
-        });
-      } else {
-        container.classList.add('hidden');
-      }
-    }
-
-    // CÁLCULO DE COSTES SSOMA
-    function calcularCostosSSOMA() {
-      const getVal = (name) => parseFloat(document.querySelector(`input[name="${name}"]`)?.value) || 0;
-      const setVal = (name, val) => {
-        const el = document.querySelector(`input[name="${name}"]`);
-        if (el) el.value = val.toFixed(2);
-      };
-
-      // 1. Personal
-      const acc = getVal('costo_per_acc_salario') * getVal('costo_per_acc_horas');
-      const otr = getVal('costo_per_otr_salario') * getVal('costo_per_otr_horas');
-      const sup = getVal('costo_per_sup_salario') * getVal('costo_per_sup_horas');
-      const seg = getVal('costo_per_seg_salario') * getVal('costo_per_seg_horas');
-      const soc = getVal('costo_per_socorrer');
-      const des = getVal('costo_per_descanso');
-
-      const totalPersonal = acc + otr + sup + seg + soc + des;
-      setVal('costo_personal_total', totalPersonal);
-
-      // 2. Daños Materiales
-      const totalMateriales = 
-        getVal('costo_mat_edf_propio') +
-        getVal('costo_mat_edf_externo') +
-        getVal('costo_mat_edf_mat') +
-        getVal('costo_mat_maq_propio') +
-        getVal('costo_mat_maq_externo') +
-        getVal('costo_mat_maq_rep') +
-        getVal('costo_mat_maq_repo') +
-        getVal('costo_mat_primas') +
-        getVal('costo_mat_prod_term') +
-        getVal('costo_mat_parada_maq');
-      setVal('costo_materiales_total', totalMateriales);
-
-      // 3. Otros Costes
-      const totalOtros = 
-        getVal('costo_otr_auxilios') +
-        getVal('costo_otr_traslado') +
-        getVal('costo_otr_sanciones') +
-        getVal('costo_otr_legales') +
-        getVal('costo_otr_indemnizacion') +
-        getVal('costo_otr_terceros_ma') +
-        getVal('costo_otr_baja_rendimiento');
-      setVal('costo_otros_total', totalOtros);
-
-      // 4. Gastos Diversos y Resumen General
-      const gastosDiversos = getVal('costo_gastos_diversos');
-      const costoTotalAccidente = totalPersonal + totalMateriales + totalOtros + gastosDiversos;
-      setVal('costo_total_accidente', costoTotalAccidente);
-    }
-
-    // Cargar listas iniciales al iniciar
-    document.addEventListener('DOMContentLoaded', () => {
-      cargarCausasFrecuentes(1);
-      cargarCausasSubyacentes(1);
+        const btn = document.getElementById('btnGuardar');
+        btn.disabled = true;
+        btn.classList.add('opacity-60', 'cursor-not-allowed');
+        btn.innerHTML = '⏳ GENERANDO Y GUARDANDO REGISTRO...';
+      });
     });
   </script>
+
 </body>
 </html>
