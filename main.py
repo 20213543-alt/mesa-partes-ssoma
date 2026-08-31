@@ -110,9 +110,7 @@ def enviar_correo_con_pdf(
 ):
     api_key = os.getenv("RESEND_API_KEY")
     if not api_key:
-        print(
-            "⚠️ RESEND_API_KEY no está configurada en las variables de entorno."
-        )
+        print("⚠️ RESEND_API_KEY no está configurada en las variables de entorno.")
         return
 
     resend.api_key = api_key.strip()
@@ -174,7 +172,7 @@ def generar_pdf_preliminar(
             celdas.append(
                 f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
                 f'<img src="data:image/jpeg;base64,{b64}" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 3px;" />'
-                f"td>"
+                f"</td>"
             )
 
         filas_html = ""
@@ -391,12 +389,12 @@ def generar_pdf_100_porciento(
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
             .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8pt; padding: 3px; margin-top: 6px; margin-bottom: 3px; }}
             .sec-red {{ background-color: #742a2a; color: #ffffff; }}
-            .sec-green {{ background-color: #276749; color: #ffffff; }}
+            .sec-green {{ background-color: #1e3a8a; color: #ffffff; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: middle; word-wrap: break-word; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
-            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
-            .val {{ color: #1a202c; width: 28%; }}
+            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 70%; }}
+            .val {{ color: #1a202c; width: 30%; text-align: right; }}
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
         </style>
@@ -417,68 +415,68 @@ def generar_pdf_100_porciento(
         <div class="sec-header">DATOS DEL EMPLEADOR PRINCIPAL</div>
         <table class="grid-table">
             <tr>
-                <td class="lbl">Razón Social:</td>
-                <td class="val" colspan="3">{g(f, 'emp_razon_social', 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
-                <td class="lbl">RUC:</td>
-                <td class="val">{g(f, 'emp_ruc', '20100063337')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Razón Social:</td>
+                <td style="width: 28%;" colspan="3">{g(f, 'emp_razon_social', 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">RUC:</td>
+                <td style="width: 28%;">{g(f, 'emp_ruc', '20100063337')}</td>
             </tr>
             <tr>
-                <td class="lbl">Sede:</td>
-                <td class="val">{g(f, 'emp_sede')}</td>
-                <td class="lbl">Dirección:</td>
-                <td class="val" colspan="3">{g(f, 'emp_direccion')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Sede:</td>
+                <td>{g(f, 'emp_sede')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Dirección:</td>
+                <td colspan="3">{g(f, 'emp_direccion')}</td>
             </tr>
             <tr>
-                <td class="lbl">N° Trab. Centro Laboral:</td>
-                <td class="val">{g(f, 'emp_num_trabajadores', g(f, 'emp_num_trab'))}</td>
-                <td class="lbl">N° Afiliados SCTR:</td>
-                <td class="val">{g(f, 'emp_num_sctr')}</td>
-                <td class="lbl">Aseguradora SCTR:</td>
-                <td class="val">{g(f, 'emp_aseguradora')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
+                <td>{g(f, 'emp_num_trabajadores', g(f, 'emp_num_trab'))}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
+                <td>{g(f, 'emp_num_sctr')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora SCTR:</td>
+                <td>{g(f, 'emp_aseguradora')}</td>
             </tr>
         </table>
 
         <div class="sec-header">DATOS DEL EMPLEADOR DE TERCERIZACIÓN, CONTRATISTA U OTROS</div>
         <table class="grid-table">
             <tr>
-                <td class="lbl">Razón Social / Nombre:</td>
-                <td class="val" colspan="3">{g(f, 'ter_razon_social')}</td>
-                <td class="lbl">RUC:</td>
-                <td class="val">{g(f, 'ter_ruc')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Razón Social / Nombre:</td>
+                <td style="width: 28%;" colspan="3">{g(f, 'ter_razon_social')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">RUC:</td>
+                <td style="width: 28%;">{g(f, 'ter_ruc')}</td>
             </tr>
             <tr>
-                <td class="lbl">Domicilio:</td>
-                <td class="val" colspan="3">{g(f, 'ter_domicilio')}</td>
-                <td class="lbl">Actividad Económica:</td>
-                <td class="val">{g(f, 'ter_actividad')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Domicilio:</td>
+                <td colspan="3">{g(f, 'ter_domicilio')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Actividad Económica:</td>
+                <td>{g(f, 'ter_actividad')}</td>
             </tr>
             <tr>
-                <td class="lbl">N° Trab. Centro Laboral:</td>
-                <td class="val">{g(f, 'ter_num_trabajadores', g(f, 'ter_num_trab'))}</td>
-                <td class="lbl">N° Afiliados SCTR:</td>
-                <td class="val">{g(f, 'ter_num_sctr')}</td>
-                <td class="lbl">Aseguradora:</td>
-                <td class="val">{g(f, 'ter_aseguradora')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
+                <td>{g(f, 'ter_num_trabajadores', g(f, 'ter_num_trab'))}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
+                <td>{g(f, 'ter_num_sctr')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora:</td>
+                <td>{g(f, 'ter_aseguradora')}</td>
             </tr>
         </table>
 
         <div class="sec-header">1) OCURRENCIA DEL EVENTO Y 2) TIPO Y CLASIFICACIÓN</div>
         <table class="grid-table">
             <tr>
-                <td class="lbl">Fecha Evento:</td>
-                <td class="val">{g(f, 'fin_fecha_evento')}</td>
-                <td class="lbl">Hora Evento:</td>
-                <td class="val">{g(f, 'fin_hora_evento')}</td>
-                <td class="lbl">Lugar Exacto:</td>
-                <td class="val">{g(f, 'fin_lugar_exacto')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Fecha Evento:</td>
+                <td style="width: 28%;">{g(f, 'fin_fecha_evento')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Hora Evento:</td>
+                <td style="width: 28%;">{g(f, 'fin_hora_evento')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Lugar Exacto:</td>
+                <td style="width: 28%;">{g(f, 'fin_lugar_exacto')}</td>
             </tr>
             <tr>
-                <td class="lbl">Tipo de Evento:</td>
-                <td class="val">{g(f, 'fin_tipo_evento')}</td>
-                <td class="lbl">Clasificación Evento:</td>
-                <td class="val">{g(f, 'fin_clasificacion')}</td>
-                <td class="lbl">Solo Incidente:</td>
-                <td class="val">{g(f, 'fin_incidente_peligro', g(f, 'fin_solo_incidente'))}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Tipo de Evento:</td>
+                <td>{g(f, 'fin_tipo_evento')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Clasificación Evento:</td>
+                <td>{g(f, 'fin_clasificacion')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Solo Incidente:</td>
+                <td>{g(f, 'fin_incidente_peligro', g(f, 'fin_solo_incidente'))}</td>
             </tr>
         </table>
 
@@ -507,18 +505,18 @@ def generar_pdf_100_porciento(
         <div class="sec-header sec-red">ACCIDENTE (EVALUACIÓN DE GRAVEDAD)</div>
         <table class="grid-table">
             <tr>
-                <td class="lbl">Gravedad Accidente:</td>
-                <td class="val">{g(f, 'acc_gravedad', g(f, 'fin_gravedad_evento'))}</td>
-                <td class="lbl">Grado Incapacitante:</td>
-                <td class="val">{g(f, 'acc_grado_incapacitante')}</td>
-                <td class="lbl">Días Descanso Médico:</td>
-                <td class="val">{g(f, 'acc_dias_descanso')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Gravedad Accidente:</td>
+                <td style="width: 28%;">{g(f, 'acc_gravedad', g(f, 'fin_gravedad_evento'))}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Grado Incapacitante:</td>
+                <td style="width: 28%;">{g(f, 'acc_grado_incapacitante')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Días Descanso Médico:</td>
+                <td style="width: 28%;">{g(f, 'acc_dias_descanso')}</td>
             </tr>
             <tr>
-                <td class="lbl">Días Cargados:</td>
-                <td class="val">{g(f, 'acc_dias_cargados')}</td>
-                <td class="lbl">N° Trab. Afectados:</td>
-                <td class="val" colspan="3">{g(f, 'acc_num_afectados')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Días Cargados:</td>
+                <td>{g(f, 'acc_dias_cargados')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Afectados:</td>
+                <td colspan="3">{g(f, 'acc_num_afectados')}</td>
             </tr>
         </table>
 
@@ -530,66 +528,110 @@ def generar_pdf_100_porciento(
         <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
         <table class="grid-table">
             <tr>
-                <td class="lbl">Forma Accidente/Incidente:</td>
-                <td class="val">{g(f, 'les_forma_evento', g(f, 'les_forma'))}</td>
-                <td class="lbl">Tipo de Lesión:</td>
-                <td class="val" colspan="3">{g(f, 'les_tipo_lesion', g(f, 'les_tipo'))}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Forma Accidente/Incidente:</td>
+                <td style="width: 28%;">{g(f, 'les_forma_evento', g(f, 'les_forma'))}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Tipo de Lesión:</td>
+                <td style="width: 28%;" colspan="3">{g(f, 'les_tipo_lesion', g(f, 'les_tipo'))}</td>
             </tr>
             <tr>
-                <td class="lbl">Agente Causante:</td>
-                <td class="val">{g(f, 'les_agente_causante', g(f, 'les_agente'))}</td>
-                <td class="lbl">Parte Cuerpo Afectada:</td>
-                <td class="val" colspan="3">{g(f, 'les_parte_cuerpo')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Agente Causante:</td>
+                <td>{g(f, 'les_agente_causante', g(f, 'les_agente'))}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Parte Cuerpo Afectada:</td>
+                <td colspan="3">{g(f, 'les_parte_cuerpo')}</td>
             </tr>
             <tr>
-                <td class="lbl">Hospital / Clínica / Tópico:</td>
-                <td class="val" colspan="5">{g(f, 'les_hospital_atencion', g(f, 'les_hospital'))}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Hospital / Clínica / Tópico:</td>
+                <td colspan="5">{g(f, 'les_hospital_atencion', g(f, 'les_hospital'))}</td>
             </tr>
         </table>
 
         <div class="sec-header">DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE</div>
         <table class="grid-table">
             <tr>
-                <td class="lbl">Daño Material:</td>
-                <td class="val">{g(f, 'dan_material')}</td>
-                <td class="lbl">Agente Causante del Daño:</td>
-                <td class="val">{g(f, 'dan_agente_causante', g(f, 'dan_agente'))}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Daño Material:</td>
+                <td style="width: 28%;">{g(f, 'dan_material')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Agente Causante del Daño:</td>
+                <td style="width: 28%;">{g(f, 'dan_agente_causante', g(f, 'dan_agente'))}</td>
             </tr>
         </table>
         <div class="text-box">
             <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion_evento', g(f, 'dan_descripcion'))}
         </div>
 
-        <!-- SECCIÓN DE IMPACTO ECONÓMICO Y COSTOS -->
-        <div class="sec-header sec-green">COSTOS ESTIMADOS DEL EVENTO (IMPACTO ECONÓMICO)</div>
+        <!-- SECCIÓN DE VALORACIÓN DE COSTES DEL ACCIDENTE COMBINADA -->
+        <div class="sec-header sec-green">VALORACIÓN DE LOS COSTES DEL ACCIDENTE</div>
         <table class="grid-table">
-            <tr>
-                <td class="lbl">Atención Médica y Tratamiento:</td>
-                <td class="val">S/ {g(f, 'costo_medico', '0.00')}</td>
-                <td class="lbl">Daños Materiales / Equipos:</td>
-                <td class="val">S/ {g(f, 'costo_dano_material', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl">Días / Horas Hombre Perdidas:</td>
-                <td class="val">S/ {g(f, 'costo_dias_perdidos', '0.00')}</td>
-                <td class="lbl">Costos Indirectos:</td>
-                <td class="val">S/ {g(f, 'costo_indirecto', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl" style="background-color: #edf2f7;"><strong>COSTO TOTAL ESTIMADO:</strong></td>
-                <td class="val" colspan="3" style="font-size: 7.5pt; font-weight: bold; color: #276749;">
-                    S/ {g(f, 'costo_total', '0.00')}
-                </td>
-            </tr>
+            <thead>
+                <tr>
+                    <th style="width: 70%;">Categoría de Coste</th>
+                    <th style="width: 30%; text-align: right;">Monto Estimado (S/.)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="lbl">1. Costo del Personal Total</td>
+                    <td class="val">S/ {g(f, 'costo_personal_total', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="lbl">2. Costo de Daños Materiales Total</td>
+                    <td class="val">S/ {g(f, 'costo_materiales_total', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Edificios e Instalaciones</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_edificios', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Máquinas, Equipos y Herramientas</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_maquinaria', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Materias Primas / Productos</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_mat_primas', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Tiempo Perdido Parada Máquina</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_parada', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="lbl">3. Sub-Total Otros Costes</td>
+                    <td class="val">S/ {g(f, 'subtotal_otros', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Primeros Auxilios / Médicos</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_primeros_auxilios', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Sanciones y Gastos Legales</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_sanciones', '0.00')} / S/ {g(f, 'costo_legales', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Resp. Civil y Medio Ambiente</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_resp_civil', '0.00')} / S/ {g(f, 'costo_medio_ambiente', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Baja de Rendimiento</td>
+                    <td style="text-align: right;">S/ {g(f, 'costo_baja_rendimiento', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="lbl">4. Gastos Diversos (2% Investigaciones)</td>
+                    <td class="val">S/ {g(f, 'gastos_diversos_2pct', '0.00')}</td>
+                </tr>
+                <tr style="background-color: #f0f0f0;">
+                    <td style="font-weight: bold; color: #1a365d; padding: 5px;">COSTO TOTAL DEL ACCIDENTE</td>
+                    <td style="font-weight: bold; color: #1a365d; text-align: right; padding: 5px;">
+                        S/ {g(f, 'costo_total_accidente', g(f, 'costo_total', '0.00'))}
+                    </td>
+                </tr>
+            </tbody>
         </table>
 
         <div class="sec-header">ANÁLISIS DEL ACCIDENTE</div>
         <table class="grid-table">
-            <tr><td class="lbl">¿Qué sucedió?:</td><td class="val" colspan="5">{g(f, 'ana_que_sucedio')}</td></tr>
-            <tr><td class="lbl">¿Por qué? / Tipo Contacto:</td><td class="val" colspan="5">{g(f, 'ana_tipo_contacto')}</td></tr>
-            <tr><td class="lbl">¿Por qué? / Causa Inmediata:</td><td class="val" colspan="5">{g(f, 'ana_causa_inmediata')}</td></tr>
-            <tr><td class="lbl">¿Por qué? / Causa Básica:</td><td class="val" colspan="5">{g(f, 'ana_causa_basica')}</td></tr>
-            <tr><td class="lbl">¿Por qué? / Falta Control:</td><td class="val" colspan="5">{g(f, 'ana_falta_control')}</td></tr>
+            <tr><td style="width: 22%; font-weight: bold; background-color: #f7fafc;">¿Qué sucedió?:</td><td colspan="5">{g(f, 'ana_que_sucedio')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Tipo Contacto:</td><td colspan="5">{g(f, 'ana_tipo_contacto')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Causa Inmediata:</td><td colspan="5">{g(f, 'ana_causa_inmediata')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Causa Básica:</td><td colspan="5">{g(f, 'ana_causa_basica')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Falta Control:</td><td colspan="5">{g(f, 'ana_falta_control')}</td></tr>
         </table>
 
         <div class="sec-header">CAUSAS INMEDIATAS O DIRECTAS</div>
@@ -644,24 +686,24 @@ def generar_pdf_100_porciento(
         <div class="sec-header">RESPONSABLE DE REGISTRO, INVESTIGACIÓN Y TESTIGOS</div>
         <table class="grid-table">
             <tr>
-                <td class="lbl">Nombre Resp./Investigador:</td>
-                <td class="val">{g(f, 'inv_nombre')}</td>
-                <td class="lbl">Cargo:</td>
-                <td class="val">{g(f, 'inv_cargo')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Nombre Resp./Investigador:</td>
+                <td style="width: 28%;">{g(f, 'inv_nombre')}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Cargo:</td>
+                <td style="width: 28%;">{g(f, 'inv_cargo')}</td>
             </tr>
             <tr>
-                <td class="lbl">Firma Investigador:</td>
-                <td class="val" colspan="3">{firma_inv_text}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Firma Investigador:</td>
+                <td colspan="3">{firma_inv_text}</td>
             </tr>
             <tr>
-                <td class="lbl">Nombre Completo Testigo:</td>
-                <td class="val">{g(f, 'tes_nombre')}</td>
-                <td class="lbl">Cargo / Vínculo:</td>
-                <td class="val">{g(f, 'tes_cargo')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Nombre Completo Testigo:</td>
+                <td>{g(f, 'tes_nombre')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Cargo / Vínculo:</td>
+                <td>{g(f, 'tes_cargo')}</td>
             </tr>
             <tr>
-                <td class="lbl">Firma del Testigo:</td>
-                <td class="val" colspan="3">{g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Firma del Testigo:</td>
+                <td colspan="3">{g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
             </tr>
         </table>
 
@@ -1010,16 +1052,14 @@ async def enviar_reporte(
                 "trab_area_interna[]": cadena_area_interna,
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
-                # Inclusión de Costos en el Webhook
-                "costo_medico": form_data.get("costo_medico", "0.00"),
-                "costo_dano_material": form_data.get(
-                    "costo_dano_material", "0.00"
+                # Inclusión de Costos en el Webhook de Google Sheets
+                "costo_personal_total": form_data.get("costo_personal_total", "0.00"),
+                "costo_materiales_total": form_data.get("costo_materiales_total", "0.00"),
+                "subtotal_otros": form_data.get("subtotal_otros", "0.00"),
+                "gastos_diversos_2pct": form_data.get("gastos_diversos_2pct", "0.00"),
+                "costo_total_accidente": form_data.get(
+                    "costo_total_accidente", form_data.get("costo_total", "0.00")
                 ),
-                "costo_dias_perdidos": form_data.get(
-                    "costo_dias_perdidos", "0.00"
-                ),
-                "costo_indirecto": form_data.get("costo_indirecto", "0.00"),
-                "costo_total": form_data.get("costo_total", "0.00"),
             }
 
             try:
