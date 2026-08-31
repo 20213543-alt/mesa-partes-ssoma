@@ -33,9 +33,419 @@ app = FastAPI()
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
 
-# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
+# Autogenerar el script frontend completo (Funciones JS + Bloqueo dinámico)
 SCRIPT_JS_PATH = os.path.join("static", "script.js")
-JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
+JS_CONTENT = """const causasInmediatasData = {
+  "Acto Subestandar": [
+    "Operar equipo sin autorización",
+    "Omisión de informar/ advertir",
+    "Omisión de Sujetar/Bloquear/Contener",
+    "Operar Equipo /Sistema a Velocidad Inadecuada",
+    "Desactivar o Anular Dispositivos Críticos de Seguridad",
+    "Usar Herramientas /Equipos/ Máquina /Dispositivo Defectuoso",
+    "Operación inadecuada de Herramientas / equipo / Maquina /Dispositivo /Instalación de Proceso",
+    "Mantenimiento Inadecuado de Equipo / Maquina / Instalación de proceso en funcionamiento",
+    "Uso de Material Incorrecto / Inadecuado",
+    "No usar correctamente el equipo de protección personal (EPP).",
+    "Operación incorrecta de carga",
+    "Operación incorrecta de colocación",
+    "Operación incorrecta de izado",
+    "Posición inadecuada para el trabajo o la tarea.",
+    "Comportamiento incorrecto/ inadecuado.",
+    "Trabajar bajo la influencia de medicación/ alcohol/ drogas.",
+    "No seguir procedimiento/ instrucciones.",
+    "Falla al identificar peligro",
+    "Acto sub estándar por parte de terceros (que no está bajo control propio).",
+    "No identificar requisitos de clientes/ partes interesadas",
+    "No cumplir requisitos de clientes/ partes interesadas",
+    "Disturbios civiles (motines, revueltas, guerra)",
+    "Actividad Delictivas"
+  ],
+  "Condición Subestandar": [
+    "Condiciones inadecuadas de pisos/superficie",
+    "Herramienta/ equipo defectuoso",
+    "Herramientas/ equipo incorrecto/ Inadecuado.",
+    "Integridad inadecuada de herramientas/ equipo de proceso",
+    "Falla en detectar/ medir",
+    "Medida /medida de señal inadecuada",
+    "Material incorrecto",
+    "Composición incorrecta de material / gas/ líquido",
+    "Protección/ barrera inadecuada",
+    "Equipo de Protección Personal (EPP) inadecuado/ incorrecto",
+    "Espacio para actuar limited/ restringido.",
+    "Sistema de advertencia inadecuado",
+    "Presencia de atmosfera explosiva /Inflamable",
+    "Presencia no autorizada de materiales peligrosos",
+    "Orden y limpieza deficiente",
+    "Nivel de ruido por encima del umbral",
+    "Radiación por encima del umbral",
+    "Iluminación excesiva / deficiente",
+    "Vibración por encima del umbral.",
+    "Exposición a altas temperaturas",
+    "Exposición a bajas temperaturas",
+    "Presión excede los límites",
+    "Ventilación inadecuada",
+    "Información inadecuada",
+    "Exposición a condiciones climáticas adversas"
+  ]
+};
+
+const causasSubyacentesData = {
+  "Factores Personales": [
+    "Capacidad física / fisiológica inadecuada",
+    "Capacidad mental / psicológica inadecuada",
+    "Tensión física o fisiológica",
+    "Tensión mental o psicológica",
+    "Falta de conocimiento",
+    "Falta de habilidad",
+    "Motivación inadecuada"
+  ],
+  "Factores Laborales / Trabajo": [
+    "Liderazgo y/o supervisión inadecuada",
+    "Ingeniería inadecuada",
+    "Adquisiciones inadecuadas",
+    "Mantenimiento inadecuado",
+    "Herramientas y equipos inadecuados",
+    "Estándares de trabajo inadecuados",
+    "Uso y desgaste excesivo",
+    "Abuso o mal uso"
+  ]
+};
+
+function calcularCostesPersonal() {
+  const salAcc = parseFloat(document.getElementById('salario_accidentado')?.value) || 0;
+  const hrsAcc = parseFloat(document.getElementById('coste_hrs_accidentado')?.value) || 0;
+
+  const salOtros = parseFloat(document.getElementById('salario_otros')?.value) || 0;
+  const hrsOtros = parseFloat(document.getElementById('coste_hrs_otros_trabajadores')?.value) || 0;
+
+  const salSup = parseFloat(document.getElementById('salario_supervisor')?.value) || 0;
+  const hrsSup = parseFloat(document.getElementById('coste_hrs_supervisor')?.value) || 0;
+
+  const salSsoma = parseFloat(document.getElementById('salario_ssoma')?.value) || 0;
+  const hrsSsoma = parseFloat(document.getElementById('coste_hrs_ssoma')?.value) || 0;
+
+  const socorro = parseFloat(document.getElementById('coste_socorro_transporte')?.value) || 0;
+  const descansoMed = parseFloat(document.getElementById('coste_dias_descanso_medico')?.value) || 0;
+
+  const subtotalAcc = (salAcc / 240) * hrsAcc;
+  const subtotalOtros = (salOtros / 240) * hrsOtros;
+  const subtotalSup = (salSup / 240) * hrsSup;
+  const subtotalSsoma = (salSsoma / 240) * hrsSsoma;
+
+  const totalCoste = subtotalAcc + subtotalOtros + subtotalSup + subtotalSsoma + socorro + descansoMed;
+
+  const elemTotal = document.getElementById('coste_total_personal');
+  if (elemTotal) {
+    elemTotal.value = totalCoste.toFixed(2);
+  }
+
+  calcularMasterTotales();
+}
+
+function calcularCostesDanos() {
+  const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
+  const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
+  const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
+  const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
+
+  const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
+  const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
+  const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
+  const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
+  const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
+
+  const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
+  const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
+
+  const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
+  const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
+
+  const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
+  const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
+
+  const subtotal21 = (edifPropHrs * edifPropCosto) + edifExtCosto + edifMatCosto;
+  const subtotal22 = (maqPropHrs * maqPropCosto) + maqExtCosto + maqRepCosto + maqRepoCosto;
+  const subtotal23 = matPrimCant * matPrimCosto;
+  const subtotal24 = prodTermCant * prodTermCosto;
+  const subtotal25 = paradaHrs * paradaCostoHora;
+
+  const totalDanos = subtotal21 + subtotal22 + subtotal23 + subtotal24 + subtotal25;
+
+  const elemTotal = document.getElementById('coste_total_danos_materiales');
+  if (elemTotal) {
+    elemTotal.value = totalDanos.toFixed(2);
+  }
+
+  calcularMasterTotales();
+}
+
+function calcularOtrosCostes() {
+  const matAux = parseFloat(document.getElementById('oc_mat_auxilios')?.value) || 0;
+  const traslado = parseFloat(document.getElementById('oc_traslado')?.value) || 0;
+  const sanciones = parseFloat(document.getElementById('oc_sanciones_contrato')?.value) || 0;
+  const multas = parseFloat(document.getElementById('oc_multas_ley')?.value) || 0;
+  const respCivil = parseFloat(document.getElementById('oc_resp_civil')?.value) || 0;
+  const danosTer = parseFloat(document.getElementById('oc_danos_terceros_ma')?.value) || 0;
+
+  const rHrs1 = parseFloat(document.getElementById('oc_rend_hrs_1')?.value) || 0;
+  const rCos1 = parseFloat(document.getElementById('oc_rend_costo_1')?.value) || 0;
+
+  const rHrs2 = parseFloat(document.getElementById('oc_rend_hrs_2')?.value) || 0;
+  const rCos2 = parseFloat(document.getElementById('oc_rend_costo_2')?.value) || 0;
+
+  const rHrs3 = parseFloat(document.getElementById('oc_rend_hrs_3')?.value) || 0;
+  const rCos3 = parseFloat(document.getElementById('oc_rend_costo_3')?.value) || 0;
+
+  const subRend = ((rHrs1 * rCos1) + (rHrs2 * rCos2) + (rHrs3 * rCos3)) * 5 * 0.30;
+
+  const subtotalOtros = matAux + traslado + sanciones + multas + respCivil + danosTer + subRend;
+
+  const elemSubOtros = document.getElementById('coste_subtotal_otros');
+  if (elemSubOtros) {
+    elemSubOtros.value = subtotalOtros.toFixed(2);
+  }
+
+  calcularMasterTotales();
+}
+
+function calcularMasterTotales() {
+  const totalPersonal = parseFloat(document.getElementById('coste_total_personal')?.value) || 0;
+  const totalDanos = parseFloat(document.getElementById('coste_total_danos_materiales')?.value) || 0;
+  const subtotalOtros = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
+
+  const totalAnterior = totalPersonal + totalDanos + subtotalOtros;
+  const gastosDiversos = totalAnterior * 0.02;
+
+  const elemGastosDiv = document.getElementById('coste_gastos_diversos');
+  if (elemGastosDiv) {
+    elemGastosDiv.value = gastosDiversos.toFixed(2);
+  }
+
+  const costoTotalAccidente = totalAnterior + gastosDiversos;
+  const elemTotalAcc = document.getElementById('coste_total_accidente');
+  if (elemTotalAcc) {
+    elemTotalAcc.value = costoTotalAccidente.toFixed(2);
+  }
+
+  if (document.getElementById('resumen_personal')) document.getElementById('resumen_personal').textContent = totalPersonal.toFixed(2);
+  if (document.getElementById('resumen_materiales')) document.getElementById('resumen_materiales').textContent = totalDanos.toFixed(2);
+  if (document.getElementById('resumen_otros')) document.getElementById('resumen_otros').textContent = subtotalOtros.toFixed(2);
+  if (document.getElementById('resumen_gastos')) document.getElementById('resumen_gastos').textContent = gastosDiversos.toFixed(2);
+  if (document.getElementById('resumen_total')) document.getElementById('resumen_total').textContent = costoTotalAccidente.toFixed(2);
+}
+
+function evaluarTipoPersona() {
+  const valor = document.getElementById('tipoPersona')?.value;
+  const secContratista = document.getElementById('seccion-contratista');
+  const secLocador = document.getElementById('seccion-locador');
+
+  if (valor === 'contratista') {
+    secContratista?.classList.remove('hidden');
+    secLocador?.classList.add('hidden');
+  } else if (valor === 'locador') {
+    secContratista?.classList.add('hidden');
+    secLocador?.classList.remove('hidden');
+  } else {
+    secContratista?.classList.add('hidden');
+    secLocador?.classList.add('hidden');
+  }
+}
+
+function toggleDanoPropiedad(checkbox) {
+  const contenedor = document.getElementById('sec_dano_propiedad');
+  if (!contenedor) return;
+  const elementos = contenedor.querySelectorAll('input, select, textarea');
+
+  elementos.forEach(elem => {
+    if (checkbox.checked) {
+      elem.value = '';
+      elem.disabled = true;
+      elem.classList.add('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+      elem.classList.remove('bg-white');
+    } else {
+      elem.disabled = false;
+      elem.classList.remove('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+      elem.classList.add('bg-white');
+    }
+  });
+}
+
+function cargarCausasFrecuentes(index) {
+  const selectTipo = document.getElementById(`cinm_tipo_${index}`);
+  const selectCausa = document.getElementById(`cinm_causa_${index}`);
+  if (!selectTipo || !selectCausa) return;
+
+  const valorSeleccionado = selectTipo.value;
+  selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+  if (causasInmediatasData[valorSeleccionado]) {
+    causasInmediatasData[valorSeleccionado].forEach(causa => {
+      const option = document.createElement('option');
+      option.value = causa;
+      option.textContent = causa;
+      selectCausa.appendChild(option);
+    });
+  }
+}
+
+function cargarCausasSubyacentes(index) {
+  const selectTipo = document.getElementById(`csub_tipo_${index}`);
+  const selectCausa = document.getElementById(`csub_causa_${index}`);
+  if (!selectTipo || !selectCausa) return;
+
+  const valorSeleccionado = selectTipo.value;
+  selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+  if (causasSubyacentesData[valorSeleccionado]) {
+    causasSubyacentesData[valorSeleccionado].forEach(causa => {
+      const option = document.createElement('option');
+      option.value = causa;
+      option.textContent = causa;
+      selectCausa.appendChild(option);
+    });
+  }
+}
+
+function cambiarTipoInforme() {
+  const tipo = document.getElementById('tipo_informe')?.value;
+  const secPreliminar = document.getElementById('seccion_preliminar');
+  const secFinal = document.getElementById('seccion_final');
+
+  if (tipo === 'PRELIMINAR') {
+    secPreliminar?.classList.remove('hidden');
+    secFinal?.classList.add('hidden');
+  } else {
+    secPreliminar?.classList.add('hidden');
+    secFinal?.classList.remove('hidden');
+  }
+}
+
+function evaluarOpcionesEvento() {
+  const tipoEv = document.getElementById('fin_tipo_evento')?.value;
+  const bloqueAcc = document.getElementById('bloque_accidente');
+  if (!bloqueAcc) return;
+
+  const camposAccidente = bloqueAcc.querySelectorAll('input, select, textarea');
+
+  if (tipoEv === 'ACCIDENTE') {
+    bloqueAcc.classList.remove('hidden');
+    camposAccidente.forEach(campo => {
+      campo.disabled = false;
+    });
+  } else {
+    bloqueAcc.classList.add('hidden');
+    camposAccidente.forEach(campo => {
+      campo.value = '';
+      campo.disabled = true;
+    });
+  }
+}
+
+function actualizarFirmaPre() {
+  const nom = document.getElementById('resp_nombre_pre')?.value;
+  const el = document.getElementById('vista_firma_pre');
+  if (el) el.textContent = nom ? nom.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
+}
+
+function actualizarFirmaInv() {
+  const nom = document.getElementById('inv_nombre')?.value;
+  const el = document.getElementById('vista_firma_inv');
+  if (el) el.textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
+}
+
+function actualizarFirmaTes() {
+  const nom = document.getElementById('tes_nombre')?.value;
+  const el = document.getElementById('vista_firma_tes');
+  if (el) el.textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
+}
+
+function previsualizarImagenes(event) {
+  const container = document.getElementById('preview_fotos_pre');
+  if (!container) return;
+  container.innerHTML = '';
+  const files = event.target.files;
+
+  if (files && files.length > 0) {
+    container.classList.remove('hidden');
+    Array.from(files).forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const imgDiv = document.createElement('div');
+          imgDiv.className = 'relative rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white aspect-square';
+          imgDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+          container.appendChild(imgDiv);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+function agregarFilaTrabajador() {
+  const body = document.getElementById('body_trabajadores');
+  if (!body) return;
+
+  const tr = document.createElement('tr');
+  tr.className = 'border-b bg-white hover:bg-slate-50 transition';
+  tr.innerHTML = `
+    <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+    <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+    <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
+    <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
+    <td class="p-1">
+      <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
+        <option value="">-- Seleccionar Área --</option>
+        <option value="Gerencia de logística">Gerencia de logística</option>
+        <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
+        <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
+        <option value="Gerencia de tesorería">Gerencia de tesorería</option>
+        <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
+        <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
+        <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
+        <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
+        <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
+        <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
+        <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
+        <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
+        <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
+        <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
+      </select>
+    </td>
+    <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
+    <td class="p-1">
+      <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
+        <option value="M">M</option>
+        <option value="F">F</option>
+      </select>
+    </td>
+    <td class="p-1"><input type="text" name="trab_dni[]" class="w-full border rounded p-1"></td>
+    <td class="p-1"><input type="number" name="trab_edad[]" class="w-full border rounded p-1"></td>
+    <td class="p-1">
+      <select name="trab_turno[]" class="w-full border rounded p-1 bg-white">
+        <option value="D">D</option>
+        <option value="T">T</option>
+        <option value="N">N</option>
+      </select>
+    </td>
+    <td class="p-1">
+      <select name="trab_personal[]" class="w-full border rounded p-1 bg-white">
+        <option value="Propio">Propio</option>
+        <option value="Tercero">Tercero</option>
+        <option value="Contratista">Contratista</option>
+      </select>
+    </td>
+    <td class="p-1 text-center">
+      <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 font-bold hover:text-red-800">✕</button>
+    </td>
+  `;
+  body.appendChild(tr);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
     const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
     const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
 
@@ -145,10 +555,6 @@ def enviar_correo_con_pdf(
 
 
 def g(form_dict, key_or_keys, default="-"):
-    """
-    Busca de manera flexible claves simples o listas de alias dentro de form_dict.
-    Acepta un string o una lista/tupla de nombres de campos posibles.
-    """
     if isinstance(key_or_keys, (list, tuple)):
         keys = key_or_keys
     else:
@@ -409,7 +815,6 @@ def generar_pdf_100_porciento(
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
-            /* ESTILOS ESPECÍFICOS COSTOS */
             .cost-title {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; font-size: 7pt; padding: 4px; }}
             .cost-val {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; text-align: right; font-size: 7pt; padding: 4px; }}
             .cost-sub-item {{ padding-left: 15px; color: #4a5568; font-size: 6.5pt; }}
@@ -577,7 +982,6 @@ def generar_pdf_100_porciento(
             <b>Descripción del Evento (Daños / M.A.):</b> {g(f, ['dan_descripcion_evento', 'dan_descripcion'])}
         </div>
 
-        <!-- SECCIÓN DE VALORACIÓN DE COSTES COMPLETA -->
         <div class="sec-header sec-green">VALORACIÓN DE LOS COSTES DEL ACCIDENTE</div>
         <table class="grid-table">
             <thead>
@@ -587,13 +991,10 @@ def generar_pdf_100_porciento(
                 </tr>
             </thead>
             <tbody>
-                <!-- CATEGORÍA 1 -->
                 <tr>
                     <td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td>
                     <td class="cost-val">S/ {g(f, ['costo_personal_total', 'costo_personal', 'cos_personal', 'costo_mano_obra', 'c_personal'], '0.00')}</td>
                 </tr>
-
-                <!-- CATEGORÍA 2 -->
                 <tr>
                     <td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td>
                     <td class="cost-val">S/ {g(f, ['costo_materiales_total', 'costo_materiales', 'cos_materiales', 'subtotal_materiales'], '0.00')}</td>
@@ -614,8 +1015,6 @@ def generar_pdf_100_porciento(
                     <td class="cost-sub-item">&bull; Tiempo Perdido Parada Máquina</td>
                     <td class="cost-sub-val">S/ {g(f, ['costo_parada', 'costo_parada_maquina', 'costo_tiempo_perdido', 'cos_parada'], '0.00')}</td>
                 </tr>
-
-                <!-- CATEGORÍA 3 -->
                 <tr>
                     <td class="cost-title">3. SUB-TOTAL OTROS COSTES</td>
                     <td class="cost-val">S/ {g(f, ['subtotal_otros', 'costo_otros_total', 'costo_otros', 'subtotal_otros_costes'], '0.00')}</td>
@@ -636,14 +1035,10 @@ def generar_pdf_100_porciento(
                     <td class="cost-sub-item">&bull; Baja de Rendimiento</td>
                     <td class="cost-sub-val">S/ {g(f, ['costo_baja_rendimiento', 'costo_rendimiento', 'cos_baja_rendimiento'], '0.00')}</td>
                 </tr>
-
-                <!-- CATEGORÍA 4 -->
                 <tr>
                     <td class="cost-title">4. GASTOS DIVERSOS (2% ESTIMADO INVESTIGACIONES)</td>
                     <td class="cost-val">S/ {g(f, ['gastos_diversos_2pct', 'gastos_diversos', 'costo_gastos_diversos', 'costo_diversos', 'gastos_2pct'], '0.00')}</td>
                 </tr>
-
-                <!-- TOTAL FINAL -->
                 <tr>
                     <td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td>
                     <td class="cost-total-val">S/ {g(f, ['costo_total_accidente', 'costo_total', 'total_costo', 'costo_final'], '0.00')}</td>
@@ -773,7 +1168,6 @@ async def enviar_reporte(
             val = form_data.getlist(key)
             form_dict[key] = val[0] if len(val) == 1 else val
 
-        # Control de seguridad backend para Incidentes
         tipo_evt = str(form_dict.get("fin_tipo_evento", "")).lower()
         clasif_evt = str(form_dict.get("fin_clasificacion", "")).lower()
 
@@ -827,7 +1221,6 @@ async def enviar_reporte(
                             f"Error procesando la imagen alternativa: {err_img}"
                         )
 
-        # Extracción de trabajadores
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist(
             "trab_paterno"
@@ -910,7 +1303,6 @@ async def enviar_reporte(
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
-        # 1. Causas Inmediatas
         causas_inmediatas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"cinm_tipo_{i}", "")).strip()
@@ -943,7 +1335,6 @@ async def enviar_reporte(
 
         form_dict["causas_inmediatas_list"] = causas_inmediatas_list
 
-        # 2. Causas Básicas
         causas_basicas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"csub_tipo_{i}", "")).strip()
@@ -988,7 +1379,6 @@ async def enviar_reporte(
 
         form_dict["causas_basicas_list"] = causas_basicas_list
 
-        # 3. Medidas Correctivas
         medidas_correctivas_list = []
         for i in range(1, 10):
             t = str(form_data.get(f"acc_tipo_{i}", "")).strip()
@@ -1045,7 +1435,6 @@ async def enviar_reporte(
 
         form_dict["medidas_correctivas_list"] = medidas_correctivas_list
 
-        # Generación de Código de Comprobante
         if es_preliminar:
             codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
         else:
@@ -1078,7 +1467,6 @@ async def enviar_reporte(
                 "trab_area_interna[]": cadena_area_interna,
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
-                # Envió robusto de Costos a Google Sheets con búsqueda flexible
                 "costo_personal_total": g(form_dict, ["costo_personal_total", "costo_personal", "cos_personal", "costo_mano_obra"], "0.00"),
                 "costo_materiales_total": g(form_dict, ["costo_materiales_total", "costo_materiales", "cos_materiales"], "0.00"),
                 "costo_edificios": g(form_dict, ["costo_edificios", "costo_edificio"], "0.00"),
