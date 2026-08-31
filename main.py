@@ -144,11 +144,24 @@ def enviar_correo_con_pdf(
         print(f"❌ Error al enviar correo mediante Resend: {e}")
 
 
-def g(form_dict, key, default="-"):
-    val = form_dict.get(key)
-    if val is None or str(val).strip() == "":
-        return default
-    return str(val).strip()
+def g(form_dict, key_or_keys, default="-"):
+    """
+    Busca de manera flexible claves simples o listas de alias dentro de form_dict.
+    Acepta un string o una lista/tupla de nombres de campos posibles.
+    """
+    if isinstance(key_or_keys, (list, tuple)):
+        keys = key_or_keys
+    else:
+        keys = [key_or_keys]
+
+    for k in keys:
+        val = form_dict.get(k)
+        if val is not None:
+            if isinstance(val, list):
+                val = val[0] if len(val) > 0 else None
+            if val is not None and str(val).strip() != "" and str(val).strip().lower() != "none":
+                return str(val).strip()
+    return default
 
 
 def html_to_pdf_file(html_string: str, pdf_path: str):
@@ -222,13 +235,13 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Razón Social:</td>
-                <td class="val" colspan="2">{g(f, 'pre_razon_social', 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td class="val" colspan="2">{g(f, ['pre_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
                 <td class="lbl">RUC:</td>
-                <td class="val">{g(f, 'pre_ruc', '20100063337')}</td>
+                <td class="val">{g(f, ['pre_ruc', 'ruc'], '20100063337')}</td>
             </tr>
             <tr>
                 <td class="lbl">Tipo de Evento:</td>
-                <td class="val" colspan="4">{g(f, 'pre_tipo_evento', g(f, 'tipo_evento_pre'))}</td>
+                <td class="val" colspan="4">{g(f, ['pre_tipo_evento', 'tipo_evento_pre', 'tipo_evento'])}</td>
             </tr>
         </table>
 
@@ -236,38 +249,38 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Fecha de Evento:</td>
-                <td class="val">{g(f, 'pre_fecha_evento', g(f, 'fecha_evento_pre'))}</td>
+                <td class="val">{g(f, ['pre_fecha_evento', 'fecha_evento_pre', 'fecha_evento'])}</td>
                 <td class="lbl">Hora de Ocurrencia:</td>
-                <td class="val">{g(f, 'pre_hora_evento', g(f, 'hora_ocurrencia_pre'))}</td>
+                <td class="val">{g(f, ['pre_hora_evento', 'hora_ocurrencia_pre', 'hora_evento'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Lugar de Ocurrencia:</td>
-                <td class="val">{g(f, 'pre_lugar_evento', g(f, 'lugar_ocurrencia_pre'))}</td>
+                <td class="val">{g(f, ['pre_lugar_evento', 'lugar_ocurrencia_pre', 'lugar_evento'])}</td>
                 <td class="lbl">Fecha de Reporte:</td>
-                <td class="val">{g(f, 'pre_fecha_reporte', g(f, 'fecha_reporte_pre'))}</td>
+                <td class="val">{g(f, ['pre_fecha_reporte', 'fecha_reporte_pre', 'fecha_reporte'])}</td>
             </tr>
         </table>
         <div class="text-box">
             <b>Trabajo que se Realizaba:</b><br/>
-            {g(f, 'pre_trabajo_realizaba', g(f, 'trabajo_realizaba_pre'))}
+            {g(f, ['pre_trabajo_realizaba', 'trabajo_realizaba_pre', 'trabajo_realizaba'])}
         </div>
 
         <div class="sec-header">DESCRIPCIÓN DE LOS LESIONADOS</div>
         <table class="grid-table">
             <tr>
                 <td class="lbl">Nombre Completo:</td>
-                <td class="val">{g(f, 'pre_nombre_lesionado', g(f, 'nombre_lesionado_pre'))}</td>
+                <td class="val">{g(f, ['pre_nombre_lesionado', 'nombre_lesionado_pre', 'nombre_lesionado'])}</td>
                 <td class="lbl">Edad:</td>
-                <td class="val">{g(f, 'pre_edad_lesionado', g(f, 'edad_lesionado_pre'))}</td>
+                <td class="val">{g(f, ['pre_edad_lesionado', 'edad_lesionado_pre', 'edad'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Cargo:</td>
-                <td class="val" colspan="3">{g(f, 'pre_cargo_lesionado', g(f, 'cargo_lesionado_pre'))}</td>
+                <td class="val" colspan="3">{g(f, ['pre_cargo_lesionado', 'cargo_lesionado_pre', 'cargo'])}</td>
             </tr>
         </table>
         <div class="text-box">
             <b>Breve Descripción del Suceso:</b><br/>
-            {g(f, 'pre_breve_descripcion', g(f, 'breve_descripcion_pre'))}
+            {g(f, ['pre_breve_descripcion', 'breve_descripcion_pre', 'descripcion'])}
         </div>
 
         <div class="sec-header">REGISTRO FOTOGRÁFICO</div>
@@ -279,13 +292,13 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Nombre y Apellido:</td>
-                <td class="val">{g(f, 'pre_resp_nombre', g(f, 'resp_nombre_pre'))}</td>
+                <td class="val">{g(f, ['pre_resp_nombre', 'resp_nombre_pre', 'inv_nombre'])}</td>
                 <td class="lbl">Cargo:</td>
-                <td class="val">{g(f, 'pre_resp_cargo', g(f, 'resp_cargo_pre'))}</td>
+                <td class="val">{g(f, ['pre_resp_cargo', 'resp_cargo_pre', 'inv_cargo'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Fecha:</td>
-                <td class="val" colspan="3">{g(f, 'pre_resp_fecha', g(f, 'resp_fecha_pre'))}</td>
+                <td class="val" colspan="3">{g(f, ['pre_resp_fecha', 'resp_fecha_pre', 'fecha_reporte'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Firma:</td>
@@ -370,9 +383,9 @@ def generar_pdf_100_porciento(
     if not filas_medidas:
         filas_medidas = "<tr><td colspan='7'>Sin registros</td></tr>"
 
-    inv_nombre_val = g(f, "inv_nombre")
+    inv_nombre_val = g(f, ["inv_nombre", "resp_nombre"])
     firma_inv_default = f"<b>[REGISTRADO POR: {inv_nombre_val}]</b>"
-    firma_inv_text = g(f, "firma_inv_text", firma_inv_default)
+    firma_inv_text = g(f, ["firma_inv_text", "inv_firma"], firma_inv_default)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -422,23 +435,23 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Razón Social:</td>
-                <td style="width: 28%;" colspan="3">{g(f, 'emp_razon_social', 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td style="width: 28%;" colspan="3">{g(f, ['emp_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">RUC:</td>
-                <td style="width: 28%;">{g(f, 'emp_ruc', '20100063337')}</td>
+                <td style="width: 28%;">{g(f, ['emp_ruc', 'ruc'], '20100063337')}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Sede:</td>
-                <td>{g(f, 'emp_sede')}</td>
+                <td>{g(f, ['emp_sede', 'sede'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Dirección:</td>
-                <td colspan="3">{g(f, 'emp_direccion')}</td>
+                <td colspan="3">{g(f, ['emp_direccion', 'direccion'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
-                <td>{g(f, 'emp_num_trabajadores', g(f, 'emp_num_trab'))}</td>
+                <td>{g(f, ['emp_num_trabajadores', 'emp_num_trab', 'num_trabajadores'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
-                <td>{g(f, 'emp_num_sctr')}</td>
+                <td>{g(f, ['emp_num_sctr', 'num_sctr'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora SCTR:</td>
-                <td>{g(f, 'emp_aseguradora')}</td>
+                <td>{g(f, ['emp_aseguradora', 'aseguradora'])}</td>
             </tr>
         </table>
 
@@ -458,7 +471,7 @@ def generar_pdf_100_porciento(
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
-                <td>{g(f, 'ter_num_trabajadores', g(f, 'ter_num_trab'))}</td>
+                <td>{g(f, ['ter_num_trabajadores', 'ter_num_trab'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
                 <td>{g(f, 'ter_num_sctr')}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora:</td>
@@ -470,19 +483,19 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Fecha Evento:</td>
-                <td style="width: 28%;">{g(f, 'fin_fecha_evento')}</td>
+                <td style="width: 28%;">{g(f, ['fin_fecha_evento', 'fecha_evento'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Hora Evento:</td>
-                <td style="width: 28%;">{g(f, 'fin_hora_evento')}</td>
+                <td style="width: 28%;">{g(f, ['fin_hora_evento', 'hora_evento'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Lugar Exacto:</td>
-                <td style="width: 28%;">{g(f, 'fin_lugar_exacto')}</td>
+                <td style="width: 28%;">{g(f, ['fin_lugar_exacto', 'lugar_exacto', 'lugar_evento'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Tipo de Evento:</td>
-                <td>{g(f, 'fin_tipo_evento')}</td>
+                <td>{g(f, ['fin_tipo_evento', 'tipo_evento'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Clasificación Evento:</td>
-                <td>{g(f, 'fin_clasificacion')}</td>
+                <td>{g(f, ['fin_clasificacion', 'clasificacion'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Solo Incidente:</td>
-                <td>{g(f, 'fin_incidente_peligro', g(f, 'fin_solo_incidente'))}</td>
+                <td>{g(f, ['fin_incidente_peligro', 'fin_solo_incidente', 'solo_incidente'])}</td>
             </tr>
         </table>
 
@@ -512,42 +525,42 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Gravedad Accidente:</td>
-                <td style="width: 28%;">{g(f, 'acc_gravedad', g(f, 'fin_gravedad_evento'))}</td>
+                <td style="width: 28%;">{g(f, ['acc_gravedad', 'fin_gravedad_evento', 'gravedad'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Grado Incapacitante:</td>
-                <td style="width: 28%;">{g(f, 'acc_grado_incapacitante')}</td>
+                <td style="width: 28%;">{g(f, ['acc_grado_incapacitante', 'grado_incapacitante'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Días Descanso Médico:</td>
-                <td style="width: 28%;">{g(f, 'acc_dias_descanso')}</td>
+                <td style="width: 28%;">{g(f, ['acc_dias_descanso', 'dias_descanso'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Días Cargados:</td>
-                <td>{g(f, 'acc_dias_cargados')}</td>
+                <td>{g(f, ['acc_dias_cargados', 'dias_cargados'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Afectados:</td>
-                <td colspan="3">{g(f, 'acc_num_afectados')}</td>
+                <td colspan="3">{g(f, ['acc_num_afectados', 'num_afectados'])}</td>
             </tr>
         </table>
 
         <div class="sec-header">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
         <div class="text-box">
-            <b>Tipo de Atención en Primeros Auxilios:</b> {g(f, 'inc_primeros_auxilios', g(f, 'pa_tipo_atencion'))}
+            <b>Tipo de Atención en Primeros Auxilios:</b> {g(f, ['inc_primeros_auxilios', 'pa_tipo_atencion', 'primeros_auxilios'])}
         </div>
 
         <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Forma Accidente/Incidente:</td>
-                <td style="width: 28%;">{g(f, 'les_forma_evento', g(f, 'les_forma'))}</td>
+                <td style="width: 28%;">{g(f, ['les_forma_evento', 'les_forma', 'forma_evento'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Tipo de Lesión:</td>
-                <td style="width: 28%;" colspan="3">{g(f, 'les_tipo_lesion', g(f, 'les_tipo'))}</td>
+                <td style="width: 28%;" colspan="3">{g(f, ['les_tipo_lesion', 'les_tipo', 'tipo_lesion'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Agente Causante:</td>
-                <td>{g(f, 'les_agente_causante', g(f, 'les_agente'))}</td>
+                <td>{g(f, ['les_agente_causante', 'les_agente', 'agente_causante'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Parte Cuerpo Afectada:</td>
-                <td colspan="3">{g(f, 'les_parte_cuerpo')}</td>
+                <td colspan="3">{g(f, ['les_parte_cuerpo', 'parte_cuerpo'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Hospital / Clínica / Tópico:</td>
-                <td colspan="5">{g(f, 'les_hospital_atencion', g(f, 'les_hospital'))}</td>
+                <td colspan="5">{g(f, ['les_hospital_atencion', 'les_hospital', 'hospital_atencion'])}</td>
             </tr>
         </table>
 
@@ -555,16 +568,16 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Daño Material:</td>
-                <td style="width: 28%;">{g(f, 'dan_material')}</td>
+                <td style="width: 28%;">{g(f, ['dan_material', 'dano_material'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Agente Causante del Daño:</td>
-                <td style="width: 28%;">{g(f, 'dan_agente_causante', g(f, 'dan_agente'))}</td>
+                <td style="width: 28%;">{g(f, ['dan_agente_causante', 'dan_agente'])}</td>
             </tr>
         </table>
         <div class="text-box">
-            <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion_evento', g(f, 'dan_descripcion'))}
+            <b>Descripción del Evento (Daños / M.A.):</b> {g(f, ['dan_descripcion_evento', 'dan_descripcion'])}
         </div>
 
-        <!-- SECCIÓN DE VALORACIÓN DE COSTES COMPLETA (4 PUNTOS + DESGLOSE) -->
+        <!-- SECCIÓN DE VALORACIÓN DE COSTES COMPLETA -->
         <div class="sec-header sec-green">VALORACIÓN DE LOS COSTES DEL ACCIDENTE</div>
         <table class="grid-table">
             <thead>
@@ -577,63 +590,63 @@ def generar_pdf_100_porciento(
                 <!-- CATEGORÍA 1 -->
                 <tr>
                     <td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td>
-                    <td class="cost-val">S/ {g(f, 'costo_personal_total', '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, ['costo_personal_total', 'costo_personal', 'cos_personal', 'costo_mano_obra', 'c_personal'], '0.00')}</td>
                 </tr>
 
                 <!-- CATEGORÍA 2 -->
                 <tr>
                     <td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td>
-                    <td class="cost-val">S/ {g(f, 'costo_materiales_total', '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, ['costo_materiales_total', 'costo_materiales', 'cos_materiales', 'subtotal_materiales'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Edificios e Instalaciones</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_edificios', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_edificios', 'costo_edificio', 'cos_edificios'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Máquinas, Equipos y Herramientas</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_maquinaria', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_maquinaria', 'costo_maquinas', 'costo_equipos', 'cos_maquinaria'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Materias Primas / Productos</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_mat_primas', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_mat_primas', 'costo_materias_primas', 'costo_mat_prima', 'cos_mat_primas'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Tiempo Perdido Parada Máquina</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_parada', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_parada', 'costo_parada_maquina', 'costo_tiempo_perdido', 'cos_parada'], '0.00')}</td>
                 </tr>
 
                 <!-- CATEGORÍA 3 -->
                 <tr>
                     <td class="cost-title">3. SUB-TOTAL OTROS COSTES</td>
-                    <td class="cost-val">S/ {g(f, 'subtotal_otros', '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, ['subtotal_otros', 'costo_otros_total', 'costo_otros', 'subtotal_otros_costes'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Primeros Auxilios / Médicos</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_primeros_auxilios', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_primeros_auxilios', 'costo_auxilios', 'costo_medicos', 'cos_primeros_auxilios'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Sanciones Administrativas / Gastos Legales</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_sanciones', '0.00')} / S/ {g(f, 'costo_legales', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_sanciones', 'costo_multas', 'cos_sanciones'], '0.00')} / S/ {g(f, ['costo_legales', 'costo_gastos_legales', 'cos_legales'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Responsabilidad Civil / Medio Ambiente</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_resp_civil', '0.00')} / S/ {g(f, 'costo_medio_ambiente', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_resp_civil', 'costo_responsabilidad_civil', 'cos_resp_civil'], '0.00')} / S/ {g(f, ['costo_medio_ambiente', 'costo_medioambiente', 'cos_medio_ambiente'], '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Baja de Rendimiento</td>
-                    <td class="cost-sub-val">S/ {g(f, 'costo_baja_rendimiento', '0.00')}</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_baja_rendimiento', 'costo_rendimiento', 'cos_baja_rendimiento'], '0.00')}</td>
                 </tr>
 
                 <!-- CATEGORÍA 4 -->
                 <tr>
                     <td class="cost-title">4. GASTOS DIVERSOS (2% ESTIMADO INVESTIGACIONES)</td>
-                    <td class="cost-val">S/ {g(f, 'gastos_diversos_2pct', '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, ['gastos_diversos_2pct', 'gastos_diversos', 'costo_gastos_diversos', 'costo_diversos', 'gastos_2pct'], '0.00')}</td>
                 </tr>
 
                 <!-- TOTAL FINAL -->
                 <tr>
                     <td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td>
-                    <td class="cost-total-val">S/ {g(f, 'costo_total_accidente', g(f, 'costo_total', '0.00'))}</td>
+                    <td class="cost-total-val">S/ {g(f, ['costo_total_accidente', 'costo_total', 'total_costo', 'costo_final'], '0.00')}</td>
                 </tr>
             </tbody>
         </table>
@@ -700,9 +713,9 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Nombre Resp./Investigador:</td>
-                <td style="width: 28%;">{g(f, 'inv_nombre')}</td>
+                <td style="width: 28%;">{g(f, ['inv_nombre', 'resp_nombre'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Cargo:</td>
-                <td style="width: 28%;">{g(f, 'inv_cargo')}</td>
+                <td style="width: 28%;">{g(f, ['inv_cargo', 'resp_cargo'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Firma Investigador:</td>
@@ -1044,10 +1057,10 @@ async def enviar_reporte(
                 if t.get("area_interna")
             ])
             datos_sheet = {
-                "fin_fecha_evento": form_data.get("fin_fecha_evento", ""),
-                "fin_hora_evento": form_data.get("fin_hora_evento", ""),
-                "fin_lugar_exacto": form_data.get("fin_lugar_exacto", ""),
-                "fin_tipo_evento": form_data.get("fin_tipo_evento", ""),
+                "fin_fecha_evento": g(form_dict, ["fin_fecha_evento", "fecha_evento"], ""),
+                "fin_hora_evento": g(form_dict, ["fin_hora_evento", "hora_evento"], ""),
+                "fin_lugar_exacto": g(form_dict, ["fin_lugar_exacto", "lugar_exacto"], ""),
+                "fin_tipo_evento": g(form_dict, ["fin_tipo_evento", "tipo_evento"], ""),
                 "trab_nombres": ", ".join([
                     t["nombres"] for t in lista_trabajadores if t.get("nombres")
                 ]),
@@ -1060,29 +1073,27 @@ async def enviar_reporte(
                 "trab_dni": ", ".join([
                     t["dni"] for t in lista_trabajadores if t.get("dni")
                 ]),
-                "ana_que_sucedio": form_data.get("ana_que_sucedio", ""),
-                "inv_nombre": form_data.get("inv_nombre", ""),
+                "ana_que_sucedio": g(form_dict, ["ana_que_sucedio", "que_sucedio"], ""),
+                "inv_nombre": g(form_dict, ["inv_nombre", "resp_nombre"], ""),
                 "trab_area_interna[]": cadena_area_interna,
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
-                # Inclusión completa de los 4 Puntos de Costos + Desglose en Google Sheets
-                "costo_personal_total": form_data.get("costo_personal_total", "0.00"),
-                "costo_materiales_total": form_data.get("costo_materiales_total", "0.00"),
-                "costo_edificios": form_data.get("costo_edificios", "0.00"),
-                "costo_maquinaria": form_data.get("costo_maquinaria", "0.00"),
-                "costo_mat_primas": form_data.get("costo_mat_primas", "0.00"),
-                "costo_parada": form_data.get("costo_parada", "0.00"),
-                "subtotal_otros": form_data.get("subtotal_otros", "0.00"),
-                "costo_primeros_auxilios": form_data.get("costo_primeros_auxilios", "0.00"),
-                "costo_sanciones": form_data.get("costo_sanciones", "0.00"),
-                "costo_legales": form_data.get("costo_legales", "0.00"),
-                "costo_resp_civil": form_data.get("costo_resp_civil", "0.00"),
-                "costo_medio_ambiente": form_data.get("costo_medio_ambiente", "0.00"),
-                "costo_baja_rendimiento": form_data.get("costo_baja_rendimiento", "0.00"),
-                "gastos_diversos_2pct": form_data.get("gastos_diversos_2pct", "0.00"),
-                "costo_total_accidente": form_data.get(
-                    "costo_total_accidente", form_data.get("costo_total", "0.00")
-                ),
+                # Envió robusto de Costos a Google Sheets con búsqueda flexible
+                "costo_personal_total": g(form_dict, ["costo_personal_total", "costo_personal", "cos_personal", "costo_mano_obra"], "0.00"),
+                "costo_materiales_total": g(form_dict, ["costo_materiales_total", "costo_materiales", "cos_materiales"], "0.00"),
+                "costo_edificios": g(form_dict, ["costo_edificios", "costo_edificio"], "0.00"),
+                "costo_maquinaria": g(form_dict, ["costo_maquinaria", "costo_maquinas", "costo_equipos"], "0.00"),
+                "costo_mat_primas": g(form_dict, ["costo_mat_primas", "costo_materias_primas"], "0.00"),
+                "costo_parada": g(form_dict, ["costo_parada", "costo_parada_maquina"], "0.00"),
+                "subtotal_otros": g(form_dict, ["subtotal_otros", "costo_otros_total", "costo_otros"], "0.00"),
+                "costo_primeros_auxilios": g(form_dict, ["costo_primeros_auxilios", "costo_auxilios"], "0.00"),
+                "costo_sanciones": g(form_dict, ["costo_sanciones", "costo_multas"], "0.00"),
+                "costo_legales": g(form_dict, ["costo_legales", "costo_gastos_legales"], "0.00"),
+                "costo_resp_civil": g(form_dict, ["costo_resp_civil", "costo_responsabilidad_civil"], "0.00"),
+                "costo_medio_ambiente": g(form_dict, ["costo_medio_ambiente", "costo_medioambiente"], "0.00"),
+                "costo_baja_rendimiento": g(form_dict, ["costo_baja_rendimiento", "costo_rendimiento"], "0.00"),
+                "gastos_diversos_2pct": g(form_dict, ["gastos_diversos_2pct", "gastos_diversos", "costo_gastos_diversos"], "0.00"),
+                "costo_total_accidente": g(form_dict, ["costo_total_accidente", "costo_total", "total_costo"], "0.00"),
             }
 
             try:
@@ -1110,10 +1121,10 @@ async def enviar_reporte(
                 pdf_filepath,
                 fotos_base64,
             )
-            nombre_afectado = (
-                form_data.get("pre_nombre_lesionado")
-                or form_data.get("nombre_lesionado_pre")
-                or "No especificado"
+            nombre_afectado = g(
+                form_dict,
+                ["pre_nombre_lesionado", "nombre_lesionado_pre", "nombre_lesionado"],
+                "No especificado",
             )
         else:
             generar_pdf_100_porciento(
@@ -1131,10 +1142,10 @@ async def enviar_reporte(
             if nombres_trabajadores:
                 nombre_afectado = ", ".join(nombres_trabajadores)
             else:
-                nombre_afectado = (
-                    form_data.get("fin_nombre_lesionado")
-                    or form_data.get("nombre_lesionado")
-                    or "No especificado"
+                nombre_afectado = g(
+                    form_dict,
+                    ["fin_nombre_lesionado", "nombre_lesionado"],
+                    "No especificado",
                 )
 
         asunto = f"NUEVO REGISTRO SSOMA [{codigo_comprobante}]: {tipo_informe} - {nombre_afectado}"
