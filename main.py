@@ -387,16 +387,22 @@ def generar_pdf_100_porciento(
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 7.5pt; color: #ffffff; margin-top: 2px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
-            .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8pt; padding: 3px; margin-top: 6px; margin-bottom: 3px; }}
+            .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8pt; padding: 4px; margin-top: 6px; margin-bottom: 3px; }}
             .sec-red {{ background-color: #742a2a; color: #ffffff; }}
-            .sec-green {{ background-color: #1e3a8a; color: #ffffff; }}
+            .sec-green {{ background-color: #1a365d; color: #ffffff; border-bottom: 2px solid #d69e2e; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: middle; word-wrap: break-word; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
-            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 70%; }}
-            .val {{ color: #1a202c; width: 30%; text-align: right; }}
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
+            
+            /* ESTILOS ESPECÍFICOS COSTOS */
+            .cost-title {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; font-size: 7pt; padding: 4px; }}
+            .cost-val {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; text-align: right; font-size: 7pt; padding: 4px; }}
+            .cost-sub-item {{ padding-left: 15px; color: #4a5568; font-size: 6.5pt; }}
+            .cost-sub-val {{ text-align: right; color: #2d3748; font-size: 6.5pt; padding-right: 4px; }}
+            .cost-total-lbl {{ font-weight: bold; color: #ffffff; background-color: #1a365d; font-size: 7.5pt; padding: 5px; }}
+            .cost-total-val {{ font-weight: bold; color: #d69e2e; background-color: #1a365d; text-align: right; font-size: 8pt; padding: 5px; }}
         </style>
     </head>
     <body>
@@ -558,69 +564,76 @@ def generar_pdf_100_porciento(
             <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion_evento', g(f, 'dan_descripcion'))}
         </div>
 
-        <!-- SECCIÓN DE VALORACIÓN DE COSTES DEL ACCIDENTE COMBINADA -->
+        <!-- SECCIÓN REESTRUCTURADA: VALORACIÓN DE LOS COSTES DEL ACCIDENTE -->
         <div class="sec-header sec-green">VALORACIÓN DE LOS COSTES DEL ACCIDENTE</div>
         <table class="grid-table">
             <thead>
-                <tr>
-                    <th style="width: 70%;">Categoría de Coste</th>
-                    <th style="width: 30%; text-align: right;">Monto Estimado (S/.)</th>
+                <tr style="background-color: #2b6cb0; color: #ffffff;">
+                    <th style="width: 70%; font-weight: bold; font-size: 7pt; color: #ffffff; background-color: #2b6cb0;">Concepto / Categoría de Coste</th>
+                    <th style="width: 30%; font-weight: bold; font-size: 7pt; color: #ffffff; background-color: #2b6cb0; text-align: right;">Monto Estimado (S/.)</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- CATEGORÍA 1 -->
                 <tr>
-                    <td class="lbl">1. Costo del Personal Total</td>
-                    <td class="val">S/ {g(f, 'costo_personal_total', '0.00')}</td>
+                    <td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td>
+                    <td class="cost-val">S/ {g(f, 'costo_personal_total', '0.00')}</td>
+                </tr>
+
+                <!-- CATEGORÍA 2 -->
+                <tr>
+                    <td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td>
+                    <td class="cost-val">S/ {g(f, 'costo_materiales_total', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td class="lbl">2. Costo de Daños Materiales Total</td>
-                    <td class="val">S/ {g(f, 'costo_materiales_total', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Edificios e Instalaciones</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_edificios', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Edificios e Instalaciones</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_edificios', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Máquinas, Equipos y Herramientas</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_maquinaria', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Máquinas, Equipos y Herramientas</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_maquinaria', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Materias Primas / Productos</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_mat_primas', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Materias Primas / Productos</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_mat_primas', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Tiempo Perdido Parada Máquina</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_parada', '0.00')}</td>
+                </tr>
+
+                <!-- CATEGORÍA 3 -->
+                <tr>
+                    <td class="cost-title">3. SUB-TOTAL OTROS COSTES</td>
+                    <td class="cost-val">S/ {g(f, 'subtotal_otros', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Tiempo Perdido Parada Máquina</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_parada', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Primeros Auxilios / Médicos</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_primeros_auxilios', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td class="lbl">3. Sub-Total Otros Costes</td>
-                    <td class="val">S/ {g(f, 'subtotal_otros', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Sanciones Administrativas / Gastos Legales</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_sanciones', '0.00')} / S/ {g(f, 'costo_legales', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Primeros Auxilios / Médicos</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_primeros_auxilios', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Responsabilidad Civil / Medio Ambiente</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_resp_civil', '0.00')} / S/ {g(f, 'costo_medio_ambiente', '0.00')}</td>
                 </tr>
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Sanciones y Gastos Legales</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_sanciones', '0.00')} / S/ {g(f, 'costo_legales', '0.00')}</td>
+                    <td class="cost-sub-item">&bull; Baja de Rendimiento</td>
+                    <td class="cost-sub-val">S/ {g(f, 'costo_baja_rendimiento', '0.00')}</td>
                 </tr>
+
+                <!-- CATEGORÍA 4 -->
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Resp. Civil y Medio Ambiente</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_resp_civil', '0.00')} / S/ {g(f, 'costo_medio_ambiente', '0.00')}</td>
+                    <td class="cost-title">4. GASTOS DIVERSOS (2% ESTIMADO INVESTIGACIONES)</td>
+                    <td class="cost-val">S/ {g(f, 'gastos_diversos_2pct', '0.00')}</td>
                 </tr>
+
+                <!-- TOTAL FINAL -->
                 <tr>
-                    <td style="padding-left: 12px; color: #4a5568;">&nbsp;&nbsp;- Baja de Rendimiento</td>
-                    <td style="text-align: right;">S/ {g(f, 'costo_baja_rendimiento', '0.00')}</td>
-                </tr>
-                <tr>
-                    <td class="lbl">4. Gastos Diversos (2% Investigaciones)</td>
-                    <td class="val">S/ {g(f, 'gastos_diversos_2pct', '0.00')}</td>
-                </tr>
-                <tr style="background-color: #f0f0f0;">
-                    <td style="font-weight: bold; color: #1a365d; padding: 5px;">COSTO TOTAL DEL ACCIDENTE</td>
-                    <td style="font-weight: bold; color: #1a365d; text-align: right; padding: 5px;">
-                        S/ {g(f, 'costo_total_accidente', g(f, 'costo_total', '0.00'))}
-                    </td>
+                    <td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td>
+                    <td class="cost-total-val">S/ {g(f, 'costo_total_accidente', g(f, 'costo_total', '0.00'))}</td>
                 </tr>
             </tbody>
         </table>
