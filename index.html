@@ -1659,54 +1659,16 @@
           </select>
         </td>
         <td class="p-1 text-center font-bold">
-          <button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">✕</button>
+          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 hover:text-red-800 font-bold p-1">✕</button>
         </td>
       `;
       body.appendChild(tr);
     }
 
-    // Manejo de envío e integración con el backend
-    document.getElementById('ssomaForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnGuardar');
-      btn.disabled = true;
-      btn.innerHTML = '⏳ GENERANDO Y ENVIANDO REGISTRO...';
-
-      // Habilitar temporalmente los campos para capturar sus valores calculados
-      const disabledElements = this.querySelectorAll(':disabled');
-      disabledElements.forEach(el => el.disabled = false);
-
-      const formData = new FormData(this);
-
-      // Reestablecer el estado de deshabilitado
-      disabledElements.forEach(el => el.disabled = true);
-
-      try {
-        const response = await fetch('/enviar-reporte', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) throw new Error('Error en el servidor al generar el reporte');
-
-        // Descarga del PDF devuelto por el servidor
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Reporte_SSOMA_${Date.now()}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-
-        alert('✅ ¡El registro fue enviado exitosamente y el PDF ha sido generado!');
-      } catch (err) {
-        console.error(err);
-        alert('❌ Hubo un problema al enviar el registro. Revisa la consola para más detalles.');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<span>💾</span> GENERAR Y GUARDAR REGISTRO EN EXCEL';
+    document.addEventListener('DOMContentLoaded', () => {
+      for (let i = 1; i <= 5; i++) {
+        cargarCausasFrecuentes(i);
+        cargarCausasSubyacentes(i);
       }
     });
   </script>
