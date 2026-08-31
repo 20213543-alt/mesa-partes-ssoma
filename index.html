@@ -1209,6 +1209,43 @@
           </div>
         </div>
 
+        <!-- TABLA RESUMEN VISTA IMPRESIÓN / PLANTILLA -->
+        <div style="page-break-inside: avoid; margin-top: 15px;" class="border border-slate-300 rounded-lg overflow-hidden shadow-sm">
+          <h3 style="background-color: #1e3a8a; color: white; padding: 8px 12px; font-size: 13px; font-weight: bold;">
+            RESUMEN DE VALORACIÓN DE LOS COSTES DEL ACCIDENTE
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="background-color: #f3f4f6;">
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Concepto</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">Total (S/.)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">1. Costo del Personal Total</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_personal">{{costo_personal_total}}</span></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">2. Costo de Daños Materiales Total</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_materiales">{{costo_materiales_total}}</span></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">3. Sub-Total Otros Costes</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_otros">{{subtotal_otros}}</span></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">4. Gastos Diversos (2%)</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_gastos">{{gastos_diversos}}</span></td>
+              </tr>
+              <tr style="background-color: #fef08a; font-weight: bold;">
+                <td style="border: 1px solid #ccc; padding: 10px;">COSTO TOTAL DEL ACCIDENTE</td>
+                <td style="border: 1px solid #ccc; padding: 10px; text-align: right;">S/ <span id="resumen_total">{{costo_total}}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <!-- RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN -->
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN</div>
@@ -1370,28 +1407,23 @@
     }
 
     function calcularCostesDanos() {
-      // 2.1 Edificios e Instalaciones
       const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
       const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
       const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
       const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
 
-      // 2.2 Máquinas, equipos y herramientas
       const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
       const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
       const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
       const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
       const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
 
-      // 2.3 Materias primas
       const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
       const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
 
-      // 2.4 Productos terminados o semitransformados
       const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
       const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
 
-      // 2.5 Tiempo perdido por parada de máquina
       const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
       const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
 
@@ -1419,7 +1451,6 @@
       const respCivil = parseFloat(document.getElementById('oc_resp_civil')?.value) || 0;
       const danosTer = parseFloat(document.getElementById('oc_danos_terceros_ma')?.value) || 0;
 
-      // 3.6 Baja de rendimiento: (hrs/día * coste/hora) * 5 días * 30%
       const rHrs1 = parseFloat(document.getElementById('oc_rend_hrs_1')?.value) || 0;
       const rCos1 = parseFloat(document.getElementById('oc_rend_costo_1')?.value) || 0;
 
@@ -1447,7 +1478,7 @@
       const subtotalOtros = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
 
       const totalAnterior = totalPersonal + totalDanos + subtotalOtros;
-      const gastosDiversos = totalAnterior * 0.02; // 2% del total anterior
+      const gastosDiversos = totalAnterior * 0.02;
 
       const elemGastosDiv = document.getElementById('coste_gastos_diversos');
       if (elemGastosDiv) {
@@ -1459,6 +1490,13 @@
       if (elemTotalAcc) {
         elemTotalAcc.value = costoTotalAccidente.toFixed(2);
       }
+
+      // Actualizar tabla resumen dinámica
+      if (document.getElementById('resumen_personal')) document.getElementById('resumen_personal').textContent = totalPersonal.toFixed(2);
+      if (document.getElementById('resumen_materiales')) document.getElementById('resumen_materiales').textContent = totalDanos.toFixed(2);
+      if (document.getElementById('resumen_otros')) document.getElementById('resumen_otros').textContent = subtotalOtros.toFixed(2);
+      if (document.getElementById('resumen_gastos')) document.getElementById('resumen_gastos').textContent = gastosDiversos.toFixed(2);
+      if (document.getElementById('resumen_total')) document.getElementById('resumen_total').textContent = costoTotalAccidente.toFixed(2);
     }
 
     function evaluarTipoPersona() {
@@ -1659,39 +1697,11 @@
           </select>
         </td>
         <td class="p-1 text-center">
-          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 hover:text-red-800 font-extrabold text-sm px-2 py-0.5 rounded hover:bg-red-50 transition" title="Eliminar fila">✕</button>
+          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 font-bold hover:text-red-800">✕</button>
         </td>
       `;
       body.appendChild(tr);
     }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      cambiarTipoInforme();
-      evaluarOpcionesEvento();
-      evaluarTipoPersona();
-
-      for (let i = 1; i <= 5; i++) {
-        cargarCausasFrecuentes(i);
-        cargarCausasSubyacentes(i);
-      }
-
-      document.getElementById('ssomaForm').addEventListener('submit', function(e) {
-        const tipoPersona = document.getElementById('tipoPersona').value;
-
-        if (tipoPersona === 'locador') {
-          document.getElementById('ter_razon_social').value = document.getElementById('loc_nombre_razon').value;
-          document.getElementById('ter_ruc').value = document.getElementById('loc_dni_ruc').value;
-          document.getElementById('ter_domicilio').value = document.getElementById('loc_domicilio').value;
-          document.getElementById('ter_actividad').value = document.getElementById('loc_descripcion_servicio').value;
-        }
-
-        const btn = document.getElementById('btnGuardar');
-        btn.disabled = true;
-        btn.classList.add('opacity-60', 'cursor-not-allowed');
-        btn.innerHTML = '⏳ GENERANDO Y GUARDANDO REGISTRO...';
-      });
-    });
   </script>
-
 </body>
 </html>
