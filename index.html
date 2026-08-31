@@ -6,17 +6,10 @@
   <title>MESA DE PARTES SSOMA - EMAPE S.A.</title>
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- html2pdf.js para generación de PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <style>
-    @media print {
-      .no-print { display: none !important; }
-    }
-  </style>
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans p-2 md:p-6 min-h-screen">
 
-  <div id="reporteContenido" class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-300">
+  <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-300">
     
     <!-- ENCABEZADO PRINCIPAL -->
     <div class="bg-blue-900 text-white p-5 border-b-4 border-amber-500 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -28,12 +21,12 @@
           Mesa de Partes SSOMA - Registro de Eventos e Incidentes
         </h2>
       </div>
-      <span class="bg-blue-950 text-blue-200 text-xs px-3 py-1 rounded-full font-semibold border border-blue-700 no-print">
+      <span class="bg-blue-950 text-blue-200 text-xs px-3 py-1 rounded-full font-semibold border border-blue-700">
         Sistema Oficial
       </span>
     </div>
 
-    <form id="ssomaForm" action="#" method="POST" enctype="multipart/form-data" class="p-4 md:p-6 space-y-6 text-xs">
+    <form id="ssomaForm" action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-4 md:p-6 space-y-6 text-xs">
 
       <!-- SELECCIÓN DE TIPO DE INFORME -->
       <div class="bg-amber-50 p-4 rounded-xl border-2 border-amber-400 shadow-sm">
@@ -123,8 +116,8 @@
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">REGISTRO FOTOGRÁFICO</div>
           <div class="p-4 bg-slate-50">
-            <label class="font-bold block text-slate-700 mb-1 no-print">Adjuntar Fotografía(s) del Evento (puedes seleccionar varias):</label>
-            <input type="file" id="fotografia_pre" name="fotografia_pre[]" accept="image/*" multiple onchange="previsualizarImagenes(event)" class="w-full border rounded p-2 bg-white file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer no-print">
+            <label class="font-bold block text-slate-700 mb-1">Adjuntar Fotografía(s) del Evento (puedes seleccionar varias):</label>
+            <input type="file" id="fotografia_pre" name="fotografia_pre[]" accept="image/*" multiple onchange="previsualizarImagenes(event)" class="w-full border rounded p-2 bg-white file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
             <div id="preview_fotos_pre" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4 hidden"></div>
           </div>
         </div>
@@ -311,7 +304,7 @@
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider flex justify-between items-center flex-wrap gap-2">
             <span>DATOS DEL TRABAJADOR AFECTADO E INVOLUCRADO EN EL EVENTO</span>
-            <button type="button" onclick="agregarFilaTrabajador()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3 py-1.5 rounded text-xs uppercase transition shadow-sm cursor-pointer no-print">
+            <button type="button" onclick="agregarFilaTrabajador()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-3 py-1.5 rounded text-xs uppercase transition shadow-sm cursor-pointer">
               + Agregar Trabajador
             </button>
           </div>
@@ -330,7 +323,7 @@
                   <th class="p-2">Edad</th>
                   <th class="p-2">Turno</th>
                   <th class="p-2">Personal</th>
-                  <th class="p-2 text-center no-print">Acción</th>
+                  <th class="p-2 text-center">Acción</th>
                 </tr>
               </thead>
               <tbody id="body_trabajadores">
@@ -381,7 +374,7 @@
                       <option value="Contratista">Contratista</option>
                     </select>
                   </td>
-                  <td class="p-1 text-center font-bold text-slate-400 no-print">-</td>
+                  <td class="p-1 text-center font-bold text-slate-400">-</td>
                 </tr>
               </tbody>
             </table>
@@ -488,7 +481,7 @@
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider flex justify-between items-center">
             <span>DATOS DEL INCIDENTE CON DAÑO A LA PROPIEDAD / MEDIO AMBIENTE</span>
-            <label class="flex items-center gap-1.5 text-xs font-bold cursor-pointer normal-case bg-blue-950 px-2.5 py-1 rounded border border-blue-700 hover:bg-blue-800 transition no-print">
+            <label class="flex items-center gap-1.5 text-xs font-bold cursor-pointer normal-case bg-blue-950 px-2.5 py-1 rounded border border-blue-700 hover:bg-blue-800 transition">
               <input type="checkbox" id="chk_dano_no_precisa" onchange="toggleDanoPropiedad(this)" class="w-4 h-4 rounded accent-amber-500 cursor-pointer">
               <span class="text-amber-300 font-bold">No precisa</span>
             </label>
@@ -1260,8 +1253,8 @@
 
       </div>
 
-      <button type="submit" id="btnGuardar" class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-900 font-black py-4 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer no-print">
-        <span>📄</span> GENERAR Y DESCARGAR REGISTRO EN PDF
+      <button type="submit" id="btnGuardar" class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-900 font-black py-4 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer">
+        <span>💾</span> GENERAR Y GUARDAR REGISTRO EN EXCEL
       </button>
 
     </form>
@@ -1377,23 +1370,28 @@
     }
 
     function calcularCostesDanos() {
+      // 2.1 Edificios e Instalaciones
       const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
       const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
       const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
       const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
 
+      // 2.2 Máquinas, equipos y herramientas
       const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
       const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
       const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
       const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
       const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
 
+      // 2.3 Materias primas
       const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
       const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
 
+      // 2.4 Productos terminados o semitransformados
       const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
       const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
 
+      // 2.5 Tiempo perdido por parada de máquina
       const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
       const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
 
@@ -1421,6 +1419,7 @@
       const respCivil = parseFloat(document.getElementById('oc_resp_civil')?.value) || 0;
       const danosTer = parseFloat(document.getElementById('oc_danos_terceros_ma')?.value) || 0;
 
+      // 3.6 Baja de rendimiento: (hrs/día * coste/hora) * 5 días * 30%
       const rHrs1 = parseFloat(document.getElementById('oc_rend_hrs_1')?.value) || 0;
       const rCos1 = parseFloat(document.getElementById('oc_rend_costo_1')?.value) || 0;
 
@@ -1448,7 +1447,7 @@
       const subtotalOtros = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
 
       const totalAnterior = totalPersonal + totalDanos + subtotalOtros;
-      const gastosDiversos = totalAnterior * 0.02;
+      const gastosDiversos = totalAnterior * 0.02; // 2% del total anterior
 
       const elemGastosDiv = document.getElementById('coste_gastos_diversos');
       if (elemGastosDiv) {
@@ -1659,60 +1658,56 @@
             <option value="Contratista">Contratista</option>
           </select>
         </td>
-        <td class="p-1 text-center no-print">
-          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 hover:text-red-800 font-extrabold text-sm px-2 py-0.5 rounded hover:bg-red-50 transition" title="Eliminar fila">✕</button>
+        <td class="p-1 text-center font-bold">
+          <button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">✕</button>
         </td>
       `;
       body.appendChild(tr);
     }
 
-    function exportarAPDF() {
-      // Sincronizar selectores e inputs dynamic en el DOM renderizado
-      const selects = document.querySelectorAll('select');
-      selects.forEach(s => {
-        const option = s.options[s.selectedIndex];
-        if (option) {
-          Array.from(s.options).forEach(o => o.removeAttribute('selected'));
-          option.setAttribute('selected', 'selected');
-        }
-      });
+    // Manejo de envío e integración con el backend
+    document.getElementById('ssomaForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnGuardar');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ GENERANDO Y ENVIANDO REGISTRO...';
 
-      const inputs = document.querySelectorAll('input, textarea');
-      inputs.forEach(i => {
-        if (i.type !== 'file' && i.type !== 'checkbox' && i.type !== 'radio') {
-          i.setAttribute('value', i.value);
-        }
-      });
+      // Habilitar temporalmente los campos para capturar sus valores calculados
+      const disabledElements = this.querySelectorAll(':disabled');
+      disabledElements.forEach(el => el.disabled = false);
 
-      const elemento = document.getElementById('reporteContenido');
-      const tipoInforme = document.getElementById('tipo_informe').value;
-      const nombreArchivo = `Reporte_SSOMA_${tipoInforme}_${new Date().toISOString().slice(0,10)}.pdf`;
+      const formData = new FormData(this);
 
-      const opciones = {
-        margin:       [0.2, 0.2, 0.2, 0.2],
-        filename:     nombreArchivo,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
+      // Reestablecer el estado de deshabilitado
+      disabledElements.forEach(el => el.disabled = true);
 
-      html2pdf().set(opciones).from(elemento).save();
-    }
+      try {
+        const response = await fetch('/enviar-reporte', {
+          method: 'POST',
+          body: formData
+        });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      cambiarTipoInforme();
-      evaluarOpcionesEvento();
-      evaluarTipoPersona();
+        if (!response.ok) throw new Error('Error en el servidor al generar el reporte');
 
-      for (let i = 1; i <= 5; i++) {
-        cargarCausasFrecuentes(i);
-        cargarCausasSubyacentes(i);
+        // Descarga del PDF devuelto por el servidor
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte_SSOMA_${Date.now()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert('✅ ¡El registro fue enviado exitosamente y el PDF ha sido generado!');
+      } catch (err) {
+        console.error(err);
+        alert('❌ Hubo un problema al enviar el registro. Revisa la consola para más detalles.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>💾</span> GENERAR Y GUARDAR REGISTRO EN EXCEL';
       }
-
-      document.getElementById('ssomaForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        exportarAPDF();
-      });
     });
   </script>
 </body>
