@@ -33,52 +33,9 @@ app = FastAPI()
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
 
-# Autogenerar el script frontend para controlar bloqueo dinámico y cálculo de costos SSOMA
+# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
 SCRIPT_JS_PATH = os.path.join("static", "script.js")
-JS_CONTENT = """function v(name) {
-    const el = document.querySelector(`[name="${name}"]`);
-    if (!el || !el.value) return 0;
-    return parseFloat(el.value) || 0;
-}
-
-function setVal(name, value) {
-    const el = document.querySelector(`[name="${name}"]`);
-    if (el) el.value = value;
-}
-
-function calcularCostosSSOMA() {
-    // 1. Costos de Personal
-    const cPersonal = (v('costo_per_acc_salario') * v('costo_per_acc_horas')) +
-                     (v('costo_per_otr_salario') * v('costo_per_otr_horas')) +
-                     (v('costo_per_sup_salario') * v('costo_per_sup_horas')) +
-                     (v('costo_per_seg_salario') * v('costo_per_seg_horas')) +
-                     v('costo_per_socorrer') + v('costo_per_descanso');
-    
-    setVal('costo_personal_total', cPersonal.toFixed(2));
-
-    // 2. Daños Materiales
-    const cMateriales = v('costo_mat_edf_propio') + v('costo_mat_edf_externo') + v('costo_mat_edf_mat') +
-                        v('costo_mat_maq_propio') + v('costo_mat_maq_externo') + v('costo_mat_maq_rep') + 
-                        v('costo_mat_maq_repo') + v('costo_mat_primas') + v('costo_mat_prod_term') + 
-                        v('costo_mat_parada_maq');
-    
-    setVal('costo_materiales_total', cMateriales.toFixed(2));
-
-    // 3. Otros Costes
-    const cOtros = v('costo_otr_auxilios') + v('costo_otr_traslado') + v('costo_otr_sanciones') +
-                   v('costo_otr_legales') + v('costo_otr_indemnizacion') + v('costo_otr_terceros_ma') + 
-                   v('costo_otr_baja_rendimiento');
-    
-    setVal('costo_otros_total', cOtros.toFixed(2));
-
-    // 4. Gastos Diversos y Total General
-    const cDiversos = v('costo_gastos_diversos');
-    const cTotal = cPersonal + cMateriales + cOtros + cDiversos;
-
-    setVal('costo_total_accidente', cTotal.toFixed(2));
-}
-
-document.addEventListener("DOMContentLoaded", () => {
+JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
     const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
     const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
 
@@ -118,16 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectClasificacion) selectClasificacion.addEventListener('change', evaluarBloqueoAccidente);
 
     evaluarBloqueoAccidente();
-
-    // Recálculo automático en tiempo real al modificar cualquier input de costos
-    document.addEventListener('input', (e) => {
-        if (e.target && e.target.name && e.target.name.startsWith('costo_')) {
-            calcularCostosSSOMA();
-        }
-    });
-
-    // Ejecución inicial al cargar la página
-    calcularCostosSSOMA();
 });
 """
 
@@ -227,7 +174,7 @@ def generar_pdf_preliminar(
             celdas.append(
                 f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
                 f'<img src="data:image/jpeg;base64,{b64}" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 3px;" />'
-                f"</td>"
+                f"td>"
             )
 
         filas_html = ""
@@ -613,108 +560,26 @@ def generar_pdf_100_porciento(
             <b>Descripción del Evento (Daños / M.A.):</b> {g(f, 'dan_descripcion_evento', g(f, 'dan_descripcion'))}
         </div>
 
-        <!-- SECCIÓN DE VALORACIÓN COMPLETA DE COSTES DEL ACCIDENTE -->
-        <div class="sec-header sec-green">VALORACIÓN DE LOS COSTES DEL ACCIDENTE (IMPACTO ECONÓMICO DETALLADO)</div>
-
-        <!-- 1. COSTES DE PERSONAL -->
+        <!-- SECCIÓN DE IMPACTO ECONÓMICO Y COSTOS -->
+        <div class="sec-header sec-green">COSTOS ESTIMADOS DEL EVENTO (IMPACTO ECONÓMICO)</div>
         <table class="grid-table">
             <tr>
-                <th colspan="4" style="background-color: #276749; color: #ffffff;">1. VALORACIÓN DE LOS COSTES DEL PERSONAL</th>
+                <td class="lbl">Atención Médica y Tratamiento:</td>
+                <td class="val">S/ {g(f, 'costo_medico', '0.00')}</td>
+                <td class="lbl">Daños Materiales / Equipos:</td>
+                <td class="val">S/ {g(f, 'costo_dano_material', '0.00')}</td>
             </tr>
             <tr>
-                <td class="lbl">Horas Perdidas Accidentado(s):</td>
-                <td class="val">Salario: S/ {g(f, 'costo_per_acc_salario', '0.00')} | Horas: {g(f, 'costo_per_acc_horas', '0')}</td>
-                <td class="lbl">Horas Perdidas Otros Trab.:</td>
-                <td class="val">Salario: S/ {g(f, 'costo_per_otr_salario', '0.00')} | Horas: {g(f, 'costo_per_otr_horas', '0')}</td>
+                <td class="lbl">Días / Horas Hombre Perdidas:</td>
+                <td class="val">S/ {g(f, 'costo_dias_perdidos', '0.00')}</td>
+                <td class="lbl">Costos Indirectos:</td>
+                <td class="val">S/ {g(f, 'costo_indirecto', '0.00')}</td>
             </tr>
             <tr>
-                <td class="lbl">Horas Supervisor:</td>
-                <td class="val">Salario: S/ {g(f, 'costo_per_sup_salario', '0.00')} | Horas: {g(f, 'costo_per_sup_horas', '0')}</td>
-                <td class="lbl">Horas Seguridad:</td>
-                <td class="val">Salario: S/ {g(f, 'costo_per_seg_salario', '0.00')} | Horas: {g(f, 'costo_per_seg_horas', '0')}</td>
-            </tr>
-            <tr>
-                <td class="lbl">Socorrer y Transportar:</td>
-                <td class="val">S/ {g(f, 'costo_per_socorrer', '0.00')}</td>
-                <td class="lbl">Días Descanso Médico:</td>
-                <td class="val">S/ {g(f, 'costo_per_descanso', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl" style="background-color: #e6fffa;" colspan="2"><strong>COSTO DEL PERSONAL TOTAL:</strong></td>
-                <td class="val" colspan="2" style="font-weight: bold; color: #276749;">S/ {g(f, 'costo_personal_total', g(f, 'costo_dias_perdidos', '0.00'))}</td>
-            </tr>
-        </table>
-
-        <!-- 2. DAÑOS MATERIALES -->
-        <table class="grid-table">
-            <tr>
-                <th colspan="4" style="background-color: #276749; color: #ffffff;">2. VALORACIÓN DE LOS COSTES DE DAÑOS MATERIALES</th>
-            </tr>
-            <tr>
-                <td class="lbl">2.1 Edificios e Instalaciones:</td>
-                <td class="val" colspan="3">M.O. Propia: S/ {g(f, 'costo_mat_edf_propio', '0.00')} | M.O. Externa: S/ {g(f, 'costo_mat_edf_externo', '0.00')} | Mat.: S/ {g(f, 'costo_mat_edf_mat', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl">2.2 Máquinas y Equipos:</td>
-                <td class="val" colspan="3">M.O. Propia: S/ {g(f, 'costo_mat_maq_propio', '0.00')} | M.O. Externa: S/ {g(f, 'costo_mat_maq_externo', '0.00')} | Repuestos: S/ {g(f, 'costo_mat_maq_rep', '0.00')} | Reposición: S/ {g(f, 'costo_mat_maq_repo', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl">2.3 Materias Primas:</td>
-                <td class="val">S/ {g(f, 'costo_mat_primas', '0.00')}</td>
-                <td class="lbl">2.4 Prod. Terminados:</td>
-                <td class="val">S/ {g(f, 'costo_mat_prod_term', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl" colspan="2">2.5 Parada de Máquina (Tiempo Perdido):</td>
-                <td class="val" colspan="2">S/ {g(f, 'costo_mat_parada_maq', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl" style="background-color: #e6fffa;" colspan="2"><strong>COSTO DE DAÑOS MATERIALES TOTAL:</strong></td>
-                <td class="val" colspan="2" style="font-weight: bold; color: #276749;">S/ {g(f, 'costo_materiales_total', g(f, 'costo_dano_material', '0.00'))}</td>
-            </tr>
-        </table>
-
-        <!-- 3. OTROS COSTES -->
-        <table class="grid-table">
-            <tr>
-                <th colspan="4" style="background-color: #276749; color: #ffffff;">3. OTROS COSTES</th>
-            </tr>
-            <tr>
-                <td class="lbl">3.1 Mat. 1ros Auxilios / Traslado:</td>
-                <td class="val">Auxilios: S/ {g(f, 'costo_otr_auxilios', '0.00')} | Traslado: S/ {g(f, 'costo_otr_traslado', '0.00')}</td>
-                <td class="lbl">3.2 Sanciones / Plazos Entrega:</td>
-                <td class="val">S/ {g(f, 'costo_otr_sanciones', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl">3.3 Implicaciones Legales (Multas):</td>
-                <td class="val">S/ {g(f, 'costo_otr_legales', '0.00')}</td>
-                <td class="lbl">3.4 Resp. Civil / Indemnizaciones:</td>
-                <td class="val">S/ {g(f, 'costo_otr_indemnizacion', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl">3.5 Daños Terceros / Medio Ambiente:</td>
-                <td class="val">S/ {g(f, 'costo_otr_terceros_ma', '0.00')}</td>
-                <td class="lbl">3.6 Baja Rendimiento Trabajador:</td>
-                <td class="val">S/ {g(f, 'costo_otr_baja_rendimiento', '0.00')}</td>
-            </tr>
-            <tr>
-                <td class="lbl" style="background-color: #e6fffa;" colspan="2"><strong>SUB - TOTAL OTROS COSTES:</strong></td>
-                <td class="val" colspan="2" style="font-weight: bold; color: #276749;">S/ {g(f, 'costo_otros_total', g(f, 'costo_indirecto', '0.00'))}</td>
-            </tr>
-        </table>
-
-        <!-- 4. GASTOS DIVERSOS Y COSTO TOTAL GENERAL -->
-        <table class="grid-table">
-            <tr>
-                <th colspan="4" style="background-color: #276749; color: #ffffff;">4. GASTOS DIVERSOS Y RESUMEN GENERAL</th>
-            </tr>
-            <tr>
-                <td class="lbl" colspan="2">Gastos Diversos (2% del Total Anterior - Informes, Investigaciones, etc.):</td>
-                <td class="val" colspan="2">S/ {g(f, 'costo_gastos_diversos', g(f, 'costo_medico', '0.00'))}</td>
-            </tr>
-            <tr>
-                <td class="lbl" style="background-color: #1a365d; color: #ffffff; font-size: 7.5pt;" colspan="2"><strong>COSTO TOTAL DEL ACCIDENTE (S/.):</strong></td>
-                <td class="val" colspan="2" style="font-size: 8pt; font-weight: bold; color: #c53030; background-color: #fff5f5;">S/ {g(f, 'costo_total_accidente', g(f, 'costo_total', '0.00'))}</td>
+                <td class="lbl" style="background-color: #edf2f7;"><strong>COSTO TOTAL ESTIMADO:</strong></td>
+                <td class="val" colspan="3" style="font-size: 7.5pt; font-weight: bold; color: #276749;">
+                    S/ {g(f, 'costo_total', '0.00')}
+                </td>
             </tr>
         </table>
 
@@ -1146,26 +1011,15 @@ async def enviar_reporte(
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
                 # Inclusión de Costos en el Webhook
-                "costo_personal_total": form_data.get(
-                    "costo_personal_total",
-                    form_data.get("costo_dias_perdidos", "0.00"),
+                "costo_medico": form_data.get("costo_medico", "0.00"),
+                "costo_dano_material": form_data.get(
+                    "costo_dano_material", "0.00"
                 ),
-                "costo_materiales_total": form_data.get(
-                    "costo_materiales_total",
-                    form_data.get("costo_dano_material", "0.00"),
+                "costo_dias_perdidos": form_data.get(
+                    "costo_dias_perdidos", "0.00"
                 ),
-                "costo_otros_total": form_data.get(
-                    "costo_otros_total",
-                    form_data.get("costo_indirecto", "0.00"),
-                ),
-                "costo_gastos_diversos": form_data.get(
-                    "costo_gastos_diversos",
-                    form_data.get("costo_medico", "0.00"),
-                ),
-                "costo_total": form_data.get(
-                    "costo_total_accidente",
-                    form_data.get("costo_total", "0.00"),
-                ),
+                "costo_indirecto": form_data.get("costo_indirecto", "0.00"),
+                "costo_total": form_data.get("costo_total", "0.00"),
             }
 
             try:
