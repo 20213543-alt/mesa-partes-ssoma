@@ -33,9 +33,52 @@ app = FastAPI()
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
 
-# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
+# Autogenerar el script frontend para controlar bloqueo dinámico y cálculo de costos SSOMA
 SCRIPT_JS_PATH = os.path.join("static", "script.js")
-JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
+JS_CONTENT = """function v(name) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (!el || !el.value) return 0;
+    return parseFloat(el.value) || 0;
+}
+
+function setVal(name, value) {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (el) el.value = value;
+}
+
+function calcularCostosSSOMA() {
+    // 1. Costos de Personal
+    const cPersonal = (v('costo_per_acc_salario') * v('costo_per_acc_horas')) +
+                     (v('costo_per_otr_salario') * v('costo_per_otr_horas')) +
+                     (v('costo_per_sup_salario') * v('costo_per_sup_horas')) +
+                     (v('costo_per_seg_salario') * v('costo_per_seg_horas')) +
+                     v('costo_per_socorrer') + v('costo_per_descanso');
+    
+    setVal('costo_personal_total', cPersonal.toFixed(2));
+
+    // 2. Daños Materiales
+    const cMateriales = v('costo_mat_edf_propio') + v('costo_mat_edf_externo') + v('costo_mat_edf_mat') +
+                        v('costo_mat_maq_propio') + v('costo_mat_maq_externo') + v('costo_mat_maq_rep') + 
+                        v('costo_mat_maq_repo') + v('costo_mat_primas') + v('costo_mat_prod_term') + 
+                        v('costo_mat_parada_maq');
+    
+    setVal('costo_materiales_total', cMateriales.toFixed(2));
+
+    // 3. Otros Costes
+    const cOtros = v('costo_otr_auxilios') + v('costo_otr_traslado') + v('costo_otr_sanciones') +
+                   v('costo_otr_legales') + v('costo_otr_indemnizacion') + v('costo_otr_terceros_ma') + 
+                   v('costo_otr_baja_rendimiento');
+    
+    setVal('costo_otros_total', cOtros.toFixed(2));
+
+    // 4. Gastos Diversos y Total General
+    const cDiversos = v('costo_gastos_diversos');
+    const cTotal = cPersonal + cMateriales + cOtros + cDiversos;
+
+    setVal('costo_total_accidente', cTotal.toFixed(2));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
     const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
     const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
 
@@ -75,6 +118,16 @@ JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
     if (selectClasificacion) selectClasificacion.addEventListener('change', evaluarBloqueoAccidente);
 
     evaluarBloqueoAccidente();
+
+    // Recálculo automático en tiempo real al modificar cualquier input de costos
+    document.addEventListener('input', (e) => {
+        if (e.target && e.target.name && e.target.name.startsWith('costo_')) {
+            calcularCostosSSOMA();
+        }
+    });
+
+    // Ejecución inicial al cargar la página
+    calcularCostosSSOMA();
 });
 """
 
