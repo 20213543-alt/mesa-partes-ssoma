@@ -396,102 +396,6 @@ def generar_pdf_100_porciento(
     firma_inv_default = f"<b>[REGISTRADO POR: {inv_nombre_val}]</b>"
     firma_inv_text = g(f, ["firma_inv_text", "inv_firma"], firma_inv_default)
 
-    def costo_numero(valor):
-        try:
-            return float(str(valor).replace(",", ".").strip() or 0)
-        except (TypeError, ValueError):
-            return 0.0
-
-    def dinero(valor):
-        return f"{costo_numero(valor):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
-    def fila_detalle(concepto, detalle, monto):
-        return f"""<tr>
-            <td>{concepto}</td>
-            <td>{detalle}</td>
-            <td style="text-align:right;">S/ {dinero(monto)}</td>
-        </tr>"""
-
-    # Desglose de costos de personal. Los campos se reciben directamente del
-    # formulario, mientras que los importes se calculan con la misma fórmula
-    # usada en main.js.
-    personal_items = [
-        ("Trabajador accidentado", "salario_accidentado", "coste_hrs_accidentado"),
-        ("Otros trabajadores", "salario_otros", "coste_hrs_otros_trabajadores"),
-        ("Supervisor", "salario_supervisor", "coste_hrs_supervisor"),
-        ("Personal SSOMA", "salario_ssoma", "coste_hrs_ssoma"),
-    ]
-    filas_personal_detalle = ""
-    for etiqueta, salario_key, horas_key in personal_items:
-        salario = costo_numero(g(f, salario_key, "0"))
-        horas = costo_numero(g(f, horas_key, "0"))
-        importe = salario / 240 * horas
-        filas_personal_detalle += fila_detalle(
-            etiqueta, f"Salario S/ {dinero(salario)} · {dinero(horas)} h", importe
-        )
-    filas_personal_detalle += fila_detalle(
-        "Socorro y transporte", "Importe directo", g(f, "coste_socorro_transporte", "0")
-    )
-    filas_personal_detalle += fila_detalle(
-        "Días de descanso médico", "Importe directo", g(f, "coste_dias_descanso_medico", "0")
-    )
-
-    # Desglose de daños materiales con detalle de cantidades, horas y tarifas.
-    danos_items = [
-        ("Reparación por personal Propio (mano de obra)", "Horas × costo/hora", costo_numero(g(f, "dm_edif_propio_hrs", "0")) * costo_numero(g(f, "dm_edif_propio_costo", "0"))),
-        ("Reparación por personal Externo (mano de obra)", "Importe declarado", g(f, "dm_edif_externo_costo", "0")),
-        ("Materiales", "Importe declarado", g(f, "dm_edif_mat_costo", "0")),
-        ("Reparación de maquinaria por personal Propio (mano de obra)", "Horas × costo/hora", costo_numero(g(f, "dm_maq_propio_hrs", "0")) * costo_numero(g(f, "dm_maq_propio_costo", "0"))),
-        ("Reparación de maquinaria por personal Externo (mano de obra)", g(f, "dm_maq_externo_costo", "0")),
-        ("Repuestos de maquinaria", "Importe declarado", g(f, "dm_maq_repuestos_costo", "0")),
-        ("Reposición de maquinaria (en caso de inutilización)", "Importe declarado", g(f, "dm_maq_reposicion_costo", "0")),
-        ("Costo de materias primas", "Cantidad × costo/unidad", costo_numero(g(f, "dm_mat_primas_cant", "0")) * costo_numero(g(f, "dm_mat_primas_costo", "0"))),
-        ("Productos terminados", "Cantidad × costo/unidad", costo_numero(g(f, "dm_prod_terminados_cant", "0")) * costo_numero(g(f, "dm_prod_terminados_costo", "0"))),
-        ("Costo de parada de máquina", "Horas × costo/hora", costo_numero(g(f, "dm_parada_hrs", "0")) * costo_numero(g(f, "dm_parada_costo_hora", "0"))),
-    ]
-    filas_danos_detalle = "".join(fila_detalle(nombre, detalle, monto) for nombre, detalle, monto in danos_items)
-
-    # Desglose de otros costos y de cada registro de baja de rendimiento.
-    otros_items = [
-        ("Costo de primeros auxilios / médicos", "Importe declarado", g(f, "oc_mat_auxilios", "0")),
-        ("Costo de Traslado", "Importe declarado", g(f, "oc_traslado", "0")),
-        ("Costo de sanciones contractuales", "Importe declarado", g(f, "oc_sanciones_contrato", "0")),
-        ("Multas de ley", "Importe declarado", g(f, "oc_multas_ley", "0")),
-        ("Costo de responsabilidad civil", "Importe declarado", g(f, "oc_resp_civil", "0")),
-        ("Costo de daños a terceros / medio ambiente", "Importe declarado", g(f, "oc_danos_terceros_ma", "0")),
-    ]
-    for i in range(1, 4):
-        horas = costo_numero(g(f, f"oc_rend_hrs_{i}", "0"))
-        costo_hora = costo_numero(g(f, f"oc_rend_costo_{i}", "0"))
-        otros_items.append((f"Baja de rendimiento #{i}", f"{dinero(horas)} h × S/ {dinero(costo_hora)} × 5 × 30%", horas * costo_hora * 5 * 0.30))
-    filas_otros_detalle = "".join(fila_detalle(nombre, detalle, monto) for nombre, detalle, monto in otros_items)
-
-    desglose_costos_html = f"""
-        <div class="cost-category-title">1. DETALLE DEL COSTO DE PERSONAL</div>
-        <table class="cost-detail-table">
-            <thead><tr><th>Elemento</th><th>Base de cálculo</th><th>Monto (S/.)</th></tr></thead>
-            <tbody>{filas_personal_detalle}</tbody>
-        </table>
-
-        <div class="cost-category-title">2. DETALLE DE DAÑOS MATERIALES</div>
-        <table class="cost-detail-table">
-            <thead><tr><th>Elemento afectado</th><th>Base de cálculo</th><th>Monto (S/.)</th></tr></thead>
-            <tbody>{filas_danos_detalle}</tbody>
-        </table>
-
-        <div class="cost-category-title">3. DETALLE DE OTROS COSTOS</div>
-        <table class="cost-detail-table">
-            <thead><tr><th>Concepto</th><th>Base de cálculo</th><th>Monto (S/.)</th></tr></thead>
-            <tbody>{filas_otros_detalle}</tbody>
-        </table>
-
-        <div class="cost-category-title">4. GASTOS DIVERSOS</div>
-        <table class="cost-detail-table">
-            <thead><tr><th>Concepto</th><th>Base de cálculo</th><th>Monto (S/.)</th></tr></thead>
-            <tbody>{fila_detalle("Gastos diversos", "2% de personal + daños materiales + otros costos", g(f, "coste_gastos_diversos", "0"))}</tbody>
-        </table>
-    """
-
     html_content = f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -521,13 +425,6 @@ def generar_pdf_100_porciento(
             .cost-sub-val {{ text-align: right; color: #2d3748; font-size: 6.5pt; padding-right: 4px; }}
             .cost-total-lbl {{ font-weight: bold; color: #ffffff; background-color: #1a365d; font-size: 7.5pt; padding: 5px; }}
             .cost-total-val {{ font-weight: bold; color: #d69e2e; background-color: #1a365d; text-align: right; font-size: 8pt; padding: 5px; }}
-            .cost-category-title {{ background-color: #e2e8f0; color: #1a365d; font-weight: bold; font-size: 7pt; padding: 4px; margin-top: 5px; }}
-            .cost-detail-table {{ width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 5px; page-break-inside: auto; }}
-            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: middle; word-wrap: break-word; }}
-            .cost-detail-table th {{ background-color: #2b6cb0; color: #ffffff; text-align: left; }}
-            .cost-detail-table th:nth-child(1) {{ width: 30%; }}
-            .cost-detail-table th:nth-child(2) {{ width: 50%; }}
-            .cost-detail-table th:nth-child(3) {{ width: 20%; text-align: right; }}
         </style>
     </head>
     <body>
@@ -689,24 +586,77 @@ def generar_pdf_100_porciento(
             <b>Descripción del Evento (Daños / M.A.):</b> {g(f, ['dan_descripcion_evento', 'dan_descripcion'])}
         </div>
 
-        <!-- SECCIÓN DE VALORACIÓN DE COSTES: DESGLOSE + CONSOLIDADO -->
-        <div class="sec-header sec-green">VALORACIÓN DETALLADA DE LOS COSTES DEL ACCIDENTE</div>
-        {desglose_costos_html}
-
-        <div class="sec-header sec-green">RESUMEN CONSOLIDADO DE COSTOS</div>
+        <!-- SECCIÓN DE VALORACIÓN DE COSTES COMPLETA -->
+        <div class="sec-header sec-green">VALORACIÓN DE LOS COSTES DEL ACCIDENTE</div>
         <table class="grid-table">
             <thead>
                 <tr style="background-color: #2b6cb0; color: #ffffff;">
-                    <th style="width: 70%; font-weight: bold; font-size: 7pt; color: #ffffff; background-color: #2b6cb0;">Concepto / Categoría</th>
+                    <th style="width: 70%; font-weight: bold; font-size: 7pt; color: #ffffff; background-color: #2b6cb0;">Concepto / Categoría de Coste</th>
                     <th style="width: 30%; font-weight: bold; font-size: 7pt; color: #ffffff; background-color: #2b6cb0; text-align: right;">Monto Estimado (S/.)</th>
                 </tr>
             </thead>
             <tbody>
-                <tr><td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td><td class="cost-val">S/ {g(f, 'coste_total_personal', '0.00')}</td></tr>
-                <tr><td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td><td class="cost-val">S/ {g(f, 'coste_total_danos_materiales', '0.00')}</td></tr>
-                <tr><td class="cost-title">3. SUBTOTAL OTROS COSTOS</td><td class="cost-val">S/ {g(f, 'coste_subtotal_otros', '0.00')}</td></tr>
-                <tr><td class="cost-title">4. GASTOS DIVERSOS (2%)</td><td class="cost-val">S/ {g(f, 'coste_gastos_diversos', '0.00')}</td></tr>
-                <tr><td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td><td class="cost-total-val">S/ {g(f, 'coste_total_accidente', '0.00')}</td></tr>
+                <!-- CATEGORÍA 1 -->
+                <tr>
+                    <td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td>
+                    <td class="cost-val">S/ {g(f, 'coste_total_personal', '0.00')}</td>
+                </tr>
+
+                <!-- CATEGORÍA 2 -->
+                <tr>
+                    <td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td>
+                    <td class="cost-val">S/ {g(f, 'coste_total_danos_materiales', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Edificios e Instalaciones</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_edificios', 'costo_edificio', 'cos_edificios'], '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Máquinas, Equipos y Herramientas</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_maquinaria', 'costo_maquinas', 'costo_equipos', 'cos_maquinaria'], '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Materias Primas / Productos</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_mat_primas', 'costo_materias_primas', 'costo_mat_prima', 'cos_mat_primas'], '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Tiempo Perdido Parada Máquina</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_parada', 'costo_parada_maquina', 'costo_tiempo_perdido', 'cos_parada'], '0.00')}</td>
+                </tr>
+
+                <!-- CATEGORÍA 3 -->
+                <tr>
+                    <td class="cost-title">3. SUB-TOTAL OTROS COSTES</td>
+                    <td class="cost-val">S/ {g(f, 'coste_subtotal_otros', '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Primeros Auxilios / Médicos</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_primeros_auxilios', 'costo_auxilios', 'costo_medicos', 'cos_primeros_auxilios'], '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Sanciones Administrativas / Gastos Legales</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_sanciones', 'costo_multas', 'cos_sanciones'], '0.00')} / S/ {g(f, ['costo_legales', 'costo_gastos_legales', 'cos_legales'], '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Responsabilidad Civil / Medio Ambiente</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_resp_civil', 'costo_responsabilidad_civil', 'cos_resp_civil'], '0.00')} / S/ {g(f, ['costo_medio_ambiente', 'costo_medioambiente', 'cos_medio_ambiente'], '0.00')}</td>
+                </tr>
+                <tr>
+                    <td class="cost-sub-item">&bull; Baja de Rendimiento</td>
+                    <td class="cost-sub-val">S/ {g(f, ['costo_baja_rendimiento', 'costo_rendimiento', 'cos_baja_rendimiento'], '0.00')}</td>
+                </tr>
+
+                <!-- CATEGORÍA 4 -->
+                <tr>
+                    <td class="cost-title">4. GASTOS DIVERSOS (2% ESTIMADO INVESTIGACIONES)</td>
+                    <td class="cost-val">S/ {g(f, 'coste_gastos_diversos', '0.00')}</td>
+                </tr>
+
+                <!-- TOTAL FINAL -->
+                <tr>
+                    <td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td>
+                    <td class="cost-total-val">S/ {g(f, 'coste_total_accidente', '0.00')}</td>
+                </tr>
             </tbody>
         </table>
 
