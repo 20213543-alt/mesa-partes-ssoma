@@ -26,7 +26,7 @@
       </span>
     </div>
 
-    <form id="ssomaForm" action="/enviar-reporte" method="POST" enctype="multipart/form-data" class="p-4 md:p-6 space-y-6 text-xs">
+    <form id="ssomaForm" action="/enviar-reporte" method="POST" enctype="multipart/form-data" onsubmit="prepararEnvio(event)" class="p-4 md:p-6 space-y-6 text-xs">
 
       <!-- SELECCIÓN DE TIPO DE INFORME -->
       <div class="bg-amber-50 p-4 rounded-xl border-2 border-amber-400 shadow-sm">
@@ -1224,23 +1224,23 @@
             <tbody>
               <tr>
                 <td style="border: 1px solid #ccc; padding: 8px;">1. Costo del Personal Total</td>
-                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_personal">{{costo_personal_total}}</span></td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_personal">0.00</span></td>
               </tr>
               <tr>
                 <td style="border: 1px solid #ccc; padding: 8px;">2. Costo de Daños Materiales Total</td>
-                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_materiales">{{costo_materiales_total}}</span></td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_materiales">0.00</span></td>
               </tr>
               <tr>
                 <td style="border: 1px solid #ccc; padding: 8px;">3. Sub-Total Otros Costes</td>
-                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_otros">{{subtotal_otros}}</span></td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_otros">0.00</span></td>
               </tr>
               <tr>
                 <td style="border: 1px solid #ccc; padding: 8px;">4. Gastos Diversos (2%)</td>
-                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_gastos">{{gastos_diversos}}</span></td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_gastos">0.00</span></td>
               </tr>
               <tr style="background-color: #fef08a; font-weight: bold;">
                 <td style="border: 1px solid #ccc; padding: 10px;">COSTO TOTAL DEL ACCIDENTE</td>
-                <td style="border: 1px solid #ccc; padding: 10px; text-align: right;">S/ <span id="resumen_total">{{costo_total}}</span></td>
+                <td style="border: 1px solid #ccc; padding: 10px; text-align: right;">S/ <span id="resumen_total">0.00</span></td>
               </tr>
             </tbody>
           </table>
@@ -1644,6 +1644,39 @@
         container.classList.add('hidden');
       }
     }
+
+    function prepararEnvio(event) {
+      // Los inputs readonly sí se envían en FormData; los disabled no.
+      // Ejecutamos todos los cálculos para garantizar que sus valores estén
+      // actualizados antes de que FastAPI reciba el formulario.
+      calcularCostesPersonal();
+      calcularCostesDanos();
+      calcularOtrosCostes();
+      calcularMasterTotales();
+
+      const camposCostos = [
+        'coste_total_personal',
+        'coste_total_danos_materiales',
+        'coste_subtotal_otros',
+        'coste_gastos_diversos',
+        'coste_total_accidente'
+      ];
+
+      // Evita enviar un valor vacío si alguna sección no está disponible.
+      camposCostos.forEach(nombre => {
+        const campo = document.querySelector(`[name="${nombre}"]`);
+        if (campo && campo.value === '') campo.value = '0.00';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      cambiarTipoInforme();
+      evaluarTipoPersona();
+      calcularCostesPersonal();
+      calcularCostesDanos();
+      calcularOtrosCostes();
+      calcularMasterTotales();
+    });
 
     function agregarFilaTrabajador() {
       const body = document.getElementById('body_trabajadores');
