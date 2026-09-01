@@ -438,27 +438,27 @@ def generar_pdf_100_porciento(
 
     # Desglose de daños materiales con detalle de cantidades, horas y tarifas.
     danos_items = [
-        ("Edificios propios", "Horas × costo/hora", costo_numero(g(f, "dm_edif_propio_hrs", "0")) * costo_numero(g(f, "dm_edif_propio_costo", "0"))),
-        ("Edificios externos", "Importe declarado", g(f, "dm_edif_externo_costo", "0")),
-        ("Materiales de edificios", "Importe declarado", g(f, "dm_edif_mat_costo", "0")),
-        ("Maquinaria propia", "Horas × costo/hora", costo_numero(g(f, "dm_maq_propio_hrs", "0")) * costo_numero(g(f, "dm_maq_propio_costo", "0"))),
-        ("Maquinaria externa", "Importe declarado", g(f, "dm_maq_externo_costo", "0")),
+        ("Reparación por personal Propio (mano de obra)", "Horas × costo/hora", costo_numero(g(f, "dm_edif_propio_hrs", "0")) * costo_numero(g(f, "dm_edif_propio_costo", "0"))),
+        ("Reparación por personal Externo (mano de obra)", "Importe declarado", g(f, "dm_edif_externo_costo", "0")),
+        ("Materiales", "Importe declarado", g(f, "dm_edif_mat_costo", "0")),
+        ("Reparación de maquinaria por personal Propio (mano de obra)", "Horas × costo/hora", costo_numero(g(f, "dm_maq_propio_hrs", "0")) * costo_numero(g(f, "dm_maq_propio_costo", "0"))),
+        ("Reparación de maquinaria por personal Externo (mano de obra)", g(f, "dm_maq_externo_costo", "0")),
         ("Repuestos de maquinaria", "Importe declarado", g(f, "dm_maq_repuestos_costo", "0")),
-        ("Reposición de maquinaria", "Importe declarado", g(f, "dm_maq_reposicion_costo", "0")),
-        ("Materias primas", "Cantidad × costo/unidad", costo_numero(g(f, "dm_mat_primas_cant", "0")) * costo_numero(g(f, "dm_mat_primas_costo", "0"))),
+        ("Reposición de maquinaria (en caso de inutilización)", "Importe declarado", g(f, "dm_maq_reposicion_costo", "0")),
+        ("Costo de materias primas", "Cantidad × costo/unidad", costo_numero(g(f, "dm_mat_primas_cant", "0")) * costo_numero(g(f, "dm_mat_primas_costo", "0"))),
         ("Productos terminados", "Cantidad × costo/unidad", costo_numero(g(f, "dm_prod_terminados_cant", "0")) * costo_numero(g(f, "dm_prod_terminados_costo", "0"))),
-        ("Parada de máquina", "Horas × costo/hora", costo_numero(g(f, "dm_parada_hrs", "0")) * costo_numero(g(f, "dm_parada_costo_hora", "0"))),
+        ("Costo de parada de máquina", "Horas × costo/hora", costo_numero(g(f, "dm_parada_hrs", "0")) * costo_numero(g(f, "dm_parada_costo_hora", "0"))),
     ]
     filas_danos_detalle = "".join(fila_detalle(nombre, detalle, monto) for nombre, detalle, monto in danos_items)
 
     # Desglose de otros costos y de cada registro de baja de rendimiento.
     otros_items = [
-        ("Primeros auxilios / médicos", "Importe declarado", g(f, "oc_mat_auxilios", "0")),
-        ("Traslado", "Importe declarado", g(f, "oc_traslado", "0")),
-        ("Sanciones contractuales", "Importe declarado", g(f, "oc_sanciones_contrato", "0")),
+        ("Costo de primeros auxilios / médicos", "Importe declarado", g(f, "oc_mat_auxilios", "0")),
+        ("Costo de Traslado", "Importe declarado", g(f, "oc_traslado", "0")),
+        ("Costo de sanciones contractuales", "Importe declarado", g(f, "oc_sanciones_contrato", "0")),
         ("Multas de ley", "Importe declarado", g(f, "oc_multas_ley", "0")),
-        ("Responsabilidad civil", "Importe declarado", g(f, "oc_resp_civil", "0")),
-        ("Daños a terceros / medio ambiente", "Importe declarado", g(f, "oc_danos_terceros_ma", "0")),
+        ("Costo de responsabilidad civil", "Importe declarado", g(f, "oc_resp_civil", "0")),
+        ("Costo de daños a terceros / medio ambiente", "Importe declarado", g(f, "oc_danos_terceros_ma", "0")),
     ]
     for i in range(1, 4):
         horas = costo_numero(g(f, f"oc_rend_hrs_{i}", "0"))
