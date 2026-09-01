@@ -643,8 +643,8 @@
                 <tr class="bg-slate-200 font-bold border-b text-[11px] text-slate-700">
                   <th class="p-2 text-center w-12">#</th>
                   <th class="p-2">Tipo</th>
-                  <th class="p-2">Causas Comunes</th>
-                  <th class="p-2">Causa Subyacente (Causa Raíz)</th>
+                  <th class="p-2">Causas Comunes (Básicas)</th>
+                  <th class="p-2">Causa Raíz</th>
                   <th class="p-2">Observaciones</th>
                 </tr>
               </thead>
@@ -665,7 +665,7 @@
                   </td>
                   <td class="p-1">
                     <select id="csub_subyacente_1" name="csub_subyacente_1" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Seleccionar Causa Raíz --</option>
+                      <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_obs_1" class="w-full border rounded p-1"></td>
@@ -686,7 +686,7 @@
                   </td>
                   <td class="p-1">
                     <select id="csub_subyacente_2" name="csub_subyacente_2" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Seleccionar Causa Raíz --</option>
+                      <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_obs_2" class="w-full border rounded p-1"></td>
@@ -707,7 +707,7 @@
                   </td>
                   <td class="p-1">
                     <select id="csub_subyacente_3" name="csub_subyacente_3" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Seleccionar Causa Raíz --</option>
+                      <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_obs_3" class="w-full border rounded p-1"></td>
@@ -728,7 +728,7 @@
                   </td>
                   <td class="p-1">
                     <select id="csub_subyacente_4" name="csub_subyacente_4" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Seleccionar Causa Raíz --</option>
+                      <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_obs_4" class="w-full border rounded p-1"></td>
@@ -749,7 +749,7 @@
                   </td>
                   <td class="p-1">
                     <select id="csub_subyacente_5" name="csub_subyacente_5" class="w-full border rounded p-1 bg-white">
-                      <option value="">-- Seleccionar Causa Raíz --</option>
+                      <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
                   <td class="p-1"><input type="text" name="csub_obs_5" class="w-full border rounded p-1"></td>
@@ -912,7 +912,7 @@
 
               <!-- SSOMA -->
               <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
-                <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">🪖 Valoración económica de las horas empleadas por Seguridad (Supervisor) para asesorar en el análisis del accidente y el seguimiento respectivo:</span>
+                <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">🪖 Valoración económica de las horas empleadas por Seguridad (Supervisor) para asesorar en el análisis del accidente y el seguimiento respectivo.</span>
                 <div>
                   <label class="font-bold block text-slate-700 mb-1 text-[11px]">Salario Mensual (S/):</label>
                   <input type="number" step="0.01" min="0" id="salario_ssoma" name="salario_ssoma" oninput="calcularCostesPersonal()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -963,528 +963,885 @@
                 <div class="grid grid-cols-2 gap-2 md:col-span-2">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas</label>
-                    <input type="number" step="0.5" min="0" id="dm_edif_propio_hrs" name="dm_edif_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1 bg-white">
+                    <input type="number" step="0.5" min="0" id="dm_edif_propio_hrs" name="dm_edif_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Costo Estimado (S/)</label>
-                    <input type="number" step="0.01" min="0" id="dm_edif_propio_costo" name="dm_edif_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste horario (S/./h)</label>
+                    <input type="number" step="0.01" min="0" id="dm_edif_propio_costo" name="dm_edif_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                   </div>
                 </div>
-              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center border-t pt-2">
-                <span class="font-bold text-slate-700 text-xs">Reparación por Contratista / Proveedores:</span>
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Externo (mano de obra):</span>
                 <div class="md:col-span-2">
-                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Costo Estimado (S/)</label>
-                  <input type="number" step="0.01" min="0" id="dm_edif_contratista_costo" name="dm_edif_contratista_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_edif_externo_costo" name="dm_edif_externo_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Materiales:</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_edif_mat_costo" name="dm_edif_mat_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
             </div>
 
-            <!-- 2.2. Maquinarias y Equipos -->
+            <!-- 2.2. Máquinas, equipos y herramientas -->
             <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
-              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.2. Maquinarias y Equipos:</span>
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.2. Máquinas, equipos y herramientas:</span>
               
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
                 <span class="font-bold text-slate-700 text-xs">Reparación por personal Propio (mano de obra):</span>
                 <div class="grid grid-cols-2 gap-2 md:col-span-2">
                   <div>
                     <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas</label>
-                    <input type="number" step="0.5" min="0" id="dm_maq_propio_hrs" name="dm_maq_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1 bg-white">
+                    <input type="number" step="0.5" min="0" id="dm_maq_propio_hrs" name="dm_maq_propio_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                   </div>
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Costo Estimado (S/)</label>
-                    <input type="number" step="0.01" min="0" id="dm_maq_propio_costo" name="dm_maq_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste horario (S/./h)</label>
+                    <input type="number" step="0.01" min="0" id="dm_maq_propio_costo" name="dm_maq_propio_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                   </div>
                 </div>
-              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center border-t pt-2">
-                <span class="font-bold text-slate-700 text-xs">Reparación por Contratista / Proveedores:</span>
+                <span class="font-bold text-slate-700 text-xs">Reparación por personal Externo (mano de obra):</span>
                 <div class="md:col-span-2">
-                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Costo Estimado (S/)</label>
-                  <input type="number" step="0.01" min="0" id="dm_maq_contratista_costo" name="dm_maq_contratista_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_externo_costo" name="dm_maq_externo_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Repuestos:</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_repuestos_costo" name="dm_maq_repuestos_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+
+                <span class="font-bold text-slate-700 text-xs">Reposición (en caso de inutilización):</span>
+                <div class="md:col-span-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.)</label>
+                  <input type="number" step="0.01" min="0" id="dm_maq_reposicion_costo" name="dm_maq_reposicion_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
               </div>
             </div>
 
-            <!-- 2.3. Materiales e Insumos -->
-            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+            <!-- 2.3. Materias primas -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.3. Materias primas:</span>
+              
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
-                <span class="font-extrabold text-blue-900 text-xs">2.3. Pérdida o Daño de Materiales e Insumos:</span>
-                <div class="md:col-span-2">
-                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Costo Estimado (S/)</label>
-                  <input type="number" step="0.01" min="0" id="dm_materiales_costo" name="dm_materiales_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+                <span class="font-bold text-slate-700 text-xs">Materias primas:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                    <input type="number" step="1" min="0" id="dm_mat_primas_cant" name="dm_mat_primas_cant" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.) / Cantidad</label>
+                    <input type="number" step="0.01" min="0" id="dm_mat_primas_costo" name="dm_mat_primas_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.4. Productos terminados o semitransformados -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.4. Productos terminados o semitransformados:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Productos terminados o semitransformados:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                    <input type="number" step="1" min="0" id="dm_prod_terminados_cant" name="dm_prod_terminados_cant" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste (S/.) / Cantidad</label>
+                    <input type="number" step="0.01" min="0" id="dm_prod_terminados_costo" name="dm_prod_terminados_costo" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2.5. Valoración económica del tiempo perdido por parada de máquina -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">2.5. Valoración económica del tiempo perdido por parada de máquina:</span>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <span class="font-bold text-slate-700 text-xs">Tiempo perdido por parada de máquina:</span>
+                <div class="grid grid-cols-2 gap-2 md:col-span-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Horas de parada</label>
+                    <input type="number" step="0.5" min="0" id="dm_parada_hrs" name="dm_parada_hrs" oninput="calcularCostesDanos()" placeholder="0" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Coste de máquina (S/.) / hora</label>
+                    <input type="number" step="0.01" min="0" id="dm_parada_costo_hora" name="dm_parada_costo_hora" oninput="calcularCostesDanos()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- TOTALIZADOR DAÑOS MATERIALES -->
             <div class="bg-amber-100 p-3 rounded-lg border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-2">
-              <span class="font-black text-slate-800 text-sm uppercase">💰 COSTO TOTAL DAÑOS MATERIALES (S/):</span>
+              <span class="font-black text-slate-800 text-sm uppercase">🏗️ COSTO DE DAÑOS MATERIALES TOTAL (S/):</span>
               <div class="flex items-center gap-1">
                 <span class="font-black text-base text-amber-900">S/</span>
-                <input type="number" step="0.01" id="coste_total_danos" name="coste_total_danos" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+                <input type="number" step="0.01" id="coste_total_danos_materiales" name="coste_total_danos_materiales" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- 3. OTROS COSTES PERDIDOS -->
+        <!-- 3. OTROS COSTES -->
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
-            3. OTROS COSTES PERDIDOS
+            3. OTROS COSTES
           </div>
-          <div class="p-4 bg-slate-50 space-y-3">
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center bg-white p-2.5 rounded border border-slate-200">
-              <span class="font-bold text-slate-700 text-xs">Contratación de Personal Temporal / Reemplazo:</span>
-              <div class="md:col-span-2">
-                <input type="number" step="0.01" min="0" id="oc_personal_temporal" name="oc_personal_temporal" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+          <div class="p-4 bg-slate-50 space-y-4">
+
+            <!-- 3.1. Materiales de primeros auxilios y traslado -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.1. Valoración económica de los costos por empleo de materiales de primeros auxilios y traslado del accidentado:</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Materiales de primeros auxilios (S/.):</label>
+                  <input type="number" step="0.01" min="0" id="oc_mat_auxilios" name="oc_mat_auxilios" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="font-bold block text-slate-700 mb-1 text-[11px]">Traslado del accidentado (transporte) (S/.):</label>
+                  <input type="number" step="0.01" min="0" id="oc_traslado" name="oc_traslado" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center bg-white p-2.5 rounded border border-slate-200">
-              <span class="font-bold text-slate-700 text-xs">Perdidas por Parálisis de Producción / Retraso de Obra:</span>
-              <div class="md:col-span-2">
-                <input type="number" step="0.01" min="0" id="oc_paralisis_obra" name="oc_paralisis_obra" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+            <!-- 3.2. Sanciones plazos de entrega -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.2. Valoración económica de sanciones por no cumplir plazos de entrega (bienes, servicios, documentación):</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor conforme al contrato (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_sanciones_contrato" name="oc_sanciones_contrato" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center bg-white p-2.5 rounded border border-slate-200">
-              <span class="font-bold text-slate-700 text-xs">Sanciones, Multas o Indemnizaciones Legales:</span>
-              <div class="md:col-span-2">
-                <input type="number" step="0.01" min="0" id="oc_multas_sanciones" name="oc_multas_sanciones" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+            <!-- 3.3. Costos por implicaciones legales -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.3. Costos por implicaciones legales:</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Multas de acuerdo a Ley (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_multas_ley" name="oc_multas_ley" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center bg-white p-2.5 rounded border border-slate-200">
-              <span class="font-bold text-slate-700 text-xs">Otros Gastos No Especificados:</span>
-              <div class="md:col-span-2">
-                <input type="number" step="0.01" min="0" id="oc_otros_gastos" name="oc_otros_gastos" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 bg-white">
+            <!-- 3.4. Responsabilidad Civil, Indemnizaciones -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.4. Responsabilidad Civil, Indemnizaciones:</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_resp_civil" name="oc_resp_civil" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
               </div>
             </div>
 
-            <!-- TOTALIZADOR OTROS COSTES -->
-            <div class="bg-amber-100 p-3 rounded-lg border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-2">
-              <span class="font-black text-slate-800 text-sm uppercase">💰 COSTO TOTAL OTROS GASTOS (S/):</span>
+            <!-- 3.5. Daños a terceros y/o Medio Ambiente -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.5. Daños a terceros y/o al Medio ambiente (empleo de útiles de limpieza y control de derrames):</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                <label class="font-bold text-slate-700 text-xs">Valor (S/.):</label>
+                <div class="md:col-span-2">
+                  <input type="number" step="0.01" min="0" id="oc_danos_terceros_ma" name="oc_danos_terceros_ma" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1.5 text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3.6. Baja del rendimiento del trabajador -->
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-3">
+              <span class="font-extrabold text-blue-900 block text-xs border-b pb-1">3.6. Valoración económica de la baja del rendimiento del trabajador a su regreso.</span>
+              <p class="text-[11px] font-bold text-slate-600 bg-amber-50 p-2 rounded border border-amber-200">
+                📌 30% en la primera semana (5 días) de reincorporación:
+              </p>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[500px]">
+                  <thead>
+                    <tr class="bg-slate-200 font-bold border-b text-[10px] text-slate-700">
+                      <th class="p-2 w-1/2">horas/día</th>
+                      <th class="p-2 w-1/2">Coste horario (S/./h)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b bg-white">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_1" name="oc_rend_hrs_1" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_1" name="oc_rend_costo_1" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                    <tr class="border-b bg-slate-50">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_2" name="oc_rend_hrs_2" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_2" name="oc_rend_costo_2" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                    <tr class="border-b bg-white">
+                      <td class="p-1"><input type="number" step="0.5" min="0" id="oc_rend_hrs_3" name="oc_rend_hrs_3" oninput="calcularOtrosCostes()" placeholder="0" class="w-full border rounded p-1 text-xs"></td>
+                      <td class="p-1"><input type="number" step="0.01" min="0" id="oc_rend_costo_3" name="oc_rend_costo_3" oninput="calcularOtrosCostes()" placeholder="0.00" class="w-full border rounded p-1 text-xs"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- SUB-TOTAL OTROS COSTES -->
+            <div class="bg-blue-900 text-white p-3 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span class="font-black text-xs md:text-sm uppercase tracking-wide">SUB - TOTAL OTROS COSTES (S/.):</span>
               <div class="flex items-center gap-1">
-                <span class="font-black text-base text-amber-900">S/</span>
-                <input type="number" step="0.01" id="coste_total_otros" name="coste_total_otros" readonly placeholder="0.00" class="border-2 border-amber-600 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
+                <span class="font-black text-base text-amber-400">S/</span>
+                <input type="number" step="0.01" id="coste_subtotal_otros" name="coste_subtotal_otros" readonly placeholder="0.00" class="border-2 border-amber-500 rounded p-2 bg-white text-slate-900 font-black text-base w-40 text-right cursor-not-allowed">
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- RESUMEN GENERAL Y TOTAL GLOBAL DE COSTES -->
-        <div class="bg-slate-900 text-white p-5 rounded-xl border-2 border-amber-500 shadow-xl space-y-4">
-          <h3 class="font-black text-base uppercase text-amber-400 border-b border-slate-700 pb-2 flex items-center gap-2">
-            📊 RESUMEN GENERAL DE COSTOS DEL EVENTO
-          </h3>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold">
-            <div class="bg-slate-800 p-3 rounded border border-slate-700">
-              <span class="block text-slate-400 mb-1">Total Costes Personal:</span>
-              <span id="res_costo_personal" class="text-base font-bold text-emerald-400">S/ 0.00</span>
-            </div>
-            <div class="bg-slate-800 p-3 rounded border border-slate-700">
-              <span class="block text-slate-400 mb-1">Total Costes Materiales:</span>
-              <span id="res_costo_materiales" class="text-base font-bold text-emerald-400">S/ 0.00</span>
-            </div>
-            <div class="bg-slate-800 p-3 rounded border border-slate-700">
-              <span class="block text-slate-400 mb-1">Total Otros Costes:</span>
-              <span id="res_costo_otros" class="text-base font-bold text-emerald-400">S/ 0.00</span>
-            </div>
-          </div>
-
-          <div class="bg-amber-500 text-slate-950 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-2 shadow-inner">
-            <span class="font-black text-lg uppercase tracking-wide">GRAND TOTAL ESTIMADO DEL ACCIDENTE / EVENTO:</span>
-            <span id="res_costo_total_global" class="font-black text-2xl tracking-wider">S/ 0.00</span>
-          </div>
-        </div>
-
-        <!-- REVISADO Y APROBADO POR -->
+        <!-- 4. GASTOS DIVERSOS -->
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">REVISADO Y APROBADO POR</div>
-          <div class="p-4 bg-slate-50 space-y-6">
-            
-            <!-- Investigador del Evento -->
-            <div class="border border-slate-300 rounded-lg p-4 bg-white shadow-sm space-y-3">
-              <span class="font-extrabold text-blue-900 block border-b pb-1">1. INVESTIGADOR DEL EVENTO:</span>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="font-bold block text-slate-700 mb-1">Nombres y Apellidos:</label>
-                  <input type="text" id="inv_nombre" name="inv_nombre" oninput="actualizarFirmaInv()" placeholder="Nombre completo" class="w-full border rounded p-2 bg-white">
-                </div>
-                <div>
-                  <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
-                  <input type="text" name="inv_cargo" placeholder="Ej. Especialista SSOMA" class="w-full border rounded p-2 bg-white">
-                </div>
-                <div>
-                  <label class="font-bold block text-slate-700 mb-1">Fecha:</label>
-                  <input type="date" name="inv_fecha" class="w-full border rounded p-2 bg-white">
-                </div>
-              </div>
-              <div class="bg-slate-50 p-3 rounded border-2 border-dashed border-slate-300">
-                <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma Digital Registrada:</label>
-                <p id="vista_firma_inv" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-                  [AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]
-                </p>
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">
+            4. GASTOS DIVERSOS (INFORMES, INVESTIGACIONES, ETC.)
+          </div>
+          <div class="p-4 bg-slate-50 space-y-4">
+            <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-3">
+              <span class="font-extrabold text-slate-700 text-xs">2% del total anterior (Personal + Daños Materiales + Otros Costes):</span>
+              <div class="flex items-center gap-1 w-full md:w-auto">
+                <span class="font-black text-sm text-slate-700">S/</span>
+                <input type="number" step="0.01" id="coste_gastos_diversos" name="coste_gastos_diversos" readonly placeholder="0.00" class="w-full md:w-40 border-2 border-slate-400 rounded p-2 bg-slate-100 text-slate-900 font-bold text-sm text-right cursor-not-allowed">
               </div>
             </div>
 
-            <!-- Testigo u Involucrado -->
-            <div class="border border-slate-300 rounded-lg p-4 bg-white shadow-sm space-y-3">
-              <span class="font-extrabold text-blue-900 block border-b pb-1">2. TESTIGO U OTRO INVOLUCRADO:</span>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label class="font-bold block text-slate-700 mb-1">Nombres y Apellidos:</label>
-                  <input type="text" id="tes_nombre" name="tes_nombre" oninput="actualizarFirmaTes()" placeholder="Nombre completo" class="w-full border rounded p-2 bg-white">
-                </div>
-                <div>
-                  <label class="font-bold block text-slate-700 mb-1">Cargo / Condición:</label>
-                  <input type="text" name="tes_cargo" placeholder="Ej. Testigo directo / Operario" class="w-full border rounded p-2 bg-white">
-                </div>
-                <div>
-                  <label class="font-bold block text-slate-700 mb-1">Fecha:</label>
-                  <input type="date" name="tes_fecha" class="w-full border rounded p-2 bg-white">
-                </div>
-              </div>
-              <div class="bg-slate-50 p-3 rounded border-2 border-dashed border-slate-300">
-                <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma Digital Registrada:</label>
-                <p id="vista_firma_tes" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-                  [AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]
-                </p>
+            <!-- COSTO TOTAL DEL ACCIDENTE -->
+            <div class="bg-slate-950 text-white p-4 rounded-xl border-4 border-amber-500 shadow-md flex flex-col md:flex-row justify-between items-center gap-3">
+              <span class="font-black text-sm md:text-base text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                <span>🚨</span> COSTO TOTAL DEL ACCIDENTE (S/.):
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-xl text-amber-400">S/</span>
+                <input type="number" step="0.01" id="coste_total_accidente" name="coste_total_accidente" readonly placeholder="0.00" class="border-2 border-amber-500 rounded-lg p-2.5 bg-white text-slate-950 font-black text-xl w-48 text-right cursor-not-allowed shadow-inner">
               </div>
             </div>
+          </div>
+        </div>
 
+        <!-- TABLA RESUMEN VISTA IMPRESIÓN / PLANTILLA -->
+        <div style="page-break-inside: avoid; margin-top: 15px;" class="border border-slate-300 rounded-lg overflow-hidden shadow-sm">
+          <h3 style="background-color: #1e3a8a; color: white; padding: 8px 12px; font-size: 13px; font-weight: bold;">
+            RESUMEN DE VALORACIÓN DE LOS COSTES DEL ACCIDENTE
+          </h3>
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="background-color: #f3f4f6;">
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Concepto</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">Total (S/.)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">1. Costo del Personal Total</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_personal">0.00</span></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">2. Costo de Daños Materiales Total</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_materiales">0.00</span></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">3. Sub-Total Otros Costes</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_otros">0.00</span></td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 8px;">4. Gastos Diversos (2%)</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">S/ <span id="resumen_gastos">0.00</span></td>
+              </tr>
+              <tr style="background-color: #fef08a; font-weight: bold;">
+                <td style="border: 1px solid #ccc; padding: 10px;">COSTO TOTAL DEL ACCIDENTE</td>
+                <td style="border: 1px solid #ccc; padding: 10px; text-align: right;">S/ <span id="resumen_total">0.00</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Nombre Completo:</label>
+              <input type="text" id="inv_nombre" name="inv_nombre" oninput="actualizarFirmaInv()" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
+              <input type="text" name="inv_cargo" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
+              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Investigador:</label>
+              <p id="vista_firma_inv" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
+                [FIRMA EN NEGRITAS]
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TESTIGOS -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">TESTIGOS</div>
+          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Nombre Completo del Testigo:</label>
+              <input type="text" id="tes_nombre" name="tes_nombre" oninput="actualizarFirmaTes()" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Cargo / Vínculo:</label>
+              <input type="text" name="tes_cargo" class="w-full border rounded p-2 bg-white">
+            </div>
+            <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
+              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Testigo:</label>
+              <p id="vista_firma_tes" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
+                [FIRMA EN NEGRITAS]
+              </p>
+            </div>
           </div>
         </div>
 
       </div>
 
-      <!-- BOTÓN DE ENVÍO -->
-      <div class="pt-4 text-center">
-        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-sm px-8 py-3 rounded-xl uppercase tracking-wider shadow-lg transition transform hover:-translate-y-0.5 cursor-pointer">
-          💾 Registrar Informe SSOMA
-        </button>
-      </div>
+      <button type="submit" id="btnGuardar" class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-900 font-black py-4 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer">
+        <span>💾</span> GENERAR Y GUARDAR REGISTRO EN EXCEL
+      </button>
 
     </form>
   </div>
 
   <script>
-    // --- DATOS DINÁMICOS PARA CAUSAS INMEDIATAS ---
-    const causasFrecuentesData = {
+    const causasInmediatasData = {
       "Acto Subestandar": [
-        "Operar equipos sin autorización",
-        "No advertir o señalizar peligros",
-        "Falta de asegurar / asegurar inadecuadamente",
-        "Operar a velocidad inadecuada",
-        "Desactivar dispositivos de seguridad",
-        "Usar equipo defectuoso",
-        "Usar herramientas / equipos de forma incorrecta",
-        "No usar EPP o usarlo incorrectamente",
-        "Cargar o almacenar de forma incorrecta",
-        "Levantar objetos en posición incorrecta",
-        "Posición o postura inadecuada para la tarea",
-        "Mantenimiento o servicio a equipo en movimiento",
-        "Broma, distracción o juego en el trabajo",
-        "Bajo influencia de alcohol u otras drogas"
+        "Operar equipo sin autorización",
+        "Omisión de informar/ advertir",
+        "Omisión de Sujetar/Bloquear/Contener",
+        "Operar Equipo /Sistema a Velocidad Inadecuada",
+        "Desactivar o Anular Dispositivos Críticos de Seguridad",
+        "Usar Herramientas /Equipos/ Máquina /Dispositivo Defectuoso",
+        "Operación inadecuada de Herramientas / equipo / Maquina /Dispositivo /Instalación de Proceso",
+        "Mantenimiento Inadecuado de Equipo / Maquina / Instalación de proceso en funcionamiento",
+        "Uso de Material Incorrecto / Inadecuado",
+        "No usar correctamente el equipo de protección personal (EPP).",
+        "Operación incorrecta de carga",
+        "Operación incorrecta de colocación",
+        "Operación incorrecta de izado",
+        "Posición inadecuada para el trabajo o la tarea.",
+        "Comportamiento incorrecto/ inadecuado.",
+        "Trabajar bajo la influencia de medicación/ alcohol/ drogas.",
+        "No seguir procedimiento/ instrucciones.",
+        "Falla al identificar peligro",
+        "Acto sub estándar por parte de terceros (que no está bajo control propio).",
+        "No identificar requisitos de clientes/ partes interesadas",
+        "No cumplir requisitos de clientes/ partes interesadas",
+        "Disturbios civiles (motines, revueltas, guerra)",
+        "Actividad Delictivas"
       ],
       "Condición Subestandar": [
-        "Protecciones o resguardos inadecuados",
-        "Equipos de protección inadecuados o insuficientes",
-        "Herramientas, equipos o materiales defectuosos",
-        "Espacio de trabajo congestionado o reducido",
-        "Sistemas de advertencia inadecuados",
-        "Peligro de explosión e incendio",
-        "Desorden y falta de limpieza en el área",
-        "Condiciones ambientales peligrosas (gases, polvo, humo)",
-        "Exposición a ruido excesivo",
-        "Exposición a radiación o temperaturas extremas",
-        "Iluminación deficiente o excesiva",
-        "Ventilación inadecuada"
+        "Condiciones inadecuadas de pisos/superficie",
+        "Herramienta/ equipo defectuoso",
+        "Herramientas/ equipo incorrecto/ Inadecuado.",
+        "Integridad inadecuada de herramientas/ equipo de proceso",
+        "Falla en detectar/ medir",
+        "Medida /medida de señal inadecuada",
+        "Material incorrecto",
+        "Composición incorrecta de material / gas/ líquido",
+        "Protección/ barrera inadecuada",
+        "Equipo de Protección Personal (EPP) inadecuado/ incorrecto",
+        "Espacio para actuar limited/ restringido.",
+        "Sistema de advertencia inadecuado",
+        "Presencia de atmosfera explosiva /Inflamable",
+        "Presencia no autorizada de materiales peligrosos",
+        "Orden y limpieza deficiente",
+        "Nivel de ruido por encima del umbral",
+        "Radiación por encima del umbral",
+        "Iluminación excesiva / deficiente",
+        "Vibración por encima del umbral.",
+        "Exposición a altas temperaturas",
+        "Exposición a bajas temperaturas",
+        "Presión excede los límites",
+        "Ventilación inadecuada",
+        "Información inadecuada",
+        "Exposición a condiciones climáticas adversas"
       ]
     };
 
-    // --- DATOS DINÁMICOS PARA CAUSAS SUBYACENTES Y CAUSAS RAÍZ ---
     const causasSubyacentesData = {
       "Factores Personales": [
         "Capacidad física / fisiológica inadecuada",
         "Capacidad mental / psicológica inadecuada",
-        "Estrés físico / fisiológico",
-        "Estrés mental / psicológico",
-        "Falta de competencias",
+        "Tensión física o fisiológica",
+        "Tensión mental o psicológica",
+        "Falta de conocimiento",
+        "Falta de habilidad",
         "Motivación inadecuada"
       ],
       "Factores Laborales / Trabajo": [
-        "Estructura organizativa poco clara",
-        "Liderazgo inadecuado",
-        "Supervisión Inadecuada / Coaching",
-        "Inadecuada Administración del Cambio",
-        "Inadecuada administración de la cadena de suministros",
-        "Inadecuado Mantenimiento / Inspección",
-        "Desgaste Excesivo",
-        "Inadecuada Herramienta / Equipo / Maquina / Dispositivo",
-        "Inadecuado Diseño de Producto / Servicio",
-        "Inadecuada Comunicación / Información"
+        "Liderazgo y/o supervisión inadecuada",
+        "Ingeniería inadecuada",
+        "Adquisiciones inadecuadas",
+        "Mantenimiento inadecuado",
+        "Herramientas y equipos inadecuados",
+        "Estándares de trabajo inadecuados",
+        "Uso y desgaste excesivo",
+        "Abuso o mal uso"
       ]
     };
 
     const causasRaizData = {
+      // FACTORES PERSONALES
       "Capacidad física / fisiológica inadecuada": [
-        "Estatura, Peso, tamaño, fuerza, alcance, etc, inadecuados",
-        "Rango limitado de movimiento corporal",
-        "Capacidad limitada para mantener posiciones del cuerpo",
-        "Alergias o sensibilidad a sustancias",
-        "Sensibilidad a extremos sensoriales",
-        "Defecto de visión",
-        "Defecto de audición",
-        "Otros defectos sensoriales (tacto, gusto, olfato, equilibrio)",
-        "Incapacidad respiratoria",
-        "Otras capacidades físicas permanentes",
-        "Incapacidades temporales"
+        "Estatura, peso, tamaño, fuerza, alcance inadecuado",
+        "Capacidad de movimiento corporal restringida",
+        "Capacidad limitada para mantener posiciones corporales",
+        "Sensibilidad a sustancias o alergias",
+        "Sensibilidad a extremos sensoriales (ruido, temperatura)",
+        "Deficiencia visual o auditiva",
+        "Otras deficiencias físicas (tacto, gusto, olfato, equilibrio)",
+        "Incapacidad física permanente o temporal"
       ],
       "Capacidad mental / psicológica inadecuada": [
-        "Miedos y Fobias",
-        "Perturbación Emocional",
-        "Enfermedad Mental",
-        "Nivel de Inteligencia",
-        "Incapacidad para comprender / Mal discernimiento",
-        "Mala coordinación",
-        "Tiempo lento de reacción",
-        "Baja aptitud mecánica",
-        "Baja aptitud para el aprendizaje",
-        "Fallas de memoria"
+        "Temores y fobias",
+        "Desequilibrio emocional / estrés mental",
+        "Enfermedad o trastorno mental",
+        "Nivel de inteligencia / capacidad de comprensión reducida",
+        "Juicio deficiente o fallas de memoria",
+        "Mala coordinación o tiempo de reacción lento",
+        "Aptitud de aprendizaje o mecánica deficiente"
       ],
-      "Estrés físico / fisiológico": [
-        "Fatiga debida a falta de descanso",
-        "Fatiga debida a sobrecarga sensorial",
-        "Exposición a peligros para la salud",
-        "Exposición a temperaturas extremas",
-        "Deficiencia de oxígeno",
-        "Variación de la presión atmosférica",
+      "Tensión física o fisiológica": [
+        "Lesión o enfermedad previa no recuperada",
+        "Fatiga por carga o duración del trabajo",
+        "Fatiga por falta de descanso adecuado",
+        "Exposición a temperaturas u otros riesgos de salud",
+        "Insuficiencia de oxígeno o cambios de presión",
         "Restricción de movimiento",
-        "Insuficiencia de azúcar en la sangre",
-        "Estrés autoimpuesto por alcohol / drogas"
+        "Efectos de medicamentos, drogas o alcohol"
       ],
-      "Estrés mental / psicológico": [
-        "Sobrecarga emocional",
-        "Fatiga debida a la velocidad o carga de trabajo mental",
-        "Exigencias extremas de discernimiento / decisión",
-        "Rutina, monotonía, exigencia de vigilancia aburrida",
-        "Exigencias extremas de concentración / percepción",
-        "Actividades sin 'sentido' o 'degradantes'",
-        "Instrucciones / exigencias confusas",
-        "Exigencias / instrucciones contradictorias",
-        "Preocupación / Distracción debido a problemas",
-        "Frustración",
-        "Enfermedad Mental"
+      "Tensión mental o psicológica": [
+        "Sobrecarga emocional o fatiga por carga mental",
+        "Exigencias extremas de juicio o decisión",
+        "Rutina, monotonía o aburrimiento",
+        "Órdenes o exigencias confusas / contradictorias",
+        "Preocupación por problemas personales / laborales",
+        "Frustración o razonamiento ilógico"
       ],
-      "Falta de competencias": [
-        "Experiencia inadecuada",
-        "Orientación / inducción inadecuada",
-        "Capacitación inicial inadecuada",
-        "Entrenamiento de actualización inadecuado",
-        "Instrucción, informaciones mal interpretadas",
-        "Falta de conciencia sobre el entorno / percepción del riesgo / conciencia del riesgo",
-        "Instrucción inicial inadecuada / Entrenamiento de habilidades",
-        "Práctica inadecuada / insuficiente",
-        "Desempeño infrecuente / poco frecuente",
-        "Inadecuado coaching",
-        "Inadecuada revisión de instrucciones"
+      "Falta de conocimiento": [
+        "Falta de experiencia en la labor",
+        "Inducción o capacitación inicial insuficiente",
+        "Capacitación periódica o de actualización deficiente",
+        "Falta de entrenamiento específico en el puesto",
+        "Instrucciones o procedimientos mal interpretados"
+      ],
+      "Falta de habilidad": [
+        "Instrucción práctica inicial insuficiente",
+        "Práctica o entrenamiento de campo insuficiente",
+        "Ejecución de la tarea poco frecuente",
+        "Falta de asesoramiento / coaching de desempeño",
+        "Deficiente coordinación psicomotriz en la tarea"
       ],
       "Motivación inadecuada": [
-        "Desempeño / comportamiento incorrecto es tolerado o premiado",
-        "Desempeño / Comportamiento correcto es desalentado o castigado",
-        "Falta de incentivos",
-        "Incentivos de producción incorrectos",
-        "Incentivos de reducción de costos incorrecto",
-        "Frustración excesiva",
-        "Agresión inapropiada",
-        "Intento inapropiado de ahorrar tiempo y/o esfuerzo",
-        "Intento inapropiado de evitar incomodidad",
-        "Intento inapropiado de llamar la atención",
-        "Disciplina inadecuada",
-        "Presión inapropiada de los compañeros",
-        "Ejemplo de liderazgo / supervisión inapropiada",
-        "Retroalimentación del desempeño inadecuado",
-        "Abuso (intencional)",
-        "Mal uso (no intencional)"
+        "El comportamiento subestándar es tolerado o premiado",
+        "Falta de incentivos al desempeño seguro",
+        "Intento incorrecto de ahorrar tiempo o esfuerzo",
+        "Intento incorrecto de evitar incomodidad",
+        "Intento incorrecto de llamar la atención",
+        "Presión de los compañeros o ejemplo inadecuado del supervisor",
+        "Retroalimentación o disciplina inadecuada"
       ],
-      "Estructura organizativa poco clara": [
-        "Relación jerárquica confusa / contradictoria",
-        "Asignación de cargo / rol confuso / contradictoria",
-        "Tarea / Responsabilidad / accountability poco clara / contradictoria"
+
+      // FACTORES LABORALES / TRABAJO
+      "Liderazgo y/o supervisión inadecuada": [
+        "Relaciones jerárquicas o funciones poco claras",
+        "Delegación de responsabilidades inadecuada",
+        "Políticas, procedimientos o pautas de trabajo insuficientes",
+        "Planificación o programación inadecuada del trabajo",
+        "Instrucciones, orientación o capacitación inadecuada por el líder",
+        "Supervisión y control en campo insuficiente",
+        "Identificación y evaluación inadecuada de riesgos"
       ],
-      "Liderazgo inadecuado": [
-        "Estrategia de Activos / Riesgos inadecuada",
-        "Desarrollo de Liderazgo Inadecuado",
-        "Delegación Inadecuada",
-        "Estándares Inadecuados",
-        "Comunicación inadecuada / implementación de política / procedimiento / práctica inadecuadas",
-        "Política / procedimiento / práctica contradictoria",
-        "Planificación / programación de procesos / trabajo inadecuado",
-        "Tolerar desviación de política / procedimiento / práctica",
-        "Tolerar mal uso de equipo / herramienta",
-        "Tolerar comportamiento incorrecto / inadecuado",
-        "Inadecuada administración de la información",
-        "Inadecuado seguimiento / cierre de acciones de auditoría"
+      "Ingeniería inadecuada": [
+        "Evaluación inadecuada de los riesgos en la etapa de diseño",
+        "Consideración ergonómica / de factores humanos inadecuada",
+        "Criterios, especificaciones o normas de diseño defectuosas",
+        "Supervisión y control de construcción / montaje inadecuado",
+        "Evaluación inadecuada de la operatividad antes del arranque"
       ],
-      "Supervisión Inadecuada / Coaching": [
-        "Inadecuada Instrucción / Orientación / Capacitación",
-        "Inadecuada información de documentación de Supervisión / coaching",
-        "Falta de Supervisión de conocimiento del trabajo",
-        "Inadecuada coincidencia entre las calificaciones y los requisitos de trabajo / tarea",
-        "Inadecuada medición y evolución del desempeño",
-        "Inadecuada retroalimentación del rendimiento"
+      "Adquisiciones inadecuadas": [
+        "Especificaciones de compra incompletas o erróneas",
+        "Selección o evaluación inadecuada de proveedores/contratistas",
+        "Inspección de recepción y verificación de calidad deficiente",
+        "Falta de información sobre seguridad/fichas técnicas (HDS)",
+        "Almacenamiento o manipulación de materiales inadecuado"
       ],
-      "Inadecuada Administración del Cambio": [
-        "Inadecuada identificación de peligros / evaluación de riesgos en el diseño",
-        "Inadecuada identificación del modo de falla",
-        "Inadecuada evaluación de requerimientos de cliente / partes interesadas",
-        "Inadecuada identificación de requisitos legales",
-        "Inadecuada consideración en el diseño de factores ergonómicos / humanos",
-        "Inadecuado diseño del proceso / estándar / especificación criterio",
-        "Inadecuada automatización de control de procesos",
-        "Inadecuado estándar / especificación (técnica) / o ausencias de las mismas",
-        "Inadecuada revisión de riesgos del proceso",
-        "Inadecuado monitoreo de construcción / fabricación / montaje",
-        "Inadecuada evaluación de preparación operacional",
-        "Inadecuado proceso de puesta en marcha / entrega",
-        "Inadecuado monitoreo de la operación inicial",
-        "Inadecuado proceso de gestión del cambio"
+      "Mantenimiento inadecuado": [
+        "Mantenimiento preventivo insuficiente o ausente",
+        "Programación de mantenimiento inadecuada",
+        "Mantenimiento correctivo / reparación deficiente",
+        "Falta de repuestos originales o inspección de reparaciones"
       ],
-      "Inadecuada administración de la cadena de suministros": [
-        "Inadecuada especificaciones en la requisición / orden de compra",
-        "Inadecuada selección de material / equipo / herramienta / suministro / etc",
-        "Inadecuada especificación para el vendedor",
-        "Inadecuada forma / ruta de envío",
-        "Inadecuada comunicación de información de peligros",
-        "Inadecuada inspección de aceptación",
-        "Manipulación incorrecta de material",
-        "Almacenamiento incorrecto de material",
-        "Transporte incorrecto de materiales",
-        "Inadecuada vida útil / validación para reutilización de materiales / equipos",
-        "Inadecuada identificación de material",
-        "Inadecuada recuperación / disposición de residuos",
-        "Inadecuada selección de contratistas / proveedor"
+      "Herramientas y equipos inadecuados": [
+        "Evaluación de necesidades y riesgos del equipo inadecuada",
+        "Especificaciones de herramientas/equipos inadecuadas",
+        "Disponibilidad o accesibilidad de equipos deficiente",
+        "Mantenimiento o calibración de herramientas deficiente",
+        "Falta de sistema para retirar/reemplazar equipos defectuosos"
       ],
-      "Inadecuado Mantenimiento / Inspección": [
-        "Inadecuada evaluación de necesidad de mantenimiento preventivo",
-        "Inadecuada lubricación y servicio preventivo",
-        "Inadecuado ajuste / montaje",
-        "Inadecuada limpieza preventiva / recubrimiento de superficie",
-        "Inadecuada comunicación de necesidades de mantenimiento correctivo",
-        "Inadecuada programación de trabajos de mantenimiento",
-        "Inadecuada evaluación de necesidades de reparación",
-        "Inadecuada sustitución de partes / reemplazo",
-        "Inadecuado método de inspección / intervalos",
-        "Imposibilitado de inspeccionar",
-        "Estándares o especificaciones inadecuadas"
+      "Estándares de trabajo inadecuados": [
+        "Desarrollo o elaboración deficiente de PETS/IPERC",
+        "Comunicación y difusión de estándares insuficiente",
+        "Falta de revisión o actualización periódica de procedimientos",
+        "Monitoreo o fiscalización del cumplimiento de estándares deficiente"
       ],
-      "Desgaste Excesivo": [
-        "Inadecuada planificación de uso",
-        "Decisión incorrecta sobre extensión de la vida útil",
-        "Inadecuada inspección / monitoreo",
-        "Inapropiada carga / ritmo de uso",
-        "Uso para el propósito / tarea / actividad equivocado"
+      "Uso y desgaste excesivo": [
+        "Planificación o cálculo de vida útil del equipo inadecuado",
+        "Sobrecarga o tasa de uso superior al límite de diseño",
+        "Inspección y monitoreo de desgaste deficiente",
+        "Extensión injustificada de la vida útil sin mantenimiento"
       ],
-      "Inadecuada Herramienta / Equipo / Maquina / Dispositivo": [
-        "Evaluación inadecuada de necesidades y riesgos",
-        "Inadecuada consideración de factores humanos / ergonómicos",
-        "Inadecuado estándar / especificación",
-        "Incorrecta medida / detección / control (de proceso)",
-        "Inadecuada disponibilidad",
-        "Inadecuada inspección / reparación / mantenimiento",
-        "Inadecuado ajuste / calibración",
-        "Inadecuada remoción y reemplazo de artículos inapropiados"
-      ],
-      "Inadecuado Diseño de Producto / Servicio": [
-        "Inadecuada evaluación de necesidades y riesgo",
-        "Inadecuado sistema de concesión / especificación / estándar de servicio / producto",
-        "Inadecuado desarrollo / diseño de servicio / producto",
-        "Inadecuado servicio estándar / producto",
-        "Inadecuada validación del diseño de servicio / producto",
-        "Inadecuada verificación del diseño de servicio / producto",
-        "Inadecuada planificación de servicio / producto",
-        "Inadecuada verificación de calidad de servicios / producto",
-        "Inadecuada identificación de requisitos (regulaciones / códigos de la industria / permisos para operar)",
-        "Inadecuada identificación de riesgo / evaluación en desarrollo de estándar",
-        "Inadecuado estándar de proveedor / contratista",
-        "Inadecuada coordinación con diseño de procesos al desarrollar el estándar",
-        "Inadecuada participación del empleado en el desarrollo de estándares",
-        "Estándares Contradictorios / priorización incorrecta de estándares",
-        "Inadecuada publicación de estándar",
-        "Inadecuada distribución de estándar",
-        "Inadecuada traducción de idioma correcto",
-        "Uso incorrecto de lenguaje",
-        "Inadecuada capacitación de estándar",
-        "Inadecuado reforzamiento del estándar con señales, códigos de color y ayudas de trabajo",
-        "Inadecuado monitoreo del cumplimiento del estándar"
-      ],
-      "Inadecuada Comunicación / Información": [
-        "Inadecuado manejo de la información",
-        "Información poco clara",
-        "Inadecuada transferencia de información con cliente / partes interesadas",
-        "Inadecuada transferencia de información con autoridades",
-        "Inadecuada transferencia información con proveedores / contratistas / terceras partes",
-        "Inadecuada estructura de comunicación",
-        "Inadecuada base de datos / sistemas de Información",
-        "Inadecuado método información / técnicas usadas"
+      "Abuso o mal uso": [
+        "Uso de equipos para fines distintos a su diseño con conocimiento",
+        "Uso inadecuado por falta de supervisión estricta",
+        "Uso inapropiado no intencional por desconocimiento"
       ]
     };
 
-    // CAMBIO ENTRE INFORME PRELIMINAR Y FINAL
-    function cambiarTipoInforme() {
-      const tipo = document.getElementById("tipo_informe").value;
-      const secPreliminar = document.getElementById("seccion_preliminar");
-      const secFinal = document.getElementById("seccion_final");
+    function calcularCostesPersonal() {
+      const salAcc = parseFloat(document.getElementById('salario_accidentado')?.value) || 0;
+      const hrsAcc = parseFloat(document.getElementById('coste_hrs_accidentado')?.value) || 0;
 
-      if (tipo === "PRELIMINAR") {
-        secPreliminar.classList.remove("hidden");
-        secFinal.classList.add("hidden");
-      } else {
-        secPreliminar.classList.add("hidden");
-        secFinal.classList.remove("hidden");
+      const salOtros = parseFloat(document.getElementById('salario_otros')?.value) || 0;
+      const hrsOtros = parseFloat(document.getElementById('coste_hrs_otros_trabajadores')?.value) || 0;
+
+      const salSup = parseFloat(document.getElementById('salario_supervisor')?.value) || 0;
+      const hrsSup = parseFloat(document.getElementById('coste_hrs_supervisor')?.value) || 0;
+
+      const salSsoma = parseFloat(document.getElementById('salario_ssoma')?.value) || 0;
+      const hrsSsoma = parseFloat(document.getElementById('coste_hrs_ssoma')?.value) || 0;
+
+      const socorro = parseFloat(document.getElementById('coste_socorro_transporte')?.value) || 0;
+      const descansoMed = parseFloat(document.getElementById('coste_dias_descanso_medico')?.value) || 0;
+
+      const subtotalAcc = (salAcc / 240) * hrsAcc;
+      const subtotalOtros = (salOtros / 240) * hrsOtros;
+      const subtotalSup = (salSup / 240) * hrsSup;
+      const subtotalSsoma = (salSsoma / 240) * hrsSsoma;
+
+      const totalCoste = subtotalAcc + subtotalOtros + subtotalSup + subtotalSsoma + socorro + descansoMed;
+
+      const elemTotal = document.getElementById('coste_total_personal');
+      if (elemTotal) {
+        elemTotal.value = totalCoste.toFixed(2);
       }
+
+      calcularMasterTotales();
     }
 
-    // EVALUAR VÍNCULO DE TERCEROS
+    function calcularCostesDanos() {
+      const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
+      const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
+      const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
+      const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
+
+      const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
+      const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
+      const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
+      const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
+      const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
+
+      const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
+      const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
+
+      const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
+      const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
+
+      const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
+      const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
+
+      const subtotal21 = (edifPropHrs * edifPropCosto) + edifExtCosto + edifMatCosto;
+      const subtotal22 = (maqPropHrs * maqPropCosto) + maqExtCosto + maqRepCosto + maqRepoCosto;
+      const subtotal23 = matPrimCant * matPrimCosto;
+      const subtotal24 = prodTermCant * prodTermCosto;
+      const subtotal25 = paradaHrs * paradaCostoHora;
+
+      const totalDanos = subtotal21 + subtotal22 + subtotal23 + subtotal24 + subtotal25;
+
+      const elemTotal = document.getElementById('coste_total_danos_materiales');
+      if (elemTotal) {
+        elemTotal.value = totalDanos.toFixed(2);
+      }
+
+      calcularMasterTotales();
+    }
+
+    function calcularOtrosCostes() {
+      const matAux = parseFloat(document.getElementById('oc_mat_auxilios')?.value) || 0;
+      const traslado = parseFloat(document.getElementById('oc_traslado')?.value) || 0;
+      const sanciones = parseFloat(document.getElementById('oc_sanciones_contrato')?.value) || 0;
+      const multas = parseFloat(document.getElementById('oc_multas_ley')?.value) || 0;
+      const respCivil = parseFloat(document.getElementById('oc_resp_civil')?.value) || 0;
+      const danosTer = parseFloat(document.getElementById('oc_danos_terceros_ma')?.value) || 0;
+
+      const rHrs1 = parseFloat(document.getElementById('oc_rend_hrs_1')?.value) || 0;
+      const rCos1 = parseFloat(document.getElementById('oc_rend_costo_1')?.value) || 0;
+
+      const rHrs2 = parseFloat(document.getElementById('oc_rend_hrs_2')?.value) || 0;
+      const rCos2 = parseFloat(document.getElementById('oc_rend_costo_2')?.value) || 0;
+
+      const rHrs3 = parseFloat(document.getElementById('oc_rend_hrs_3')?.value) || 0;
+      const rCos3 = parseFloat(document.getElementById('oc_rend_costo_3')?.value) || 0;
+
+      const subRend = ((rHrs1 * rCos1) + (rHrs2 * rCos2) + (rHrs3 * rCos3)) * 5 * 0.30;
+
+      const subtotalOtros = matAux + traslado + sanciones + multas + respCivil + danosTer + subRend;
+
+      const elemSubOtros = document.getElementById('coste_subtotal_otros');
+      if (elemSubOtros) {
+        elemSubOtros.value = subtotalOtros.toFixed(2);
+      }
+
+      calcularMasterTotales();
+    }
+
+    function calcularMasterTotales() {
+      const totalPersonal = parseFloat(document.getElementById('coste_total_personal')?.value) || 0;
+      const totalDanos = parseFloat(document.getElementById('coste_total_danos_materiales')?.value) || 0;
+      const subtotalOtros = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
+
+      const totalAnterior = totalPersonal + totalDanos + subtotalOtros;
+      const gastosDiversos = totalAnterior * 0.02;
+
+      const elemGastosDiv = document.getElementById('coste_gastos_diversos');
+      if (elemGastosDiv) {
+        elemGastosDiv.value = gastosDiversos.toFixed(2);
+      }
+
+      const costoTotalAccidente = totalAnterior + gastosDiversos;
+      const elemTotalAcc = document.getElementById('coste_total_accidente');
+      if (elemTotalAcc) {
+        elemTotalAcc.value = costoTotalAccidente.toFixed(2);
+      }
+
+      // Actualizar tabla resumen dinámica
+      if (document.getElementById('resumen_personal')) document.getElementById('resumen_personal').textContent = totalPersonal.toFixed(2);
+      if (document.getElementById('resumen_materiales')) document.getElementById('resumen_materiales').textContent = totalDanos.toFixed(2);
+      if (document.getElementById('resumen_otros')) document.getElementById('resumen_otros').textContent = subtotalOtros.toFixed(2);
+      if (document.getElementById('resumen_gastos')) document.getElementById('resumen_gastos').textContent = gastosDiversos.toFixed(2);
+      if (document.getElementById('resumen_total')) document.getElementById('resumen_total').textContent = costoTotalAccidente.toFixed(2);
+    }
+
     function evaluarTipoPersona() {
-      const val = document.getElementById("tipoPersona").value;
-      const secContratista = document.getElementById("seccion-contratista");
-      const secLocador = document.getElementById("seccion-locador");
+      const valor = document.getElementById('tipoPersona').value;
+      const secContratista = document.getElementById('seccion-contratista');
+      const secLocador = document.getElementById('seccion-locador');
 
-      secContratista.classList.add("hidden");
-      secLocador.classList.add("hidden");
-
-      if (val === "contratista") {
-        secContratista.classList.remove("hidden");
-      } else if (val === "locador") {
-        secLocador.classList.remove("hidden");
-      }
-    }
-
-    // EVALUAR TIPO DE EVENTO (ACCIDENTE / INCIDENTE)
-    function evaluarOpcionesEvento() {
-      const tipo = document.getElementById("fin_tipo_evento").value;
-      const bloqueAcc = document.getElementById("bloque_accidente");
-      if (tipo === "INCIDENTE") {
-        bloqueAcc.classList.add("opacity-50", "pointer-events-none");
+      if (valor === 'contratista') {
+        secContratista.classList.remove('hidden');
+        secLocador.classList.add('hidden');
+      } else if (valor === 'locador') {
+        secContratista.classList.add('hidden');
+        secLocador.classList.remove('hidden');
       } else {
-        bloqueAcc.classList.remove("opacity-50", "pointer-events-none");
+        secContratista.classList.add('hidden');
+        secLocador.classList.add('hidden');
       }
     }
 
-    // TABLA TRABAJADORES DINÁMICA
+    function toggleDanoPropiedad(checkbox) {
+      const contenedor = document.getElementById('sec_dano_propiedad');
+      if (!contenedor) return;
+      const elementos = contenedor.querySelectorAll('input, select, textarea');
+
+      elementos.forEach(elem => {
+        if (checkbox.checked) {
+          elem.value = '';
+          elem.disabled = true;
+          elem.classList.add('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+          elem.classList.remove('bg-white');
+        } else {
+          elem.disabled = false;
+          elem.classList.remove('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
+          elem.classList.add('bg-white');
+        }
+      });
+    }
+
+    function cargarCausasFrecuentes(index) {
+      const selectTipo = document.getElementById(`cinm_tipo_${index}`);
+      const selectCausa = document.getElementById(`cinm_causa_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      if (causasInmediatasData[valorSeleccionado]) {
+        causasInmediatasData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
+    function cargarCausasSubyacentes(index) {
+      const selectTipo = document.getElementById(`csub_tipo_${index}`);
+      const selectCausa = document.getElementById(`csub_causa_${index}`);
+      const selectSubyacente = document.getElementById(`csub_subyacente_${index}`);
+      if (!selectTipo || !selectCausa) return;
+
+      const valorSeleccionado = selectTipo.value;
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+      if (selectSubyacente) {
+        selectSubyacente.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
+      }
+
+      if (causasSubyacentesData[valorSeleccionado]) {
+        causasSubyacentesData[valorSeleccionado].forEach(causa => {
+          const option = document.createElement('option');
+          option.value = causa;
+          option.textContent = causa;
+          selectCausa.appendChild(option);
+        });
+      }
+    }
+
+    function cargarCausasRaiz(index) {
+      const selectCausa = document.getElementById(`csub_causa_${index}`);
+      const selectSubyacente = document.getElementById(`csub_subyacente_${index}`);
+      if (!selectCausa || !selectSubyacente) return;
+
+      const valorCausa = selectCausa.value;
+      selectSubyacente.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
+
+      if (causasRaizData[valorCausa]) {
+        causasRaizData[valorCausa].forEach(raiz => {
+          const option = document.createElement('option');
+          option.value = raiz;
+          option.textContent = raiz;
+          selectSubyacente.appendChild(option);
+        });
+      }
+    }
+
+    function cambiarTipoInforme() {
+      const tipo = document.getElementById('tipo_informe').value;
+      const secPreliminar = document.getElementById('seccion_preliminar');
+      const secFinal = document.getElementById('seccion_final');
+
+      if (tipo === 'PRELIMINAR') {
+        secPreliminar.classList.remove('hidden');
+        secFinal.classList.add('hidden');
+      } else {
+        secPreliminar.classList.add('hidden');
+        secFinal.classList.remove('hidden');
+      }
+    }
+
+    function evaluarOpcionesEvento() {
+      const tipoEv = document.getElementById('fin_tipo_evento').value;
+      const bloqueAcc = document.getElementById('bloque_accidente');
+      if (!bloqueAcc) return;
+
+      const camposAccidente = bloqueAcc.querySelectorAll('input, select, textarea');
+
+      if (tipoEv === 'ACCIDENTE') {
+        bloqueAcc.classList.remove('hidden');
+        camposAccidente.forEach(campo => {
+          campo.disabled = false;
+        });
+      } else {
+        bloqueAcc.classList.add('hidden');
+        camposAccidente.forEach(campo => {
+          campo.value = '';
+          campo.disabled = true;
+        });
+      }
+    }
+
+    function actualizarFirmaPre() {
+      const nom = document.getElementById('resp_nombre_pre').value;
+      document.getElementById('vista_firma_pre').textContent = nom ? nom.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
+    }
+
+    function actualizarFirmaInv() {
+      const nom = document.getElementById('inv_nombre').value;
+      document.getElementById('vista_firma_inv').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
+    }
+
+    function actualizarFirmaTes() {
+      const nom = document.getElementById('tes_nombre').value;
+      document.getElementById('vista_firma_tes').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
+    }
+
+    function previsualizarImagenes(event) {
+      const container = document.getElementById('preview_fotos_pre');
+      container.innerHTML = '';
+      const files = event.target.files;
+
+      if (files && files.length > 0) {
+        container.classList.remove('hidden');
+        Array.from(files).forEach(file => {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const imgDiv = document.createElement('div');
+              imgDiv.className = 'relative rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white aspect-square';
+              imgDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+              container.appendChild(imgDiv);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function prepararEnvio(event) {
+      calcularCostesPersonal();
+      calcularCostesDanos();
+      calcularOtrosCostes();
+      calcularMasterTotales();
+
+      const camposCostos = [
+        'coste_total_personal',
+        'coste_total_danos_materiales',
+        'coste_subtotal_otros',
+        'coste_gastos_diversos',
+        'coste_total_accidente'
+      ];
+
+      camposCostos.forEach(nombre => {
+        const campo = document.querySelector(`[name="${nombre}"]`);
+        if (campo && campo.value === '') campo.value = '0.00';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      cambiarTipoInforme();
+      evaluarTipoPersona();
+      for (let i = 1; i <= 5; i++) {
+        cargarCausasFrecuentes(i);
+        cargarCausasSubyacentes(i);
+      }
+      calcularCostesPersonal();
+      calcularCostesDanos();
+      calcularOtrosCostes();
+      calcularMasterTotales();
+    });
+
     function agregarFilaTrabajador() {
-      const tbody = document.getElementById("body_trabajadores");
-      const tr = document.createElement("tr");
-      tr.className = "border-b bg-white hover:bg-slate-50 transition";
+      const body = document.getElementById('body_trabajadores');
+      const tr = document.createElement('tr');
+      tr.className = 'border-b bg-white hover:bg-slate-50 transition';
       tr.innerHTML = `
         <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
@@ -1532,173 +1889,10 @@
             <option value="Contratista">Contratista</option>
           </select>
         </td>
-        <td class="p-1 text-center font-bold">
-          <button type="button" onclick="eliminarFilaTrabajador(this)" class="text-red-600 hover:text-red-800 font-bold px-2 py-0.5 rounded border border-red-200 bg-red-50 hover:bg-red-100">✕</button>
-        </td>
+        <td class="p-1 text-center font-bold text-red-600 cursor-pointer" onclick="this.parentElement.remove()">✕</td>
       `;
-      tbody.appendChild(tr);
+      body.appendChild(tr);
     }
-
-    function eliminarFilaTrabajador(btn) {
-      const row = btn.closest("tr");
-      row.remove();
-    }
-
-    // CHECKBOX NO PRECISA DAÑO PROPIEDAD
-    function toggleDanoPropiedad(chk) {
-      const sec = document.getElementById("sec_dano_propiedad");
-      if (chk.checked) {
-        sec.classList.add("opacity-40", "pointer-events-none");
-      } else {
-        sec.classList.remove("opacity-40", "pointer-events-none");
-      }
-    }
-
-    // CARGAR CAUSAS FRECUENTES (CAUSAS INMEDIATAS)
-    function cargarCausasFrecuentes(index) {
-      const tipo = document.getElementById(`cinm_tipo_${index}`).value;
-      const selectCausa = document.getElementById(`cinm_causa_${index}`);
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
-
-      if (tipo && causasFrecuentesData[tipo]) {
-        causasFrecuentesData[tipo].forEach(c => {
-          const opt = document.createElement("option");
-          opt.value = c;
-          opt.textContent = c;
-          selectCausa.appendChild(opt);
-        });
-      }
-    }
-
-    // CARGAR CAUSAS COMUNES (CAUSAS SUBYACENTES)
-    function cargarCausasSubyacentes(index) {
-      const tipo = document.getElementById(`csub_tipo_${index}`).value;
-      const selectCausa = document.getElementById(`csub_causa_${index}`);
-      const selectRaiz = document.getElementById(`csub_subyacente_${index}`);
-
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
-      selectRaiz.innerHTML = '<option value="">-- Seleccionar Causa Raíz --</option>';
-
-      if (tipo && causasSubyacentesData[tipo]) {
-        causasSubyacentesData[tipo].forEach(c => {
-          const opt = document.createElement("option");
-          opt.value = c;
-          opt.textContent = c;
-          selectCausa.appendChild(opt);
-        });
-      }
-    }
-
-    // CARGAR CAUSA RAÍZ DEPENDIENTE DE LA CAUSA COMÚN
-    function cargarCausasRaiz(index) {
-      const causaComun = document.getElementById(`csub_causa_${index}`).value;
-      const selectRaiz = document.getElementById(`csub_subyacente_${index}`);
-
-      selectRaiz.innerHTML = '<option value="">-- Seleccionar Causa Raíz --</option>';
-
-      if (causaComun && causasRaizData[causaComun]) {
-        causasRaizData[causaComun].forEach(r => {
-          const opt = document.createElement("option");
-          opt.value = r;
-          opt.textContent = r;
-          selectRaiz.appendChild(opt);
-        });
-      }
-    }
-
-    // FIRMAS VISTAS
-    function actualizarFirmaPre() {
-      const val = document.getElementById("resp_nombre_pre").value;
-      document.getElementById("vista_firma_pre").textContent = val.trim() !== "" ? val.toUpperCase() : "[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]";
-    }
-
-    function actualizarFirmaInv() {
-      const val = document.getElementById("inv_nombre").value;
-      document.getElementById("vista_firma_inv").textContent = val.trim() !== "" ? val.toUpperCase() : "[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]";
-    }
-
-    function actualizarFirmaTes() {
-      const val = document.getElementById("tes_nombre").value;
-      document.getElementById("vista_firma_tes").textContent = val.trim() !== "" ? val.toUpperCase() : "[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]";
-    }
-
-    // CÁLCULOS DE COSTES DE PERSONAL
-    function calcularCostesPersonal() {
-      const parseVal = (id) => parseFloat(document.getElementById(id)?.value) || 0;
-
-      // Cálculo Hora Hombre basado en salario mensual (suponiendo 240 hrs laborales al mes)
-      const costAcc = (parseVal("salario_accidentado") / 240) * parseVal("coste_hrs_accidentado");
-      const costOtr = (parseVal("salario_otros") / 240) * parseVal("coste_hrs_otros_trabajadores");
-      const costSup = (parseVal("salario_supervisor") / 240) * parseVal("coste_hrs_supervisor");
-      const costSso = (parseVal("salario_ssoma") / 240) * parseVal("coste_hrs_ssoma");
-
-      const socorro = parseVal("coste_socorro_transporte");
-      const descanso = parseVal("coste_dias_descanso_medico");
-
-      const totalPersonal = costAcc + costOtr + costSup + costSso + socorro + descanso;
-      document.getElementById("coste_total_personal").value = totalPersonal.toFixed(2);
-
-      calcularMasterTotales();
-    }
-
-    // CÁLCULOS DE COSTES DAÑOS MATERIALES
-    function calcularCostesDanos() {
-      const parseVal = (id) => parseFloat(document.getElementById(id)?.value) || 0;
-
-      const totalDanos = parseVal("dm_edif_propio_costo") +
-                         parseVal("dm_edif_contratista_costo") +
-                         parseVal("dm_maq_propio_costo") +
-                         parseVal("dm_maq_contratista_costo") +
-                         parseVal("dm_materiales_costo");
-
-      document.getElementById("coste_total_danos").value = totalDanos.toFixed(2);
-
-      calcularMasterTotales();
-    }
-
-    // CÁLCULOS DE OTROS COSTES
-    function calcularOtrosCostes() {
-      const parseVal = (id) => parseFloat(document.getElementById(id)?.value) || 0;
-
-      const totalOtros = parseVal("oc_personal_temporal") +
-                         parseVal("oc_paralisis_obra") +
-                         parseVal("oc_multas_sanciones") +
-                         parseVal("oc_otros_gastos");
-
-      document.getElementById("coste_total_otros").value = totalOtros.toFixed(2);
-
-      calcularMasterTotales();
-    }
-
-    // TOTAL GLOBAL
-    function calcularMasterTotales() {
-      const parseVal = (id) => parseFloat(document.getElementById(id)?.value) || 0;
-
-      const cPersonal = parseVal("coste_total_personal");
-      const cDanos = parseVal("coste_total_danos");
-      const cOtros = parseVal("coste_total_otros");
-
-      const totalGlobal = cPersonal + cDanos + cOtros;
-
-      document.getElementById("res_costo_personal").textContent = `S/ ${cPersonal.toFixed(2)}`;
-      document.getElementById("res_costo_materiales").textContent = `S/ ${cDanos.toFixed(2)}`;
-      document.getElementById("res_costo_otros").textContent = `S/ ${cOtros.toFixed(2)}`;
-      document.getElementById("res_costo_total_global").textContent = `S/ ${totalGlobal.toFixed(2)}`;
-    }
-
-    // ENVÍO FORMULARIO
-    function prepararEnvio(e) {
-      e.preventDefault();
-      alert("✅ Reporte SSOMA procesado y registrado correctamente.");
-    }
-
-    // INICIALIZACIÓN DE DESPLEGABLES AL CARGAR
-    window.addEventListener("DOMContentLoaded", () => {
-      for (let i = 1; i <= 5; i++) {
-        cargarCausasFrecuentes(i);
-        cargarCausasSubyacentes(i);
-      }
-    });
   </script>
 </body>
 </html>
