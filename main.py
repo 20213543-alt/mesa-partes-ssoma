@@ -14,7 +14,6 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 import requests
-import resend
 from xhtml2pdf import pisa
 
 # Forzar resolución de DNS a IPv4 para evitar el error [Errno 101] en Render
@@ -107,41 +106,51 @@ def optimizar_imagen_base64(bytes_imagen, target_size=(600, 360)):
 
 def enviar_correo_con_pdf(
     destinatarios: list, asunto: str, cuerpo: str, pdf_path: str = None
-):
-    api_key = os.getenv("RESEND_API_KEY")
-    if not api_key:
-        print("⚠️ RESEND_API_KEY no está configurada en las variables de entorno.")
-        return
+) -> bool:
+    """Envía el correo por la API HTTP de Resend, incluyendo el PDF en base64."""
+    api_key = os.getenv("RESEND_API_KEY", "").strip()
+    remitente = os.getenv(
+        "RESEND_FROM",
+        "Sistema SSOMA <onboarding@resend.dev>",
+    ).strip()
 
-    resend.api_key = api_key.strip()
+    if not api_key:
+        print("RESEND_API_KEY no está configurada; se omite el correo.")
+        return False
+
+    payload = {
+        "from": remitente,
+        "to": destinatarios,
+        "subject": asunto,
+        "html": "<p>" + cuerpo.replace("\n", "<br>") + "</p>",
+    }
+
+    if pdf_path and os.path.isfile(pdf_path):
+        with open(pdf_path, "rb") as archivo_pdf:
+            pdf_b64 = base64.b64encode(archivo_pdf.read()).decode("ascii")
+        payload["attachments"] = [{
+            "filename": os.path.basename(pdf_path),
+            "content": pdf_b64,
+        }]
 
     try:
-        attachments = []
-        if pdf_path and os.path.exists(pdf_path):
-            with open(pdf_path, "rb") as f:
-                pdf_bytes = list(f.read())
-            filename = os.path.basename(pdf_path)
-            attachments.append({"filename": filename, "content": pdf_bytes})
-
-        cuerpo_html = f"<p>{cuerpo.replace('\n', '<br>')}</p>"
-
-        payload = {
-            "from": "Sistema SSOMA <onboarding@resend.dev>",
-            "to": destinatarios,
-            "subject": asunto,
-            "html": cuerpo_html,
-        }
-
-        if attachments:
-            payload["attachments"] = attachments
-
-        response = resend.Emails.send(payload)
-        print(
-            f"✅ Correo enviado a {destinatarios} mediante Resend. ID: {response.get('id')}"
+        respuesta = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=30,
         )
-
-    except Exception as e:
-        print(f"❌ Error al enviar correo mediante Resend: {e}")
+        respuesta.raise_for_status()
+        datos = respuesta.json()
+        print(f"Correo enviado mediante Resend. ID: {datos.get('id', '-')}")
+        return True
+    except requests.RequestException as error:
+        detalle = getattr(error.response, "text", "") if error.response else str(error)
+        print(f"Error al enviar correo mediante Resend: {detalle}")
+        return False
 
 
 def g(form_dict, key_or_keys, default="-"):
@@ -590,13 +599,13 @@ def generar_pdf_100_porciento(
                 <!-- CATEGORÍA 1 -->
                 <tr>
                     <td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td>
-                    <td class="cost-val">S/ {g(f, ['costo_personal_total', 'costo_personal', 'cos_personal', 'costo_mano_obra', 'c_personal'], '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, 'coste_total_personal', '0.00')}</td>
                 </tr>
 
                 <!-- CATEGORÍA 2 -->
                 <tr>
                     <td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td>
-                    <td class="cost-val">S/ {g(f, ['costo_materiales_total', 'costo_materiales', 'cos_materiales', 'subtotal_materiales'], '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, 'coste_total_danos_materiales', '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Edificios e Instalaciones</td>
@@ -618,7 +627,7 @@ def generar_pdf_100_porciento(
                 <!-- CATEGORÍA 3 -->
                 <tr>
                     <td class="cost-title">3. SUB-TOTAL OTROS COSTES</td>
-                    <td class="cost-val">S/ {g(f, ['subtotal_otros', 'costo_otros_total', 'costo_otros', 'subtotal_otros_costes'], '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, 'coste_subtotal_otros', '0.00')}</td>
                 </tr>
                 <tr>
                     <td class="cost-sub-item">&bull; Primeros Auxilios / Médicos</td>
@@ -640,13 +649,13 @@ def generar_pdf_100_porciento(
                 <!-- CATEGORÍA 4 -->
                 <tr>
                     <td class="cost-title">4. GASTOS DIVERSOS (2% ESTIMADO INVESTIGACIONES)</td>
-                    <td class="cost-val">S/ {g(f, ['gastos_diversos_2pct', 'gastos_diversos', 'costo_gastos_diversos', 'costo_diversos', 'gastos_2pct'], '0.00')}</td>
+                    <td class="cost-val">S/ {g(f, 'coste_gastos_diversos', '0.00')}</td>
                 </tr>
 
                 <!-- TOTAL FINAL -->
                 <tr>
                     <td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td>
-                    <td class="cost-total-val">S/ {g(f, ['costo_total_accidente', 'costo_total', 'total_costo', 'costo_final'], '0.00')}</td>
+                    <td class="cost-total-val">S/ {g(f, 'coste_total_accidente', '0.00')}</td>
                 </tr>
             </tbody>
         </table>
@@ -772,6 +781,33 @@ async def enviar_reporte(
         for key in form_data.keys():
             val = form_data.getlist(key)
             form_dict[key] = val[0] if len(val) == 1 else val
+
+        # Campos calculados por main.js. Se normalizan a nombres canónicos para
+        # que estén disponibles tanto en el PDF como en el webhook.
+        campos_costos = {
+            "coste_total_personal": [
+                "coste_total_personal", "costo_personal_total", "costo_personal",
+                "cos_personal", "costo_mano_obra"
+            ],
+            "coste_total_danos_materiales": [
+                "coste_total_danos_materiales", "costo_materiales_total",
+                "costo_materiales", "cos_materiales", "subtotal_materiales"
+            ],
+            "coste_subtotal_otros": [
+                "coste_subtotal_otros", "subtotal_otros", "costo_otros_total",
+                "costo_otros", "subtotal_otros_costes"
+            ],
+            "coste_gastos_diversos": [
+                "coste_gastos_diversos", "gastos_diversos_2pct", "gastos_diversos",
+                "costo_gastos_diversos", "costo_diversos", "gastos_2pct"
+            ],
+            "coste_total_accidente": [
+                "coste_total_accidente", "costo_total_accidente", "costo_total",
+                "total_costo", "costo_final"
+            ],
+        }
+        for nombre_canonico, alias in campos_costos.items():
+            form_dict[nombre_canonico] = g(form_dict, alias, "0.00")
 
         # Control de seguridad backend para Incidentes
         tipo_evt = str(form_dict.get("fin_tipo_evento", "")).lower()
@@ -1079,21 +1115,21 @@ async def enviar_reporte(
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
                 # Envió robusto de Costos a Google Sheets con búsqueda flexible
-                "costo_personal_total": g(form_dict, ["costo_personal_total", "costo_personal", "cos_personal", "costo_mano_obra"], "0.00"),
-                "costo_materiales_total": g(form_dict, ["costo_materiales_total", "costo_materiales", "cos_materiales"], "0.00"),
+                "costo_personal_total": g(form_dict, "coste_total_personal", "0.00"),
+                "costo_materiales_total": g(form_dict, "coste_total_danos_materiales", "0.00"),
                 "costo_edificios": g(form_dict, ["costo_edificios", "costo_edificio"], "0.00"),
                 "costo_maquinaria": g(form_dict, ["costo_maquinaria", "costo_maquinas", "costo_equipos"], "0.00"),
                 "costo_mat_primas": g(form_dict, ["costo_mat_primas", "costo_materias_primas"], "0.00"),
                 "costo_parada": g(form_dict, ["costo_parada", "costo_parada_maquina"], "0.00"),
-                "subtotal_otros": g(form_dict, ["subtotal_otros", "costo_otros_total", "costo_otros"], "0.00"),
+                "subtotal_otros": g(form_dict, "coste_subtotal_otros", "0.00"),
                 "costo_primeros_auxilios": g(form_dict, ["costo_primeros_auxilios", "costo_auxilios"], "0.00"),
                 "costo_sanciones": g(form_dict, ["costo_sanciones", "costo_multas"], "0.00"),
                 "costo_legales": g(form_dict, ["costo_legales", "costo_gastos_legales"], "0.00"),
                 "costo_resp_civil": g(form_dict, ["costo_resp_civil", "costo_responsabilidad_civil"], "0.00"),
                 "costo_medio_ambiente": g(form_dict, ["costo_medio_ambiente", "costo_medioambiente"], "0.00"),
                 "costo_baja_rendimiento": g(form_dict, ["costo_baja_rendimiento", "costo_rendimiento"], "0.00"),
-                "gastos_diversos_2pct": g(form_dict, ["gastos_diversos_2pct", "gastos_diversos", "costo_gastos_diversos"], "0.00"),
-                "costo_total_accidente": g(form_dict, ["costo_total_accidente", "costo_total", "total_costo"], "0.00"),
+                "gastos_diversos_2pct": g(form_dict, "coste_gastos_diversos", "0.00"),
+                "costo_total_accidente": g(form_dict, "coste_total_accidente", "0.00"),
             }
 
             try:
