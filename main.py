@@ -466,6 +466,71 @@ def generar_pdf_100_porciento(
     firma_inv_default = f"<b>[REGISTRADO POR: {inv_nombre_val}]</b>"
     firma_inv_text = g(f, ["firma_inv_text", "inv_firma"], firma_inv_default)
 
+    # Mapeo explícito del bloque de tercerización/locación. El formulario usa
+    # nombres loc_* para el locador y ter_* para una empresa contratista.
+    tipo_vinculo_pdf = g(f, ["tipo_persona", "tipo_vinculo", "vinculo_entidad"], "-")
+    es_locador_pdf = tipo_vinculo_pdf.strip().lower() == "locador"
+
+    if es_locador_pdf:
+        nombre_tercero_pdf = g(f, ["loc_nombre_razon", "loc_nombre", "nombre_locador"], "-")
+        identificacion_tercero_pdf = g(f, ["loc_dni_ruc", "loc_dni", "loc_ruc", "dni_ruc_locador"], "-")
+        domicilio_tercero_pdf = g(f, ["loc_domicilio", "domicilio_locador"], "-")
+        detalle_tercero_pdf = g(f, ["loc_descripcion_servicio", "loc_servicio", "descripcion_servicio"], "-")
+        tercerizado_html = f"""
+        <table class="grid-table">
+            <tr>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Tipo de Vínculo / Entidad:</td>
+                <td colspan="5">{tipo_vinculo_pdf}</td>
+            </tr>
+            <tr>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Nombres / Razón Social:</td>
+                <td style="width: 28%;" colspan="3">{nombre_tercero_pdf}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">DNI / RUC:</td>
+                <td style="width: 28%;">{identificacion_tercero_pdf}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background-color: #f7fafc;">Domicilio:</td>
+                <td colspan="5">{domicilio_tercero_pdf}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background-color: #f7fafc;">Descripción del Servicio:</td>
+                <td colspan="5">{detalle_tercero_pdf}</td>
+            </tr>
+        </table>
+        """
+    else:
+        nombre_tercero_pdf = g(f, "ter_razon_social")
+        identificacion_tercero_pdf = g(f, "ter_ruc")
+        domicilio_tercero_pdf = g(f, "ter_domicilio")
+        tercerizado_html = f"""
+        <table class="grid-table">
+            <tr>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Tipo de Vínculo / Entidad:</td>
+                <td colspan="5">{tipo_vinculo_pdf}</td>
+            </tr>
+            <tr>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Razón Social / Nombre:</td>
+                <td style="width: 28%;" colspan="3">{nombre_tercero_pdf}</td>
+                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">RUC:</td>
+                <td style="width: 28%;">{identificacion_tercero_pdf}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background-color: #f7fafc;">Domicilio:</td>
+                <td colspan="3">{domicilio_tercero_pdf}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Actividad Económica:</td>
+                <td>{g(f, "ter_actividad")}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
+                <td>{g(f, ["ter_num_trabajadores", "ter_num_trab"])}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
+                <td>{g(f, "ter_num_sctr")}</td>
+                <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora:</td>
+                <td>{g(f, "ter_aseguradora")}</td>
+            </tr>
+        </table>
+        """
+
     def costo_numero(valor):
         try:
             return float(str(valor).replace(",", ".").strip() or 0)
@@ -633,28 +698,7 @@ def generar_pdf_100_porciento(
         </table>
 
         <div class="sec-header">DATOS DEL EMPLEADOR DE TERCERIZACIÓN, CONTRATISTA U OTROS</div>
-        <table class="grid-table">
-            <tr>
-                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Razón Social / Nombre:</td>
-                <td style="width: 28%;" colspan="3">{g(f, 'ter_razon_social')}</td>
-                <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">RUC:</td>
-                <td style="width: 28%;">{g(f, 'ter_ruc')}</td>
-            </tr>
-            <tr>
-                <td style="font-weight: bold; background-color: #f7fafc;">Domicilio:</td>
-                <td colspan="3">{g(f, 'ter_domicilio')}</td>
-                <td style="font-weight: bold; background-color: #f7fafc;">Actividad Económica:</td>
-                <td>{g(f, 'ter_actividad')}</td>
-            </tr>
-            <tr>
-                <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
-                <td>{g(f, ['ter_num_trabajadores', 'ter_num_trab'])}</td>
-                <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
-                <td>{g(f, 'ter_num_sctr')}</td>
-                <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora:</td>
-                <td>{g(f, 'ter_aseguradora')}</td>
-            </tr>
-        </table>
+        {tercerizado_html}
 
         <div class="sec-header">1) OCURRENCIA DEL EVENTO Y 2) TIPO Y CLASIFICACIÓN</div>
         <table class="grid-table">
@@ -920,6 +964,23 @@ async def enviar_reporte(
         }
         for nombre_canonico, alias in campos_costos.items():
             form_dict[nombre_canonico] = g(form_dict, alias, "0.00")
+
+        # Alias canónicos del bloque Locador de Servicios.
+        form_dict["tipo_vinculo_entidad"] = g(
+            form_dict, ["tipo_persona", "tipo_vinculo", "vinculo_entidad"], "-"
+        )
+        form_dict["nombre_razon_locador"] = g(
+            form_dict, ["loc_nombre_razon", "loc_nombre", "nombre_locador"], "-"
+        )
+        form_dict["dni_ruc_locador"] = g(
+            form_dict, ["loc_dni_ruc", "loc_dni", "loc_ruc", "dni_ruc_locador"], "-"
+        )
+        form_dict["domicilio_locador"] = g(
+            form_dict, ["loc_domicilio", "domicilio_locador"], "-"
+        )
+        form_dict["descripcion_servicio_locador"] = g(
+            form_dict, ["loc_descripcion_servicio", "loc_servicio", "descripcion_servicio"], "-"
+        )
 
         # Control de seguridad backend para Incidentes
         tipo_evt = str(form_dict.get("fin_tipo_evento", "")).lower()
