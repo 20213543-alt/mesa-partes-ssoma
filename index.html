@@ -9,6 +9,33 @@
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans p-2 md:p-6 min-h-screen">
 
+  <!-- MODAL DE CONFIRMACIÓN DE ENVÍO -->
+  <div id="modalConfirmacion" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-6 text-center transform transition-all scale-100">
+      
+      <!-- Ícono de Alerta -->
+      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 text-amber-600 mb-4 text-3xl">
+        ⚠️
+      </div>
+
+      <h3 class="text-xl font-black text-slate-800 mb-2">¿Estás seguro de registrar este informe?</h3>
+      <p class="text-xs text-slate-600 mb-6 leading-relaxed">
+        Verifica que la información ingresada sea correcta. Al continuar, se generará el documento PDF oficial y se enviará la notificación por correo.
+      </p>
+
+      <!-- Botones de Acción -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button type="button" onclick="cerrarModalConfirmacion()" class="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 focus:outline-none transition cursor-pointer text-xs uppercase tracking-wide">
+          ↩️ Volver / Corregir
+        </button>
+        <button type="button" onclick="confirmarYEnviar()" class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md focus:outline-none transition cursor-pointer text-xs uppercase tracking-wide flex items-center justify-center gap-1.5">
+          💾 Grabar y Enviar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-300">
     
     <!-- ENCABEZADO PRINCIPAL -->
@@ -1396,7 +1423,6 @@
     };
 
     const causasRaizData = {
-      // FACTORES PERSONALES
       "Capacidad física / fisiológica inadecuada": [
         "Estatura, peso, tamaño, fuerza, alcance inadecuado",
         "Capacidad de movimiento corporal restringida",
@@ -1456,8 +1482,6 @@
         "Presión de los compañeros o ejemplo inadecuado del supervisor",
         "Retroalimentación o disciplina inadecuada"
       ],
-
-      // FACTORES LABORALES / TRABAJO
       "Liderazgo y/o supervisión inadecuada": [
         "Relaciones jerárquicas o funciones poco claras",
         "Delegación de responsabilidades inadecuada",
@@ -1512,6 +1536,213 @@
         "Uso inapropiado no intencional por desconocimiento"
       ]
     };
+
+    function cambiarTipoInforme() {
+      const tipo = document.getElementById('tipo_informe').value;
+      const pre = document.getElementById('seccion_preliminar');
+      const fin = document.getElementById('seccion_final');
+      if (tipo === 'PRELIMINAR') {
+        pre.classList.remove('hidden');
+        fin.classList.add('hidden');
+      } else {
+        pre.classList.add('hidden');
+        fin.classList.remove('hidden');
+      }
+    }
+
+    function evaluarTipoPersona() {
+      const val = document.getElementById('tipoPersona').value;
+      const secContra = document.getElementById('seccion-contratista');
+      const secLoc = document.getElementById('seccion-locador');
+      if (val === 'contratista') {
+        secContra.classList.remove('hidden');
+        secLoc.classList.add('hidden');
+      } else if (val === 'locador') {
+        secContra.classList.add('hidden');
+        secLoc.classList.remove('hidden');
+      } else {
+        secContra.classList.add('hidden');
+        secLoc.classList.add('hidden');
+      }
+    }
+
+    function evaluarOpcionesEvento() {
+      const tipo = document.getElementById('fin_tipo_evento').value;
+      const bloqueAcc = document.getElementById('bloque_accidente');
+      if (tipo === 'ACCIDENTE') {
+        bloqueAcc.classList.remove('hidden');
+      } else {
+        bloqueAcc.classList.add('hidden');
+      }
+    }
+
+    function agregarFilaTrabajador() {
+      const tbody = document.getElementById('body_trabajadores');
+      const tr = document.createElement('tr');
+      tr.className = 'border-b bg-white hover:bg-slate-50 transition';
+      tr.innerHTML = `
+        <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
+        <td class="p-1">
+          <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
+            <option value="">-- Seleccionar Área --</option>
+            <option value="Gerencia de logística">Gerencia de logística</option>
+            <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
+            <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
+            <option value="Gerencia de tesorería">Gerencia de tesorería</option>
+            <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
+            <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
+            <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
+            <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
+            <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
+            <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
+            <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
+            <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
+            <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
+            <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
+          </select>
+        </td>
+        <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
+        <td class="p-1">
+          <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
+            <option value="M">M</option>
+            <option value="F">F</option>
+          </select>
+        </td>
+        <td class="p-1"><input type="text" name="trab_dni[]" class="w-full border rounded p-1"></td>
+        <td class="p-1"><input type="number" name="trab_edad[]" class="w-full border rounded p-1"></td>
+        <td class="p-1">
+          <select name="trab_turno[]" class="w-full border rounded p-1 bg-white">
+            <option value="D">D</option>
+            <option value="T">T</option>
+            <option value="N">N</option>
+          </select>
+        </td>
+        <td class="p-1">
+          <select name="trab_personal[]" class="w-full border rounded p-1 bg-white">
+            <option value="Propio">Propio</option>
+            <option value="Tercero">Tercero</option>
+            <option value="Contratista">Contratista</option>
+          </select>
+        </td>
+        <td class="p-1 text-center font-bold">
+          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 hover:text-red-800 font-bold px-1">✕</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function toggleDanoPropiedad(chk) {
+      const sec = document.getElementById('sec_dano_propiedad');
+      const inputs = sec.querySelectorAll('input, select, textarea');
+      if (chk.checked) {
+        sec.classList.add('opacity-50', 'pointer-events-none');
+        inputs.forEach(i => i.disabled = true);
+      } else {
+        sec.classList.remove('opacity-50', 'pointer-events-none');
+        inputs.forEach(i => i.disabled = false);
+      }
+    }
+
+    function cargarCausasFrecuentes(index) {
+      const tipoSel = document.getElementById(`cinm_tipo_${index}`).value;
+      const causaSel = document.getElementById(`cinm_causa_${index}`);
+      causaSel.innerHTML = '<option value="">-- Opcional --</option>';
+      if (causasInmediatasData[tipoSel]) {
+        causasInmediatasData[tipoSel].forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          causaSel.appendChild(opt);
+        });
+      }
+    }
+
+    function cargarCausasSubyacentes(index) {
+      const tipoSel = document.getElementById(`csub_tipo_${index}`).value;
+      const causaSel = document.getElementById(`csub_causa_${index}`);
+      const subSel = document.getElementById(`csub_subyacente_${index}`);
+      causaSel.innerHTML = '<option value="">-- Opcional --</option>';
+      subSel.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
+      if (causasSubyacentesData[tipoSel]) {
+        causasSubyacentesData[tipoSel].forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          causaSel.appendChild(opt);
+        });
+      }
+    }
+
+    function cargarCausasRaiz(index) {
+      const causaSel = document.getElementById(`csub_causa_${index}`).value;
+      const subSel = document.getElementById(`csub_subyacente_${index}`);
+      subSel.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
+      if (causasRaizData[causaSel]) {
+        causasRaizData[causaSel].forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          subSel.appendChild(opt);
+        });
+      }
+    }
+
+    function previsualizarImagenes(e) {
+      const container = document.getElementById('preview_fotos_pre');
+      container.innerHTML = '';
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        container.classList.remove('hidden');
+        Array.from(files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            const img = document.createElement('img');
+            img.src = evt.target.result;
+            img.className = 'w-full h-24 object-cover rounded border border-slate-300 shadow-sm';
+            container.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function actualizarFirmaPre() {
+      const val = document.getElementById('resp_nombre_pre').value;
+      document.getElementById('vista_firma_pre').textContent = val ? val.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
+    }
+
+    function actualizarFirmaInv() {
+      const val = document.getElementById('inv_nombre').value;
+      document.getElementById('vista_firma_inv').textContent = val ? val.toUpperCase() : '[FIRMA EN NEGRITAS]';
+    }
+
+    function actualizarFirmaTes() {
+      const val = document.getElementById('tes_nombre').value;
+      document.getElementById('vista_firma_tes').textContent = val ? val.toUpperCase() : '[FIRMA EN NEGRITAS]';
+    }
+
+    function prepararEnvio(e) {
+      e.preventDefault();
+      const modal = document.getElementById('modalConfirmacion');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function cerrarModalConfirmacion() {
+      const modal = document.getElementById('modalConfirmacion');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function confirmarYEnviar() {
+      cerrarModalConfirmacion();
+      document.getElementById('ssomaForm').submit();
+    }
 
     function calcularCostesPersonal() {
       const salAcc = parseFloat(document.getElementById('salario_accidentado')?.value) || 0;
@@ -1623,276 +1854,24 @@
         elemGastosDiv.value = gastosDiversos.toFixed(2);
       }
 
-      const costoTotalAccidente = totalAnterior + gastosDiversos;
+      const costeTotalAccidente = totalAnterior + gastosDiversos;
       const elemTotalAcc = document.getElementById('coste_total_accidente');
       if (elemTotalAcc) {
-        elemTotalAcc.value = costoTotalAccidente.toFixed(2);
+        elemTotalAcc.value = costeTotalAccidente.toFixed(2);
       }
 
-      // Actualizar tabla resumen dinámica
-      if (document.getElementById('resumen_personal')) document.getElementById('resumen_personal').textContent = totalPersonal.toFixed(2);
-      if (document.getElementById('resumen_materiales')) document.getElementById('resumen_materiales').textContent = totalDanos.toFixed(2);
-      if (document.getElementById('resumen_otros')) document.getElementById('resumen_otros').textContent = subtotalOtros.toFixed(2);
-      if (document.getElementById('resumen_gastos')) document.getElementById('resumen_gastos').textContent = gastosDiversos.toFixed(2);
-      if (document.getElementById('resumen_total')) document.getElementById('resumen_total').textContent = costoTotalAccidente.toFixed(2);
-    }
-
-    function evaluarTipoPersona() {
-      const valor = document.getElementById('tipoPersona').value;
-      const secContratista = document.getElementById('seccion-contratista');
-      const secLocador = document.getElementById('seccion-locador');
-
-      if (valor === 'contratista') {
-        secContratista.classList.remove('hidden');
-        secLocador.classList.add('hidden');
-      } else if (valor === 'locador') {
-        secContratista.classList.add('hidden');
-        secLocador.classList.remove('hidden');
-      } else {
-        secContratista.classList.add('hidden');
-        secLocador.classList.add('hidden');
-      }
-    }
-
-    function toggleDanoPropiedad(checkbox) {
-      const contenedor = document.getElementById('sec_dano_propiedad');
-      if (!contenedor) return;
-      const elementos = contenedor.querySelectorAll('input, select, textarea');
-
-      elementos.forEach(elem => {
-        if (checkbox.checked) {
-          elem.value = '';
-          elem.disabled = true;
-          elem.classList.add('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
-          elem.classList.remove('bg-white');
-        } else {
-          elem.disabled = false;
-          elem.classList.remove('bg-slate-200', 'cursor-not-allowed', 'opacity-60');
-          elem.classList.add('bg-white');
-        }
-      });
-    }
-
-    function cargarCausasFrecuentes(index) {
-      const selectTipo = document.getElementById(`cinm_tipo_${index}`);
-      const selectCausa = document.getElementById(`cinm_causa_${index}`);
-      if (!selectTipo || !selectCausa) return;
-
-      const valorSeleccionado = selectTipo.value;
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
-
-      if (causasInmediatasData[valorSeleccionado]) {
-        causasInmediatasData[valorSeleccionado].forEach(causa => {
-          const option = document.createElement('option');
-          option.value = causa;
-          option.textContent = causa;
-          selectCausa.appendChild(option);
-        });
-      }
-    }
-
-    function cargarCausasSubyacentes(index) {
-      const selectTipo = document.getElementById(`csub_tipo_${index}`);
-      const selectCausa = document.getElementById(`csub_causa_${index}`);
-      const selectSubyacente = document.getElementById(`csub_subyacente_${index}`);
-      if (!selectTipo || !selectCausa) return;
-
-      const valorSeleccionado = selectTipo.value;
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
-      if (selectSubyacente) {
-        selectSubyacente.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
-      }
-
-      if (causasSubyacentesData[valorSeleccionado]) {
-        causasSubyacentesData[valorSeleccionado].forEach(causa => {
-          const option = document.createElement('option');
-          option.value = causa;
-          option.textContent = causa;
-          selectCausa.appendChild(option);
-        });
-      }
-    }
-
-    function cargarCausasRaiz(index) {
-      const selectCausa = document.getElementById(`csub_causa_${index}`);
-      const selectSubyacente = document.getElementById(`csub_subyacente_${index}`);
-      if (!selectCausa || !selectSubyacente) return;
-
-      const valorCausa = selectCausa.value;
-      selectSubyacente.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
-
-      if (causasRaizData[valorCausa]) {
-        causasRaizData[valorCausa].forEach(raiz => {
-          const option = document.createElement('option');
-          option.value = raiz;
-          option.textContent = raiz;
-          selectSubyacente.appendChild(option);
-        });
-      }
-    }
-
-    function cambiarTipoInforme() {
-      const tipo = document.getElementById('tipo_informe').value;
-      const secPreliminar = document.getElementById('seccion_preliminar');
-      const secFinal = document.getElementById('seccion_final');
-
-      if (tipo === 'PRELIMINAR') {
-        secPreliminar.classList.remove('hidden');
-        secFinal.classList.add('hidden');
-      } else {
-        secPreliminar.classList.add('hidden');
-        secFinal.classList.remove('hidden');
-      }
-    }
-
-    function evaluarOpcionesEvento() {
-      const tipoEv = document.getElementById('fin_tipo_evento').value;
-      const bloqueAcc = document.getElementById('bloque_accidente');
-      if (!bloqueAcc) return;
-
-      const camposAccidente = bloqueAcc.querySelectorAll('input, select, textarea');
-
-      if (tipoEv === 'ACCIDENTE') {
-        bloqueAcc.classList.remove('hidden');
-        camposAccidente.forEach(campo => {
-          campo.disabled = false;
-        });
-      } else {
-        bloqueAcc.classList.add('hidden');
-        camposAccidente.forEach(campo => {
-          campo.value = '';
-          campo.disabled = true;
-        });
-      }
-    }
-
-    function actualizarFirmaPre() {
-      const nom = document.getElementById('resp_nombre_pre').value;
-      document.getElementById('vista_firma_pre').textContent = nom ? nom.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
-    }
-
-    function actualizarFirmaInv() {
-      const nom = document.getElementById('inv_nombre').value;
-      document.getElementById('vista_firma_inv').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
-    }
-
-    function actualizarFirmaTes() {
-      const nom = document.getElementById('tes_nombre').value;
-      document.getElementById('vista_firma_tes').textContent = nom ? nom.toUpperCase() : '[FIRMA EN NEGRITAS]';
-    }
-
-    function previsualizarImagenes(event) {
-      const container = document.getElementById('preview_fotos_pre');
-      container.innerHTML = '';
-      const files = event.target.files;
-
-      if (files && files.length > 0) {
-        container.classList.remove('hidden');
-        Array.from(files).forEach(file => {
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              const imgDiv = document.createElement('div');
-              imgDiv.className = 'relative rounded-lg overflow-hidden border border-slate-300 shadow-sm bg-white aspect-square';
-              imgDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
-              container.appendChild(imgDiv);
-            };
-            reader.readAsDataURL(file);
-          }
-        });
-      } else {
-        container.classList.add('hidden');
-      }
-    }
-
-    function prepararEnvio(event) {
-      calcularCostesPersonal();
-      calcularCostesDanos();
-      calcularOtrosCostes();
-      calcularMasterTotales();
-
-      const camposCostos = [
-        'coste_total_personal',
-        'coste_total_danos_materiales',
-        'coste_subtotal_otros',
-        'coste_gastos_diversos',
-        'coste_total_accidente'
-      ];
-
-      camposCostos.forEach(nombre => {
-        const campo = document.querySelector(`[name="${nombre}"]`);
-        if (campo && campo.value === '') campo.value = '0.00';
-      });
+      // Actualizar resumen
+      if (document.getElementById('resumen_personal')) document.getElementById('resumen_personal').innerText = totalPersonal.toFixed(2);
+      if (document.getElementById('resumen_materiales')) document.getElementById('resumen_materiales').innerText = totalDanos.toFixed(2);
+      if (document.getElementById('resumen_otros')) document.getElementById('resumen_otros').innerText = subtotalOtros.toFixed(2);
+      if (document.getElementById('resumen_gastos')) document.getElementById('resumen_gastos').innerText = gastosDiversos.toFixed(2);
+      if (document.getElementById('resumen_total')) document.getElementById('resumen_total').innerText = costeTotalAccidente.toFixed(2);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      cambiarTipoInforme();
-      evaluarTipoPersona();
-      for (let i = 1; i <= 5; i++) {
-        cargarCausasFrecuentes(i);
-        cargarCausasSubyacentes(i);
-      }
-      calcularCostesPersonal();
-      calcularCostesDanos();
-      calcularOtrosCostes();
-      calcularMasterTotales();
+      cargarCausasFrecuentes(1);
+      cargarCausasSubyacentes(1);
     });
-
-    function agregarFilaTrabajador() {
-      const body = document.getElementById('body_trabajadores');
-      const tr = document.createElement('tr');
-      tr.className = 'border-b bg-white hover:bg-slate-50 transition';
-      tr.innerHTML = `
-        <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="text" name="trab_ocupacion[]" class="w-full border rounded p-1"></td>
-        <td class="p-1">
-          <select name="trab_area_interna[]" class="w-full border rounded p-1 bg-white">
-            <option value="">-- Seleccionar Área --</option>
-            <option value="Gerencia de logística">Gerencia de logística</option>
-            <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
-            <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
-            <option value="Gerencia de tesorería">Gerencia de tesorería</option>
-            <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
-            <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
-            <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
-            <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
-            <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
-            <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
-            <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
-            <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
-            <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
-            <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
-          </select>
-        </td>
-        <td class="p-1"><input type="text" name="trab_condicion[]" value="Afectado" class="w-full border rounded p-1"></td>
-        <td class="p-1">
-          <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
-            <option value="M">M</option>
-            <option value="F">F</option>
-          </select>
-        </td>
-        <td class="p-1"><input type="text" name="trab_dni[]" class="w-full border rounded p-1"></td>
-        <td class="p-1"><input type="number" name="trab_edad[]" class="w-full border rounded p-1"></td>
-        <td class="p-1">
-          <select name="trab_turno[]" class="w-full border rounded p-1 bg-white">
-            <option value="D">D</option>
-            <option value="T">T</option>
-            <option value="N">N</option>
-          </select>
-        </td>
-        <td class="p-1">
-          <select name="trab_personal[]" class="w-full border rounded p-1 bg-white">
-            <option value="Propio">Propio</option>
-            <option value="Tercero">Tercero</option>
-            <option value="Contratista">Contratista</option>
-          </select>
-        </td>
-        <td class="p-1 text-center font-bold text-red-600 cursor-pointer" onclick="this.parentElement.remove()">✕</td>
-      `;
-      body.appendChild(tr);
-    }
   </script>
 </body>
 </html>
