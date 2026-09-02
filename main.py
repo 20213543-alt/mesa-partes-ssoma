@@ -33,9 +33,46 @@ app = FastAPI()
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
 
-# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
+# Autogenerar el script frontend para controlar el modal y el bloqueo dinámico de incidentes
 SCRIPT_JS_PATH = os.path.join("static", "script.js")
-JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
+JS_CONTENT = """let estaConfirmado = false;
+
+function prepararEnvio(event) {
+    if (!estaConfirmado) {
+        if (event) event.preventDefault();
+        abrirModalConfirmacion();
+        return false;
+    }
+    return true;
+}
+
+function abrirModalConfirmacion() {
+    const modal = document.getElementById('modalConfirmacion');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function cerrarModalConfirmacion() {
+    const modal = document.getElementById('modalConfirmacion');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function confirmarYEnviar() {
+    estaConfirmado = true;
+    cerrarModalConfirmacion();
+
+    const form = document.getElementById('ssomaForm');
+    if (form) {
+        form.submit();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
     const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
     const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
 
