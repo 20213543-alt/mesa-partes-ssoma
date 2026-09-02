@@ -32,9 +32,70 @@ app = FastAPI()
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
 
-# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
+# Autogenerar el script frontend para controlar la lógica de códigos y bloqueo dinámico
 SCRIPT_JS_PATH = os.path.join("static", "script.js")
-JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
+JS_CONTENT = """// Obtiene la primera letra del nombre y la primera letra del apellido paterno/último
+function obtenerIniciales(cadenaNombre) {
+  if (!cadenaNombre || !cadenaNombre.trim()) return "XX";
+  const palabras = cadenaNombre.trim().split(/\\s+/);
+  if (palabras.length === 1) return palabras[0][0].toUpperCase();
+  
+  const primeraLetraNombre = palabras[0][0].toUpperCase();
+  const primeraLetraApellido = palabras[palabras.length - 1][0].toUpperCase();
+  return primeraLetraNombre + primeraLetraApellido;
+}
+
+// Obtiene el mes actual formateado a dos dígitos (01-12)
+function obtenerMesActual() {
+  const fecha = new Date();
+  return String(fecha.getMonth() + 1).padStart(2, '0');
+}
+
+// Incrementa y recupera el número correlativo (001, 002, 003...)
+function obtenerSiguienteCorrelativo() {
+  let contador = parseInt(localStorage.getItem('correlativo_emp_final') || '0', 10) + 1;
+  localStorage.setItem('correlativo_emp_final', contador);
+  return String(contador).padStart(3, '0');
+}
+
+// Genera el código correspondiente según el tipo de informe
+function generarCodigoReporte() {
+  const selectTipoInforme = document.getElementById('tipo_informe') || document.querySelector('[name="tipo_informe"]');
+  const tipoInforme = selectTipoInforme ? selectTipoInforme.value : '';
+  const mes = obtenerMesActual();
+
+  if (tipoInforme.toUpperCase().includes('PRELIMINAR')) {
+    const nombreResp = document.getElementById('resp_nombre_pre')?.value || 
+                       document.querySelector('[name="nombre_lesionado_pre"]')?.value || 
+                       document.querySelector('[name="pre_nombre_lesionado"]')?.value || '';
+    const iniciales = obtenerIniciales(nombreResp);
+    return `EMP-PRELIMINAR-${iniciales}-${mes}`;
+  } else {
+    const nombreInv = document.getElementById('inv_nombre')?.value || 
+                      document.querySelector('[name="inv_nombre"]')?.value || '';
+    const iniciales = obtenerIniciales(nombreInv);
+    const correlativo = obtenerSiguienteCorrelativo();
+    return `EMP-${iniciales}-${mes}-${correlativo}`;
+  }
+}
+
+// Función ejecutada al enviar el formulario
+function prepararEnvio(event) {
+  const codigoGenerado = generarCodigoReporte();
+  
+  let inputCodigo = document.getElementById('codigo_informe_hidden');
+  if (!inputCodigo) {
+    inputCodigo = document.createElement('input');
+    inputCodigo.type = 'hidden';
+    inputCodigo.id = 'codigo_informe_hidden';
+    inputCodigo.name = 'codigo_informe';
+    const form = document.getElementById('ssomaForm') || document.forms[0];
+    if (form) form.appendChild(inputCodigo);
+  }
+  inputCodigo.value = codigoGenerado;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
     const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
     const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
 
@@ -74,6 +135,11 @@ JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
     if (selectClasificacion) selectClasificacion.addEventListener('change', evaluarBloqueoAccidente);
 
     evaluarBloqueoAccidente();
+
+    const formSSOMA = document.getElementById('ssomaForm') || document.forms[0];
+    if (formSSOMA) {
+        formSSOMA.addEventListener('submit', prepararEnvio);
+    }
 });
 """
 
@@ -412,9 +478,6 @@ def generar_pdf_100_porciento(
             <td style="text-align:right;">S/ {dinero(monto)}</td>
         </tr>"""
 
-    # Desglose de costos de personal. Los campos se reciben directamente del
-    # formulario, mientras que los importes se calculan con la misma fórmula
-    # usada en main.js.
     personal_items = [
         ("Trabajador accidentado", "salario_accidentado", "coste_hrs_accidentado"),
         ("Otros trabajadores", "salario_otros", "coste_hrs_otros_trabajadores"),
@@ -436,7 +499,6 @@ def generar_pdf_100_porciento(
         "Días de descanso médico", "Importe directo", g(f, "coste_dias_descanso_medico", "0")
     )
 
-    # Desglose de daños materiales con detalle de cantidades, horas y tarifas.
     danos_items = [
         ("Edificios propios", "Horas × costo/hora", costo_numero(g(f, "dm_edif_propio_hrs", "0")) * costo_numero(g(f, "dm_edif_propio_costo", "0"))),
         ("Edificios externos", "Importe declarado", g(f, "dm_edif_externo_costo", "0")),
@@ -451,7 +513,6 @@ def generar_pdf_100_porciento(
     ]
     filas_danos_detalle = "".join(fila_detalle(nombre, detalle, monto) for nombre, detalle, monto in danos_items)
 
-    # Desglose de otros costos y de cada registro de baja de rendimiento.
     otros_items = [
         ("Primeros auxilios / médicos", "Importe declarado", g(f, "oc_mat_auxilios", "0")),
         ("Traslado", "Importe declarado", g(f, "oc_traslado", "0")),
@@ -514,7 +575,6 @@ def generar_pdf_100_porciento(
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
-            /* ESTILOS ESPECÍFICOS COSTOS */
             .cost-title {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; font-size: 7pt; padding: 4px; }}
             .cost-val {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; text-align: right; font-size: 7pt; padding: 4px; }}
             .cost-sub-item {{ padding-left: 15px; color: #4a5568; font-size: 6.5pt; }}
@@ -689,7 +749,6 @@ def generar_pdf_100_porciento(
             <b>Descripción del Evento (Daños / M.A.):</b> {g(f, ['dan_descripcion_evento', 'dan_descripcion'])}
         </div>
 
-        <!-- SECCIÓN DE VALORACIÓN DE COSTES: DESGLOSE + CONSOLIDADO -->
         <div class="sec-header sec-green">VALORACIÓN DETALLADA DE LOS COSTES DEL ACCIDENTE</div>
         {desglose_costos_html}
 
@@ -832,8 +891,6 @@ async def enviar_reporte(
             val = form_data.getlist(key)
             form_dict[key] = val[0] if len(val) == 1 else val
 
-        # Campos calculados por main.js. Se normalizan a nombres canónicos para
-        # que estén disponibles tanto en el PDF como en el webhook.
         campos_costos = {
             "coste_total_personal": [
                 "coste_total_personal", "costo_personal_total", "costo_personal",
@@ -859,7 +916,6 @@ async def enviar_reporte(
         for nombre_canonico, alias in campos_costos.items():
             form_dict[nombre_canonico] = g(form_dict, alias, "0.00")
 
-        # Control de seguridad backend para Incidentes
         tipo_evt = str(form_dict.get("fin_tipo_evento", "")).lower()
         clasif_evt = str(form_dict.get("fin_clasificacion", "")).lower()
 
@@ -913,7 +969,6 @@ async def enviar_reporte(
                             f"Error procesando la imagen alternativa: {err_img}"
                         )
 
-        # Extracción de trabajadores
         lista_trabajadores = []
         paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist(
             "trab_paterno"
@@ -996,7 +1051,6 @@ async def enviar_reporte(
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
-        # 1. Causas Inmediatas
         causas_inmediatas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"cinm_tipo_{i}", "")).strip()
@@ -1029,7 +1083,6 @@ async def enviar_reporte(
 
         form_dict["causas_inmediatas_list"] = causas_inmediatas_list
 
-        # 2. Causas Básicas
         causas_basicas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"csub_tipo_{i}", "")).strip()
@@ -1074,7 +1127,6 @@ async def enviar_reporte(
 
         form_dict["causas_basicas_list"] = causas_basicas_list
 
-        # 3. Medidas Correctivas
         medidas_correctivas_list = []
         for i in range(1, 10):
             t = str(form_data.get(f"acc_tipo_{i}", "")).strip()
@@ -1131,12 +1183,14 @@ async def enviar_reporte(
 
         form_dict["medidas_correctivas_list"] = medidas_correctivas_list
 
-        # Generación de Código de Comprobante
-        if es_preliminar:
-            codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
+        codigo_recibido = g(form_dict, ["codigo_informe", "codigo_informe_hidden"], "")
+        
+        if codigo_recibido and codigo_recibido != "-":
+            codigo_comprobante = codigo_recibido
         else:
-            codigo_comprobante = f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
+            codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}" if es_preliminar else f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
 
+        if not es_preliminar:
             cadena_area_interna = ", ".join([
                 t["area_interna"]
                 for t in lista_trabajadores
@@ -1164,7 +1218,6 @@ async def enviar_reporte(
                 "trab_area_interna[]": cadena_area_interna,
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
-                # Envió robusto de Costos a Google Sheets con búsqueda flexible
                 "costo_personal_total": g(form_dict, "coste_total_personal", "0.00"),
                 "costo_materiales_total": g(form_dict, "coste_total_danos_materiales", "0.00"),
                 "costo_edificios": g(form_dict, ["costo_edificios", "costo_edificio"], "0.00"),
@@ -1180,6 +1233,7 @@ async def enviar_reporte(
                 "costo_baja_rendimiento": g(form_dict, ["costo_baja_rendimiento", "costo_rendimiento"], "0.00"),
                 "gastos_diversos_2pct": g(form_dict, "coste_gastos_diversos", "0.00"),
                 "costo_total_accidente": g(form_dict, "coste_total_accidente", "0.00"),
+                "codigo_informe": codigo_comprobante,
             }
 
             try:
