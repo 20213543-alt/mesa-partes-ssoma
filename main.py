@@ -3,6 +3,7 @@ from datetime import datetime
 import io
 from io import BytesIO
 from itertools import zip_longest
+import json
 import os
 import socket
 import traceback
@@ -32,70 +33,9 @@ app = FastAPI()
 # Configuración de carpeta y ruta estática para archivos JS/CSS
 os.makedirs("static", exist_ok=True)
 
-# Autogenerar el script frontend para controlar la lógica de códigos y bloqueo dinámico
+# Autogenerar el script frontend para controlar el bloqueo dinámico de incidentes
 SCRIPT_JS_PATH = os.path.join("static", "script.js")
-JS_CONTENT = """// Obtiene la primera letra del nombre y la primera letra del apellido paterno/último
-function obtenerIniciales(cadenaNombre) {
-  if (!cadenaNombre || !cadenaNombre.trim()) return "XX";
-  const palabras = cadenaNombre.trim().split(/\\s+/);
-  if (palabras.length === 1) return palabras[0][0].toUpperCase();
-  
-  const primeraLetraNombre = palabras[0][0].toUpperCase();
-  const primeraLetraApellido = palabras[palabras.length - 1][0].toUpperCase();
-  return primeraLetraNombre + primeraLetraApellido;
-}
-
-// Obtiene el mes actual formateado a dos dígitos (01-12)
-function obtenerMesActual() {
-  const fecha = new Date();
-  return String(fecha.getMonth() + 1).padStart(2, '0');
-}
-
-// Incrementa y recupera el número correlativo (001, 002, 003...)
-function obtenerSiguienteCorrelativo() {
-  let contador = parseInt(localStorage.getItem('correlativo_emp_final') || '0', 10) + 1;
-  localStorage.setItem('correlativo_emp_final', contador);
-  return String(contador).padStart(3, '0');
-}
-
-// Genera el código correspondiente según el tipo de informe
-function generarCodigoReporte() {
-  const selectTipoInforme = document.getElementById('tipo_informe') || document.querySelector('[name="tipo_informe"]');
-  const tipoInforme = selectTipoInforme ? selectTipoInforme.value : '';
-  const mes = obtenerMesActual();
-
-  if (tipoInforme.toUpperCase().includes('PRELIMINAR')) {
-    const nombreResp = document.getElementById('resp_nombre_pre')?.value || 
-                       document.querySelector('[name="nombre_lesionado_pre"]')?.value || 
-                       document.querySelector('[name="pre_nombre_lesionado"]')?.value || '';
-    const iniciales = obtenerIniciales(nombreResp);
-    return `EMP-PRELIMINAR-${iniciales}-${mes}`;
-  } else {
-    const nombreInv = document.getElementById('inv_nombre')?.value || 
-                      document.querySelector('[name="inv_nombre"]')?.value || '';
-    const iniciales = obtenerIniciales(nombreInv);
-    const correlativo = obtenerSiguienteCorrelativo();
-    return `EMP-${iniciales}-${mes}-${correlativo}`;
-  }
-}
-
-// Función ejecutada al enviar el formulario
-function prepararEnvio(event) {
-  const codigoGenerado = generarCodigoReporte();
-  
-  let inputCodigo = document.getElementById('codigo_informe_hidden');
-  if (!inputCodigo) {
-    inputCodigo = document.createElement('input');
-    inputCodigo.type = 'hidden';
-    inputCodigo.id = 'codigo_informe_hidden';
-    inputCodigo.name = 'codigo_informe';
-    const form = document.getElementById('ssomaForm') || document.forms[0];
-    if (form) form.appendChild(inputCodigo);
-  }
-  inputCodigo.value = codigoGenerado;
-}
-
-document.addEventListener("DOMContentLoaded", () => {
+JS_CONTENT = """document.addEventListener("DOMContentLoaded", () => {
     const selectTipo = document.querySelector('[name="fin_tipo_evento"]') || document.getElementById('fin_tipo_evento');
     const selectClasificacion = document.querySelector('[name="fin_clasificacion"]') || document.getElementById('fin_clasificacion');
 
@@ -135,11 +75,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectClasificacion) selectClasificacion.addEventListener('change', evaluarBloqueoAccidente);
 
     evaluarBloqueoAccidente();
-
-    const formSSOMA = document.getElementById('ssomaForm') || document.forms[0];
-    if (formSSOMA) {
-        formSSOMA.addEventListener('submit', prepararEnvio);
-    }
 });
 """
 
@@ -154,6 +89,38 @@ CORREOS_PREDETERMINADOS = ["20213543@aloe.ulima.edu.pe"]
 
 PDF_DIR = "pdf_reports"
 os.makedirs(PDF_DIR, exist_ok=True)
+COUNTER_FILE = "counter.json"
+
+
+def extraer_iniciales(nombre: str) -> str:
+    """Extrae las iniciales de la primera letra del nombre y apellidos."""
+    if not nombre or nombre.strip() in ["-", "No especificado"]:
+        return "XX"
+    palabras = [p for p in nombre.strip().split() if p]
+    iniciales = "".join([p[0].upper() for p in palabras if p[0].isalpha()])
+    return iniciales if iniciales else "XX"
+
+
+def obtener_siguiente_correlativo(clave: str) -> str:
+    """Mantiene un contador incremental correlativo de 3 dígitos (001, 002, etc.)."""
+    data = {}
+    if os.path.exists(COUNTER_FILE):
+        try:
+            with open(COUNTER_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+
+    num = data.get(clave, 0) + 1
+    data[clave] = num
+
+    try:
+        with open(COUNTER_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error guardando contador: {e}")
+
+    return f"{num:03d}"
 
 
 def optimizar_imagen_base64(bytes_imagen, target_size=(600, 360)):
@@ -575,6 +542,7 @@ def generar_pdf_100_porciento(
             .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
+            /* ESTILOS ESPECÍFICOS COSTOS */
             .cost-title {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; font-size: 7pt; padding: 4px; }}
             .cost-val {{ font-weight: bold; color: #1a365d; background-color: #edf2f7; text-align: right; font-size: 7pt; padding: 4px; }}
             .cost-sub-item {{ padding-left: 15px; color: #4a5568; font-size: 6.5pt; }}
@@ -916,6 +884,7 @@ async def enviar_reporte(
         for nombre_canonico, alias in campos_costos.items():
             form_dict[nombre_canonico] = g(form_dict, alias, "0.00")
 
+        # Control de seguridad backend para Incidentes
         tipo_evt = str(form_dict.get("fin_tipo_evento", "")).lower()
         clasif_evt = str(form_dict.get("fin_clasificacion", "")).lower()
 
@@ -969,43 +938,24 @@ async def enviar_reporte(
                             f"Error procesando la imagen alternativa: {err_img}"
                         )
 
+        # Extracción de trabajadores
         lista_trabajadores = []
-        paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist(
-            "trab_paterno"
-        )
-        materno_list = form_data.getlist("trab_materno[]") or form_data.getlist(
-            "trab_materno"
-        )
-        nombres_list = form_data.getlist("trab_nombres[]") or form_data.getlist(
-            "trab_nombres"
-        )
-        ocupacion_list = form_data.getlist(
-            "trab_ocupacion[]"
-        ) or form_data.getlist("trab_ocupacion")
+        paterno_list = form_data.getlist("trab_paterno[]") or form_data.getlist("trab_paterno")
+        materno_list = form_data.getlist("trab_materno[]") or form_data.getlist("trab_materno")
+        nombres_list = form_data.getlist("trab_nombres[]") or form_data.getlist("trab_nombres")
+        ocupacion_list = form_data.getlist("trab_ocupacion[]") or form_data.getlist("trab_ocupacion")
         area_list = (
             form_data.getlist("trab_area_interna[]")
             or form_data.getlist("trab_area_interna")
             or form_data.getlist("trab_area[]")
             or form_data.getlist("trab_area")
         )
-        condicion_list = form_data.getlist(
-            "trab_condicion[]"
-        ) or form_data.getlist("trab_condicion")
-        sexo_list = form_data.getlist("trab_sexo[]") or form_data.getlist(
-            "trab_sexo"
-        )
-        dni_list = form_data.getlist("trab_dni[]") or form_data.getlist(
-            "trab_dni"
-        )
-        edad_list = form_data.getlist("trab_edad[]") or form_data.getlist(
-            "trab_edad"
-        )
-        turno_list = form_data.getlist("trab_turno[]") or form_data.getlist(
-            "trab_turno"
-        )
-        personal_list = form_data.getlist(
-            "trab_personal[]"
-        ) or form_data.getlist("trab_personal")
+        condicion_list = form_data.getlist("trab_condicion[]") or form_data.getlist("trab_condicion")
+        sexo_list = form_data.getlist("trab_sexo[]") or form_data.getlist("trab_sexo")
+        dni_list = form_data.getlist("trab_dni[]") or form_data.getlist("trab_dni")
+        edad_list = form_data.getlist("trab_edad[]") or form_data.getlist("trab_edad")
+        turno_list = form_data.getlist("trab_turno[]") or form_data.getlist("trab_turno")
+        personal_list = form_data.getlist("trab_personal[]") or form_data.getlist("trab_personal")
 
         for p, m, n, oc, ar, co, sx, d, ed, tu, pe in zip_longest(
             paterno_list,
@@ -1051,6 +1001,7 @@ async def enviar_reporte(
 
         form_dict["lista_trabajadores"] = lista_trabajadores
 
+        # 1. Causas Inmediatas
         causas_inmediatas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"cinm_tipo_{i}", "")).strip()
@@ -1065,8 +1016,7 @@ async def enviar_reporte(
             for f_num, t, c, o in zip_longest(
                 form_data.getlist("ci_fila[]") or form_data.getlist("ci_fila"),
                 form_data.getlist("ci_tipo[]") or form_data.getlist("ci_tipo"),
-                form_data.getlist("ci_causa[]")
-                or form_data.getlist("ci_causa"),
+                form_data.getlist("ci_causa[]") or form_data.getlist("ci_causa"),
                 form_data.getlist("ci_obs[]") or form_data.getlist("ci_obs"),
                 fillvalue="",
             ):
@@ -1083,6 +1033,7 @@ async def enviar_reporte(
 
         form_dict["causas_inmediatas_list"] = causas_inmediatas_list
 
+        # 2. Causas Básicas
         causas_basicas_list = []
         for i in range(1, 6):
             t = str(form_data.get(f"csub_tipo_{i}", "")).strip()
@@ -1102,10 +1053,8 @@ async def enviar_reporte(
             for f_num, t, c, s, o in zip_longest(
                 form_data.getlist("cb_fila[]") or form_data.getlist("cb_fila"),
                 form_data.getlist("cb_tipo[]") or form_data.getlist("cb_tipo"),
-                form_data.getlist("cb_causa[]")
-                or form_data.getlist("cb_causa"),
-                form_data.getlist("cb_subyacente[]")
-                or form_data.getlist("cb_subyacente"),
+                form_data.getlist("cb_causa[]") or form_data.getlist("cb_causa"),
+                form_data.getlist("cb_subyacente[]") or form_data.getlist("cb_subyacente"),
                 form_data.getlist("cb_obs[]") or form_data.getlist("cb_obs"),
                 fillvalue="",
             ):
@@ -1127,6 +1076,7 @@ async def enviar_reporte(
 
         form_dict["causas_basicas_list"] = causas_basicas_list
 
+        # 3. Medidas Correctivas
         medidas_correctivas_list = []
         for i in range(1, 10):
             t = str(form_data.get(f"acc_tipo_{i}", "")).strip()
@@ -1150,14 +1100,10 @@ async def enviar_reporte(
             for f_num, t, a, r, fe, si, o in zip_longest(
                 form_data.getlist("mc_fila[]") or form_data.getlist("mc_fila"),
                 form_data.getlist("mc_tipo[]") or form_data.getlist("mc_tipo"),
-                form_data.getlist("mc_accion[]")
-                or form_data.getlist("mc_accion"),
-                form_data.getlist("mc_responsable[]")
-                or form_data.getlist("mc_responsable"),
-                form_data.getlist("mc_fecha[]")
-                or form_data.getlist("mc_fecha"),
-                form_data.getlist("mc_situacion[]")
-                or form_data.getlist("mc_situacion"),
+                form_data.getlist("mc_accion[]") or form_data.getlist("mc_accion"),
+                form_data.getlist("mc_responsable[]") or form_data.getlist("mc_responsable"),
+                form_data.getlist("mc_fecha[]") or form_data.getlist("mc_fecha"),
+                form_data.getlist("mc_situacion[]") or form_data.getlist("mc_situacion"),
                 form_data.getlist("mc_obs[]") or form_data.getlist("mc_obs"),
                 fillvalue="",
             ):
@@ -1183,20 +1129,46 @@ async def enviar_reporte(
 
         form_dict["medidas_correctivas_list"] = medidas_correctivas_list
 
-        codigo_recibido = g(form_dict, ["codigo_informe", "codigo_informe_hidden"], "")
-        
-        if codigo_recibido and codigo_recibido != "-":
-            codigo_comprobante = codigo_recibido
+        # Extracción del nombre para obtención de iniciales
+        if es_preliminar:
+            nombre_persona = g(
+                form_dict,
+                ["pre_nombre_lesionado", "nombre_lesionado_pre", "nombre_lesionado", "pre_resp_nombre", "resp_nombre_pre"],
+                "No especificado",
+            )
         else:
-            codigo_comprobante = f"PRE-{ahora_peru.strftime('%Y%m%d%H%M%S')}" if es_preliminar else f"FIN-{ahora_peru.strftime('%Y%m%d%H%M%S')}"
+            nombres_trabajadores = [
+                f"{t.get('nombres', '')} {t.get('paterno', '')} {t.get('materno', '')}".strip()
+                for t in lista_trabajadores
+                if t.get("nombres") or t.get("paterno")
+            ]
+            if nombres_trabajadores:
+                nombre_persona = nombres_trabajadores[0]
+            else:
+                nombre_persona = g(
+                    form_dict,
+                    ["fin_nombre_lesionado", "nombre_lesionado", "inv_nombre", "resp_nombre"],
+                    "No especificado",
+                )
 
-        if not es_preliminar:
+        iniciales = extraer_iniciales(nombre_persona)
+        mes_str = ahora_peru.strftime("%m")
+
+        # Generación de Código de Comprobante según la nueva regla
+        if es_preliminar:
+            codigo_comprobante = f"EMP-PRELIMINAR-{iniciales}-{mes_str}"
+        else:
+            clave_contador = f"EMP-{mes_str}"
+            correlativo_num = obtener_siguiente_correlativo(clave_contador)
+            codigo_comprobante = f"EMP-{iniciales}-{mes_str}-{correlativo_num}"
+
             cadena_area_interna = ", ".join([
                 t["area_interna"]
                 for t in lista_trabajadores
                 if t.get("area_interna")
             ])
             datos_sheet = {
+                "codigo_comprobante": codigo_comprobante,
                 "fin_fecha_evento": g(form_dict, ["fin_fecha_evento", "fecha_evento"], ""),
                 "fin_hora_evento": g(form_dict, ["fin_hora_evento", "hora_evento"], ""),
                 "fin_lugar_exacto": g(form_dict, ["fin_lugar_exacto", "lugar_exacto"], ""),
@@ -1233,20 +1205,10 @@ async def enviar_reporte(
                 "costo_baja_rendimiento": g(form_dict, ["costo_baja_rendimiento", "costo_rendimiento"], "0.00"),
                 "gastos_diversos_2pct": g(form_dict, "coste_gastos_diversos", "0.00"),
                 "costo_total_accidente": g(form_dict, "coste_total_accidente", "0.00"),
-                "codigo_informe": codigo_comprobante,
             }
 
             try:
-                res = requests.post(
-                    GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=5
-                )
-                if res.status_code == 200:
-                    res_json = res.json()
-                    if (
-                        isinstance(res_json, dict)
-                        and "codigo_comprobante" in res_json
-                    ):
-                        codigo_comprobante = res_json["codigo_comprobante"]
+                requests.post(GOOGLE_WEBHOOK_URL, json=datos_sheet, timeout=5)
             except Exception as err_sheet:
                 print(f"Error Google Sheets Webhook: {err_sheet}")
 
