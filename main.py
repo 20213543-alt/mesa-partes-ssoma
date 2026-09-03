@@ -325,10 +325,11 @@ def generar_pdf_preliminar(
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; text-align: center; border-radius: 3px; }}
             .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8.5pt; padding: 4px; margin-top: 8px; margin-bottom: 4px; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; }}
-            .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: middle; }}
-            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
-            .val {{ color: #1a202c; width: 28%; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; }}
+            .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: normal; }}
+            .grid-table th {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: normal; }}
+            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; }}
+            .val {{ color: #1a202c; width: 28%; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: normal; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: normal; }}
             .photo-box {{ text-align: center; padding: 6px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
             .footer {{ margin-top: 15px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
@@ -671,9 +672,9 @@ def generar_pdf_100_porciento(
             .sec-red {{ background-color: #742a2a; color: #ffffff; }}
             .sec-green {{ background-color: #1a365d; color: #ffffff; border-bottom: 2px solid #d69e2e; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; }}
-            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: middle; word-wrap: break-word; }}
-            .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
+            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: normal; }}
+            .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: normal; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
             /* ESTILOS ESPECÍFICOS COSTOS */
@@ -685,7 +686,7 @@ def generar_pdf_100_porciento(
             .cost-total-val {{ font-weight: bold; color: #d69e2e; background-color: #1a365d; text-align: right; font-size: 8pt; padding: 5px; }}
             .cost-category-title {{ background-color: #e2e8f0; color: #1a365d; font-weight: bold; font-size: 7pt; padding: 4px; margin-top: 5px; }}
             .cost-detail-table {{ width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 5px; page-break-inside: auto; }}
-            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: middle; word-wrap: break-word; }}
+            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: normal; }}
             .cost-detail-table th {{ background-color: #2b6cb0; color: #ffffff; text-align: left; }}
             .cost-detail-table th:nth-child(1) {{ width: 30%; }}
             .cost-detail-table th:nth-child(2) {{ width: 50%; }}
