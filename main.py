@@ -1,6 +1,7 @@
 import base64
 from datetime import datetime
 import io
+import html as html_lib
 from io import BytesIO
 from itertools import zip_longest
 import json
@@ -243,6 +244,34 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
+def generar_tabla_campos_completos(formulario: dict) -> str:
+    """Renderiza todos los valores recibidos del formulario en una tabla de respaldo PDF."""
+    filas = []
+    claves_omitidas = {"fotos_base64", "lista_trabajadores", "causas_inmediatas_list", "causas_basicas_list", "medidas_correctivas_list"}
+    for clave, valor in formulario.items():
+        if clave in claves_omitidas or clave.startswith("__"):
+            continue
+        if isinstance(valor, list):
+            if not valor:
+                continue
+            valor = ", ".join(str(item) for item in valor if item not in (None, ""))
+        elif isinstance(valor, dict):
+            valor = json.dumps(valor, ensure_ascii=False)
+        if valor is None or str(valor).strip() == "":
+            continue
+        clave_segura = html_lib.escape(str(clave), quote=True)
+        valor_seguro = html_lib.escape(str(valor), quote=True).replace("\\n", "<br/>").replace("\n", "<br/>")
+        filas.append(f"<tr><td class='lbl'>{clave_segura}</td><td class='val' colspan='3'>{valor_seguro}</td></tr>")
+    if not filas:
+        filas.append("<tr><td class='val' colspan='4'>No se recibieron campos adicionales.</td></tr>")
+    return """
+        <div class="sec-header">REGISTRO ÍNTEGRO DE RESPUESTAS RECIBIDAS</div>
+        <table class="grid-table">
+            <tr><td class="lbl">Campo</td><td class="val" colspan="3">Valor registrado</td></tr>
+            {filas}
+        </table>
+    """.format(filas="".join(filas))
+
 def html_to_pdf_file(html_string: str, pdf_path: str):
     with open(pdf_path, "wb") as pdf_file:
         pisa_status = pisa.CreatePDF(
@@ -274,6 +303,8 @@ def generar_pdf_preliminar(
         img_html = f'<table style="width: 100%; border-collapse: collapse; margin: 0 auto;">{filas_html}</table>'
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px; text-align: center;">Sin fotografía adjunta</p>'
+
+    tabla_campos_completos = generar_tabla_campos_completos(f)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -388,6 +419,8 @@ def generar_pdf_preliminar(
                 <td class="val" colspan="3"><b>[FIRMA REGISTRADA]</b></td>
             </tr>
         </table>
+
+        {tabla_campos_completos}
 
         <div class="footer">
             Documento Digital Generado por el Sistema SSOMA - EMAPE S.A. | Fecha Registro System: {fecha_registro}
@@ -625,6 +658,8 @@ def generar_pdf_100_porciento(
             <tbody>{fila_detalle("Gastos diversos", "2% de personal + daños materiales + otros costos", g(f, "coste_gastos_diversos", "0"))}</tbody>
         </table>
     """
+
+    tabla_campos_completos = generar_tabla_campos_completos(f)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -907,6 +942,8 @@ def generar_pdf_100_porciento(
                 <td colspan="3">{g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
             </tr>
         </table>
+
+        {tabla_campos_completos}
 
         <div class="footer">
             Documento Digital Generado por el Sistema de Gestión SSOMA - EMAPE S.A. | Fecha Registro: {fecha_registro}
