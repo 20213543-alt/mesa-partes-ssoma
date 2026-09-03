@@ -1,4 +1,4 @@
-¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,30 @@
   <style>
     textarea.auto-resize { overflow-y: hidden; resize: none; }
     .accordion-header { cursor: pointer; user-select: none; }
+    #modalObservaciones.flex { display: flex; }
+    #observacion_modal_input { overflow-y: auto; resize: vertical; }
+    .observation-button-filled {
+      background-color: #dbeafe !important;
+      border-color: #1e3a8a !important;
+      color: #1e3a8a !important;
+    }
+    .cost-toggle-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 128px;
+      padding: 5px 12px;
+      border: 2px solid #fef3c7;
+      border-radius: 9999px;
+      background-color: #fbbf24;
+      color: #172554;
+      font-size: 10pt;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: .03em;
+      box-shadow: 0 1px 3px rgba(0,0,0,.35);
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans p-2 md:p-6 min-h-screen">
@@ -37,6 +61,24 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- MODAL AMPLIADO PARA OBSERVACIONES -->
+  <div id="modalObservaciones" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center z-[60] p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-4xl p-5 md:p-6">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-200 pb-3 mb-4">
+        <div>
+          <h3 class="text-lg md:text-xl font-black text-blue-900 uppercase tracking-wide">Observaciones</h3>
+          <p id="observacion_modal_contexto" class="text-xs text-slate-500 mt-1">Redacte el detalle de la observación.</p>
+        </div>
+        <button type="button" onclick="cerrarModalObservaciones(false)" aria-label="Cerrar observaciones" class="text-slate-500 hover:text-slate-900 text-2xl font-black leading-none">×</button>
+      </div>
+      <textarea id="observacion_modal_input" rows="14" class="w-full min-h-[320px] border-2 border-blue-800 rounded-lg p-4 bg-white text-slate-800 text-sm leading-relaxed focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Escriba aquí la observación detallada..."></textarea>
+      <div class="flex flex-col sm:flex-row justify-end gap-3 mt-4">
+        <button type="button" onclick="cerrarModalObservaciones(false)" class="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition text-xs uppercase tracking-wide">Cancelar</button>
+        <button type="button" onclick="guardarModalObservaciones()" class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold shadow-md transition text-xs uppercase tracking-wide">Guardar</button>
+      </div>
     </div>
   </div>
 
@@ -368,13 +410,13 @@
                   <th class="p-2">Nombres</th>
                   <th class="p-2">Ocupación</th>
                   <th class="p-2">Área Interna de Responsabilidad</th>
-                  <th class="p-2">Condición</th>
+                  <th class="p-2">Jefe inmediato</th>
                   <th class="p-2">Sexo</th>
                   <th class="p-2">DNI</th>
                   <th class="p-2">Edad</th>
                   <th class="p-2">Turno</th>
                   <th class="p-2">Personal</th>
-                  <th class="p-2 text-center">Acción</th>
+                  
                 </tr>
               </thead>
               <tbody id="body_trabajadores">
@@ -425,8 +467,7 @@
                       <option value="Contratista">Contratista</option>
                     </select>
                   </td>
-                  <td class="p-1 text-center font-bold text-slate-400">-</td>
-                </tr>
+                                  </tr>
               </tbody>
             </table>
           </div>
@@ -502,17 +543,33 @@
             <div>
               <label class="font-bold block text-slate-700 mb-1">Agente Causante de la Lesión (EMAPE):</label>
               <select name="les_agente_causante" class="w-full border rounded p-2 bg-white">
-                <option value="Herramientas Manuales (Pala, Pico, Martillo)">Herramientas Manuales (Pala, Pico, Martillo)</option>
-                <option value="Maquinaria Pesada / Vehículo">Maquinaria Pesada / Vehículo</option>
-                <option value="Material de Cantera / Piedras / Escombros">Material de Cantera / Piedras / Escombros</option>
-                <option value="Estructuras Metálicas / Barreras de Seguridad">Estructuras Metálicas / Barreras de Seguridad</option>
-                <option value="Superficie de Trabajo / Calzada / Pista">Superficie de Trabajo / Calzada / Pista</option>
-                <option value="Productos Químicos / Asfalto">Productos Químicos / Asfalto</option>
-                <option value="Herramientas eléctricas">Herramientas eléctricas</option>
-                <option value="Herramientas neumáticas">Herramientas neumáticas</option>
-                <option value="Agentes relacionados con electricidad">Agentes relacionados con electricidad</option>
-                <option value="Agentes relacionados con oficina">Agentes relacionados con oficina</option>
-                <option value="Agentes relacionados con quemaduras">Agentes relacionados con quemaduras</option>
+                <option value="">-- Seleccionar agente causante --</option>
+                <optgroup label="Riesgos e instalaciones eléctricas">
+                  <option value="Tableros eléctricos">Tableros eléctricos</option>
+                  <option value="Cables energizados">Cables energizados</option>
+                  <option value="Arcos eléctricos">Arcos eléctricos</option>
+                  <option value="Herramientas eléctricas">Herramientas eléctricas</option>
+                  <option value="Agentes relacionados con electricidad">Agentes relacionados con electricidad</option>
+                </optgroup>
+                <optgroup label="Entorno y equipos de oficina">
+                  <option value="Mobiliario de oficina">Mobiliario de oficina</option>
+                  <option value="Cables en piso">Cables en piso</option>
+                  <option value="Equipos informáticos">Equipos informáticos</option>
+                  <option value="Agentes relacionados con oficina">Agentes relacionados con oficina</option>
+                </optgroup>
+                <optgroup label="Fuentes térmicas y quemaduras">
+                  <option value="Fluidos calientes">Fluidos calientes</option>
+                  <option value="Componentes de alta temperatura">Componentes de alta temperatura</option>
+                  <option value="Químicos corrosivos">Químicos corrosivos</option>
+                  <option value="Agentes relacionados con quemaduras">Agentes relacionados con quemaduras</option>
+                </optgroup>
+                <optgroup label="Otros riesgos y agentes">
+                  <option value="Herramientas neumáticas">Herramientas neumáticas</option>
+                  <option value="Herramientas manuales">Herramientas manuales</option>
+                  <option value="Maquinaria pesada / vehículo">Maquinaria pesada / vehículo</option>
+                  <option value="Materiales, estructuras o superficies de trabajo">Materiales, estructuras o superficies de trabajo</option>
+                  <option value="Productos químicos / asfalto">Productos químicos / asfalto</option>
+                </optgroup>
                 <option value="Otros">Otros</option>
               </select>
             </div>
@@ -620,7 +677,7 @@
                       <option value="">-- Opcional --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_1" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="cinm_obs_1" id="cinm_obs_1" value=""><button type="button" data-observation-button="1" data-observation-target="cinm_obs_1" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">2</td>
@@ -636,7 +693,7 @@
                       <option value="">-- Opcional --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_2" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="cinm_obs_2" id="cinm_obs_2" value=""><button type="button" data-observation-button="1" data-observation-target="cinm_obs_2" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">3</td>
@@ -652,7 +709,7 @@
                       <option value="">-- Opcional --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_3" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="cinm_obs_3" id="cinm_obs_3" value=""><button type="button" data-observation-button="1" data-observation-target="cinm_obs_3" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">4</td>
@@ -668,7 +725,7 @@
                       <option value="">-- Opcional --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_4" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="cinm_obs_4" id="cinm_obs_4" value=""><button type="button" data-observation-button="1" data-observation-target="cinm_obs_4" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">5</td>
@@ -684,7 +741,7 @@
                       <option value="">-- Opcional --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="cinm_obs_5" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="cinm_obs_5" id="cinm_obs_5" value=""><button type="button" data-observation-button="1" data-observation-target="cinm_obs_5" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
               </tbody>
             </table>
@@ -725,7 +782,7 @@
                       <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="csub_obs_1" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="csub_obs_1" id="csub_obs_1" value=""><button type="button" data-observation-button="1" data-observation-target="csub_obs_1" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">2</td>
@@ -746,7 +803,7 @@
                       <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="csub_obs_2" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="csub_obs_2" id="csub_obs_2" value=""><button type="button" data-observation-button="1" data-observation-target="csub_obs_2" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">3</td>
@@ -767,7 +824,7 @@
                       <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="csub_obs_3" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="csub_obs_3" id="csub_obs_3" value=""><button type="button" data-observation-button="1" data-observation-target="csub_obs_3" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">4</td>
@@ -788,7 +845,7 @@
                       <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="csub_obs_4" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="csub_obs_4" id="csub_obs_4" value=""><button type="button" data-observation-button="1" data-observation-target="csub_obs_4" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">5</td>
@@ -809,7 +866,7 @@
                       <option value="">-- Seleccione Causa Raíz --</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="csub_obs_5" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="csub_obs_5" id="csub_obs_5" value=""><button type="button" data-observation-button="1" data-observation-target="csub_obs_5" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
               </tbody>
             </table>
@@ -852,7 +909,7 @@
                       <option value="Ejecutado">Ejecutado</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="acc_obs_1" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="acc_obs_1" id="acc_obs_1" value=""><button type="button" data-observation-button="1" data-observation-target="acc_obs_1" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">2</td>
@@ -873,7 +930,7 @@
                       <option value="Ejecutado">Ejecutado</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="acc_obs_2" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="acc_obs_2" id="acc_obs_2" value=""><button type="button" data-observation-button="1" data-observation-target="acc_obs_2" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-white">
                   <td class="p-2 text-center">3</td>
@@ -894,7 +951,7 @@
                       <option value="Ejecutado">Ejecutado</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="acc_obs_3" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="acc_obs_3" id="acc_obs_3" value=""><button type="button" data-observation-button="1" data-observation-target="acc_obs_3" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
                 <tr class="border-b bg-slate-50">
                   <td class="p-2 text-center">4</td>
@@ -915,7 +972,7 @@
                       <option value="Ejecutado">Ejecutado</option>
                     </select>
                   </td>
-                  <td class="p-1"><input type="text" name="acc_obs_4" class="w-full border rounded p-1"></td>
+                  <td class="p-1"><input type="hidden" name="acc_obs_4" id="acc_obs_4" value=""><button type="button" data-observation-button="1" data-observation-target="acc_obs_4" onclick="abrirModalObservacionFila(this)" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 font-bold rounded p-2 text-[10px] transition text-left">📝 Agregar / Editar Observación</button></td>
                 </tr>
               </tbody>
             </table>
@@ -1954,20 +2011,30 @@
         const contenido = encabezado.nextElementSibling;
         if (!contenido) return;
 
-        encabezado.classList.add('accordion-header');
+        encabezado.classList.add('accordion-header', 'flex', 'justify-between', 'items-center', 'gap-2');
         encabezado.setAttribute('role', 'button');
         encabezado.setAttribute('tabindex', '0');
-        encabezado.setAttribute('aria-expanded', 'true');
+        encabezado.setAttribute('aria-expanded', 'false');
         encabezado.dataset.accordionReady = '1';
 
-        encabezado.addEventListener('click', () => {
+        const indicador = document.createElement('span');
+        indicador.className = 'accordion-indicator cost-toggle-indicator ml-auto';
+        indicador.setAttribute('aria-hidden', 'true');
+        indicador.textContent = 'Mostrar ▼';
+        contenido.classList.add('hidden');
+        encabezado.appendChild(indicador);
+
+        function alternar() {
           const cerrado = contenido.classList.toggle('hidden');
           encabezado.setAttribute('aria-expanded', String(!cerrado));
-        });
+          indicador.textContent = cerrado ? 'Mostrar ▼' : 'Ocultar ▲';
+        }
+
+        encabezado.addEventListener('click', alternar);
         encabezado.addEventListener('keydown', event => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            encabezado.click();
+            alternar();
           }
         });
       });
@@ -1990,6 +2057,195 @@
       iniciarAutoResize();
       iniciarAcordeonesCostos();
       if (typeof window.evaluarTipoPersona === 'function') window.evaluarTipoPersona();
+
+      const observador = new MutationObserver(() => {
+        iniciarAutoResize();
+        iniciarAcordeonesCostos();
+      });
+      observador.observe(document.getElementById('ssomaForm') || document.body, {
+        childList: true,
+        subtree: true
+      });
+    });
+    let textareaObservacionActivo = null;
+    let valorObservacionInicial = '';
+
+    function esCampoObservacion(textarea) {
+      const nombre = (textarea.name || '').toLowerCase();
+      if (/(obs|observacion|observaciones)/.test(nombre)) return true;
+      const contenedor = textarea.closest('div, td, tr');
+      return !!(contenedor && /observaciones|observación|observación/i.test(contenedor.textContent || ''));
+    }
+
+    function abrirModalObservaciones(textarea) {
+      if (!textarea || !esCampoObservacion(textarea)) return;
+      textareaObservacionActivo = textarea;
+      valorObservacionInicial = textarea.value;
+      const modal = document.getElementById('modalObservaciones');
+      const entrada = document.getElementById('observacion_modal_input');
+      const contexto = document.getElementById('observacion_modal_contexto');
+      if (!modal || !entrada) return;
+
+      const etiqueta = textarea.closest('div, td, tr')?.querySelector('label, th');
+      contexto.textContent = etiqueta?.textContent?.trim() || 'Redacte el detalle de la observación.';
+      entrada.value = textarea.value;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      window.setTimeout(() => entrada.focus(), 0);
+    }
+
+    function cerrarModalObservaciones(guardar = false) {
+      if (guardar) guardarModalObservaciones();
+      const modal = document.getElementById('modalObservaciones');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      document.body.classList.remove('overflow-hidden');
+      textareaObservacionActivo = null;
+    }
+
+    function guardarModalObservaciones() {
+      const entrada = document.getElementById('observacion_modal_input');
+      if (textareaObservacionActivo && entrada) {
+        textareaObservacionActivo.value = entrada.value;
+        textareaObservacionActivo.dispatchEvent(new Event('input', { bubbles: true }));
+        textareaObservacionActivo.dispatchEvent(new Event('change', { bubbles: true }));
+        ajustarAlturaTextarea(textareaObservacionActivo);
+      }
+      cerrarModalObservaciones(false);
+    }
+
+    function iniciarModalObservaciones() {
+      document.querySelectorAll('#ssomaForm textarea').forEach(textarea => {
+        if (!esCampoObservacion(textarea) || textarea.dataset.modalObservacionReady === '1') return;
+        textarea.dataset.modalObservacionReady = '1';
+        textarea.setAttribute('readonly', 'readonly');
+        textarea.classList.add('cursor-pointer');
+        textarea.addEventListener('focus', () => abrirModalObservaciones(textarea));
+        textarea.addEventListener('click', () => abrirModalObservaciones(textarea));
+      });
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && textareaObservacionActivo) cerrarModalObservaciones(false);
+    });
+
+    function sincronizarObservacionActivaAntesDeEnviar() {
+      const entrada = document.getElementById('observacion_modal_input');
+      if (campoObservacionActivo && entrada) {
+        campoObservacionActivo.value = entrada.value;
+        actualizarEstadoBotonObservacion(botonObservacionActivo, entrada.value);
+      }
+    }
+
+    const formularioCompleto = document.getElementById('ssomaForm');
+    if (formularioCompleto) {
+      formularioCompleto.addEventListener('submit', sincronizarObservacionActivaAntesDeEnviar, true);
+    }
+
+
+    const observadorObservaciones = new MutationObserver(() => iniciarModalObservaciones());
+    document.addEventListener('DOMContentLoaded', () => {
+      iniciarModalObservaciones();
+      const formulario = document.getElementById('ssomaForm');
+      if (formulario) observadorObservaciones.observe(formulario, { childList: true, subtree: true });
+    });
+
+    let botonObservacionActivo = null;
+    let campoObservacionActivo = null;
+
+    function actualizarEstadoBotonObservacion(boton, valor) {
+      if (!boton) return;
+      const tieneTexto = Boolean((valor || '').trim());
+      boton.textContent = tieneTexto
+        ? '✓ Observación registrada · Editar'
+        : '📝 Agregar / Editar Observación';
+      boton.classList.toggle('observation-button-filled', tieneTexto);
+    }
+
+    function abrirModalObservacionFila(boton) {
+      const nombreCampo = boton?.dataset?.observationTarget;
+      const campo = nombreCampo ? document.getElementById(nombreCampo) : null;
+      const modal = document.getElementById('modalObservaciones');
+      const entrada = document.getElementById('observacion_modal_input');
+      const contexto = document.getElementById('observacion_modal_contexto');
+      if (!campo || !modal || !entrada) return;
+
+      botonObservacionActivo = boton;
+      campoObservacionActivo = campo;
+      entrada.value = campo.value || '';
+      if (contexto) {
+        const fila = boton.closest('tr');
+        const numero = fila?.querySelector('td')?.textContent?.trim() || '';
+        contexto.textContent = numero
+          ? `Observación de la fila ${numero}. Redacte el detalle y pulse Guardar.`
+          : 'Redacte el detalle de la observación y pulse Guardar.';
+      }
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+      window.setTimeout(() => entrada.focus(), 0);
+    }
+
+    function guardarModalObservacionFila() {
+      const entrada = document.getElementById('observacion_modal_input');
+      if (campoObservacionActivo && entrada) {
+        campoObservacionActivo.value = entrada.value;
+        campoObservacionActivo.dispatchEvent(new Event('input', { bubbles: true }));
+        campoObservacionActivo.dispatchEvent(new Event('change', { bubbles: true }));
+        actualizarEstadoBotonObservacion(botonObservacionActivo, entrada.value);
+      }
+      cerrarModalObservaciones(false);
+    }
+
+    function iniciarBotonesObservaciones() {
+      document.querySelectorAll('[data-observation-button="1"]').forEach(boton => {
+        if (boton.dataset.observationReady === '1') return;
+        boton.dataset.observationReady = '1';
+        const nombre = boton.dataset.observationTarget;
+        const campo = nombre ? document.getElementById(nombre) : null;
+        actualizarEstadoBotonObservacion(boton, campo?.value || '');
+      });
+    }
+
+    // El botón Guardar del modal utiliza la versión por fila cuando existe una fila activa.
+    const guardarModalObservacionesOriginal = window.guardarModalObservaciones;
+    window.guardarModalObservaciones = function() {
+      if (campoObservacionActivo) {
+        guardarModalObservacionFila();
+        return;
+      }
+      if (typeof guardarModalObservacionesOriginal === 'function') {
+        guardarModalObservacionesOriginal();
+      }
+    };
+
+    const cerrarModalObservacionesOriginal = window.cerrarModalObservaciones;
+    window.cerrarModalObservaciones = function(guardar = false) {
+      if (guardar && campoObservacionActivo) {
+        guardarModalObservacionFila();
+        return;
+      }
+      const modal = document.getElementById('modalObservaciones');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      document.body.classList.remove('overflow-hidden');
+      botonObservacionActivo = null;
+      campoObservacionActivo = null;
+      if (typeof cerrarModalObservacionesOriginal === 'function' && !guardar) {
+        // La función original realiza la misma limpieza para textareas generales.
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', iniciarBotonesObservaciones);
+    const observadorBotonesObservaciones = new MutationObserver(iniciarBotonesObservaciones);
+    document.addEventListener('DOMContentLoaded', () => {
+      const formulario = document.getElementById('ssomaForm');
+      if (formulario) observadorBotonesObservaciones.observe(formulario, { childList: true, subtree: true });
     });
 </script>
 </body>
