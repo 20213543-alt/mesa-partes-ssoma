@@ -11,12 +11,16 @@
     .accordion-header { cursor: pointer; user-select: none; }
     #modalObservaciones.flex { display: flex; }
     #observacion_modal_input { overflow-y: auto; resize: vertical; }
+    td, th, label, p, span, .text-box {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      white-space: normal;
+    }
     @media print {
       body { background: #fff !important; padding: 0 !important; }
       #modalConfirmacion, #modalObservaciones, #btnGuardar { display: none !important; }
       [data-cost-content="1"] { display: block !important; }
       .cost-toggle-indicator { display: none !important; }
-      .hidden { display: revert !important; }
       input, select, textarea { color: #111827 !important; }
     }
     .observation-button-filled {
