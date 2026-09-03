@@ -356,6 +356,10 @@ def generar_pdf_preliminar(
                 <td class="lbl">Cargo:</td>
                 <td class="val" colspan="3">{g(f, ['pre_cargo_lesionado', 'cargo_lesionado_pre', 'cargo'])}</td>
             </tr>
+            <tr>
+                <td class="lbl">Área interna de responsabilidad:</td>
+                <td class="val" colspan="3">{g(f, ['pre_area_interna_responsabilidad', 'area_interna_responsabilidad_pre', 'pre_area_interna', 'area_interna_responsabilidad'])}</td>
+            </tr>
         </table>
         <div class="text-box">
             <b>Breve Descripción del Suceso:</b><br/>
@@ -406,7 +410,7 @@ def generar_pdf_100_porciento(
             <td style="width: 11%;">{trab.get('nombres','-')}</td>
             <td style="width: 11%;">{trab.get('ocupacion','-')}</td>
             <td style="width: 13%;">{trab.get('area_interna','-')}</td>
-            <td style="width: 9%;">{trab.get('condicion','-')}</td>
+            <td style="width: 9%;">{trab.get('jefe_inmediato', trab.get('condicion','-'))}</td>
             <td style="width: 5%;">{trab.get('sexo','-')}</td>
             <td style="width: 8%;">{trab.get('dni','-')}</td>
             <td style="width: 5%;">{trab.get('edad','-')}</td>
@@ -729,7 +733,7 @@ def generar_pdf_100_porciento(
                     <th style="width: 11%;">Nombres</th>
                     <th style="width: 11%;">Ocupación</th>
                     <th style="width: 13%;">Área Interna</th>
-                    <th style="width: 9%;">Condición</th>
+                    <th style="width: 9%;">Jefe inmediato</th>
                     <th style="width: 5%;">Sexo</th>
                     <th style="width: 8%;">DNI</th>
                     <th style="width: 5%;">Edad</th>
@@ -876,13 +880,17 @@ def generar_pdf_100_porciento(
             </tbody>
         </table>
 
-        <div class="sec-header">RESPONSABLE DE REGISTRO, INVESTIGACIÓN Y TESTIGOS</div>
+        <div class="sec-header">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN (JEFE INMEDIATO)</div>
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Nombre Resp./Investigador:</td>
                 <td style="width: 28%;">{g(f, ['inv_nombre', 'resp_nombre'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Cargo:</td>
                 <td style="width: 28%;">{g(f, ['inv_cargo', 'resp_cargo'])}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold; background-color: #f7fafc;">Área interna de responsabilidad:</td>
+                <td colspan="3">{g(f, ['inv_area_interna_responsabilidad', 'inv_area_interna', 'area_interna_responsabilidad_inv', 'area_interna_responsabilidad'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Firma Investigador:</td>
@@ -1049,6 +1057,13 @@ async def enviar_reporte(
             or form_data.getlist("trab_area")
         )
         condicion_list = form_data.getlist("trab_condicion[]") or form_data.getlist("trab_condicion")
+        jefe_inmediato_list = (
+            form_data.getlist("trab_jefe_inmediato[]")
+            or form_data.getlist("trab_jefe_inmediato")
+            or form_data.getlist("jefe_inmediato[]")
+            or form_data.getlist("jefe_inmediato")
+            or condicion_list
+        )
         sexo_list = form_data.getlist("trab_sexo[]") or form_data.getlist("trab_sexo")
         dni_list = form_data.getlist("trab_dni[]") or form_data.getlist("trab_dni")
         edad_list = form_data.getlist("trab_edad[]") or form_data.getlist("trab_edad")
@@ -1061,7 +1076,7 @@ async def enviar_reporte(
             nombres_list,
             ocupacion_list,
             area_list,
-            condicion_list,
+            jefe_inmediato_list,
             sexo_list,
             dni_list,
             edad_list,
@@ -1089,6 +1104,7 @@ async def enviar_reporte(
                     "nombres": n,
                     "ocupacion": oc,
                     "area_interna": ar,
+                    "jefe_inmediato": co,
                     "condicion": co,
                     "sexo": sx,
                     "dni": d,
@@ -1098,6 +1114,16 @@ async def enviar_reporte(
                 })
 
         form_dict["lista_trabajadores"] = lista_trabajadores
+        form_dict["pre_area_interna_responsabilidad"] = g(
+            form_dict,
+            ["pre_area_interna_responsabilidad", "area_interna_responsabilidad_pre", "pre_area_interna", "area_interna_responsabilidad"],
+            "-",
+        )
+        form_dict["inv_area_interna_responsabilidad"] = g(
+            form_dict,
+            ["inv_area_interna_responsabilidad", "inv_area_interna", "area_interna_responsabilidad_inv", "area_interna_responsabilidad"],
+            "-",
+        )
 
         # 1. Causas Inmediatas
         causas_inmediatas_list = []
@@ -1285,6 +1311,11 @@ async def enviar_reporte(
                 ]),
                 "ana_que_sucedio": g(form_dict, ["ana_que_sucedio", "que_sucedio"], ""),
                 "inv_nombre": g(form_dict, ["inv_nombre", "resp_nombre"], ""),
+                "pre_area_interna_responsabilidad": g(form_dict, "pre_area_interna_responsabilidad", ""),
+                "inv_area_interna_responsabilidad": g(form_dict, "inv_area_interna_responsabilidad", ""),
+                "trab_jefe_inmediato": ", ".join([
+                    t.get("jefe_inmediato", "") for t in lista_trabajadores if t.get("jefe_inmediato")
+                ]),
                 "trab_area_interna[]": cadena_area_interna,
                 "trab_area_interna": cadena_area_interna,
                 "trab_area": cadena_area_interna,
