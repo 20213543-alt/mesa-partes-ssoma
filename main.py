@@ -94,11 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
         camposAccidente.forEach(nombre => {
             const elementos = document.querySelectorAll(`[name="${nombre}"]`);
             elementos.forEach(el => {
-                el.disabled = esIncidente;
-                if (esIncidente) {
-                    el.value = '';
-                    el.removeAttribute('required');
-                }
+                // No se deshabilitan ni se borran valores: el backend debe recibir
+                // cualquier respuesta que el usuario haya registrado.
+                el.disabled = false;
             });
         });
 
@@ -244,10 +242,16 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
+def safe_g(form_dict, key_or_keys, default="-"):
+    """Obtiene un campo y lo escapa para insertarlo de forma segura en HTML/PDF."""
+    value = g(form_dict, key_or_keys, default)
+    return html_lib.escape(str(value), quote=True).replace("\n", "<br/>").replace("\n", "<br/>")
+
+
 def generar_tabla_campos_completos(formulario: dict) -> str:
     """Renderiza todos los valores recibidos del formulario en una tabla de respaldo PDF."""
     filas = []
-    claves_omitidas = {"fotos_base64", "lista_trabajadores", "causas_inmediatas_list", "causas_basicas_list", "medidas_correctivas_list"}
+    claves_omitidas = {"fotos_base64", "fotografia_pre", "foto_evento_pre", "foto_evento", "lista_trabajadores", "causas_inmediatas_list", "causas_basicas_list", "medidas_correctivas_list"}
     for clave, valor in formulario.items():
         if clave in claves_omitidas or clave.startswith("__"):
             continue
@@ -345,13 +349,13 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Razón Social:</td>
-                <td class="val" colspan="2">{g(f, ['pre_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td class="val" colspan="2">{safe_g(f, ['pre_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
                 <td class="lbl">RUC:</td>
-                <td class="val">{g(f, ['pre_ruc', 'ruc'], '20100063337')}</td>
+                <td class="val">{safe_g(f, ['pre_ruc', 'ruc'], '20100063337')}</td>
             </tr>
             <tr>
                 <td class="lbl">Tipo de Evento:</td>
-                <td class="val" colspan="4">{g(f, ['pre_tipo_evento', 'tipo_evento_pre', 'tipo_evento'])}</td>
+                <td class="val" colspan="4">{safe_g(f, ['pre_tipo_evento', 'tipo_evento_pre', 'tipo_evento'])}</td>
             </tr>
         </table>
 
@@ -359,42 +363,42 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Fecha de Evento:</td>
-                <td class="val">{g(f, ['pre_fecha_evento', 'fecha_evento_pre', 'fecha_evento'])}</td>
+                <td class="val">{safe_g(f, ['pre_fecha_evento', 'fecha_evento_pre', 'fecha_evento'])}</td>
                 <td class="lbl">Hora de Ocurrencia:</td>
-                <td class="val">{g(f, ['pre_hora_evento', 'hora_ocurrencia_pre', 'hora_evento'])}</td>
+                <td class="val">{safe_g(f, ['pre_hora_evento', 'hora_ocurrencia_pre', 'hora_evento'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Lugar de Ocurrencia:</td>
-                <td class="val">{g(f, ['pre_lugar_evento', 'lugar_ocurrencia_pre', 'lugar_evento'])}</td>
+                <td class="val">{safe_g(f, ['pre_lugar_evento', 'lugar_ocurrencia_pre', 'lugar_evento'])}</td>
                 <td class="lbl">Fecha de Reporte:</td>
-                <td class="val">{g(f, ['pre_fecha_reporte', 'fecha_reporte_pre', 'fecha_reporte'])}</td>
+                <td class="val">{safe_g(f, ['pre_fecha_reporte', 'fecha_reporte_pre', 'fecha_reporte'])}</td>
             </tr>
         </table>
         <div class="text-box">
             <b>Trabajo que se Realizaba:</b><br/>
-            {g(f, ['pre_trabajo_realizaba', 'trabajo_realizaba_pre', 'trabajo_realizaba'])}
+            {safe_g(f, ['pre_trabajo_realizaba', 'trabajo_realizaba_pre', 'trabajo_realizaba'])}
         </div>
 
         <div class="sec-header">DESCRIPCIÓN DE LOS LESIONADOS</div>
         <table class="grid-table">
             <tr>
                 <td class="lbl">Nombre Completo:</td>
-                <td class="val">{g(f, ['pre_nombre_lesionado', 'nombre_lesionado_pre', 'nombre_lesionado'])}</td>
+                <td class="val">{safe_g(f, ['pre_nombre_lesionado', 'nombre_lesionado_pre', 'nombre_lesionado'])}</td>
                 <td class="lbl">Edad:</td>
-                <td class="val">{g(f, ['pre_edad_lesionado', 'edad_lesionado_pre', 'edad'])}</td>
+                <td class="val">{safe_g(f, ['pre_edad_lesionado', 'edad_lesionado_pre', 'edad'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Cargo:</td>
-                <td class="val" colspan="3">{g(f, ['pre_cargo_lesionado', 'cargo_lesionado_pre', 'cargo'])}</td>
+                <td class="val" colspan="3">{safe_g(f, ['pre_cargo_lesionado', 'cargo_lesionado_pre', 'cargo'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Área interna de responsabilidad:</td>
-                <td class="val" colspan="3">{g(f, ['pre_area_interna_responsabilidad', 'area_interna_responsabilidad_pre', 'pre_area_interna', 'area_interna_responsabilidad'])}</td>
+                <td class="val" colspan="3">{safe_g(f, ['pre_area_interna_responsabilidad', 'area_interna_responsabilidad_pre', 'pre_area_interna', 'area_interna_responsabilidad'])}</td>
             </tr>
         </table>
         <div class="text-box">
             <b>Breve Descripción del Suceso:</b><br/>
-            {g(f, ['pre_breve_descripcion', 'breve_descripcion_pre', 'descripcion'])}
+            {safe_g(f, ['pre_breve_descripcion', 'breve_descripcion_pre', 'descripcion'])}
         </div>
 
         <div class="sec-header">REGISTRO FOTOGRÁFICO</div>
@@ -402,17 +406,19 @@ def generar_pdf_preliminar(
             {img_html}
         </div>
 
-        <div class="sec-header">RESPONSABLE DEL REPORTE</div>
+        <div class="sec-header">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN (JEFE INMEDIATO)</div>
         <table class="grid-table">
             <tr>
                 <td class="lbl">Nombre y Apellido:</td>
-                <td class="val">{g(f, ['pre_resp_nombre', 'resp_nombre_pre', 'inv_nombre'])}</td>
+                <td class="val">{safe_g(f, ['pre_resp_nombre', 'resp_nombre_pre', 'inv_nombre'])}</td>
                 <td class="lbl">Cargo:</td>
-                <td class="val">{g(f, ['pre_resp_cargo', 'resp_cargo_pre', 'inv_cargo'])}</td>
+                <td class="val">{safe_g(f, ['pre_resp_cargo', 'resp_cargo_pre', 'inv_cargo'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Fecha:</td>
-                <td class="val" colspan="3">{g(f, ['pre_resp_fecha', 'resp_fecha_pre', 'fecha_reporte'])}</td>
+                <td class="val">{safe_g(f, ['pre_resp_fecha', 'resp_fecha_pre', 'fecha_reporte'])}</td>
+                <td class="lbl">Área interna de responsabilidad:</td>
+                <td class="val">{safe_g(f, ['pre_area_interna_responsabilidad', 'area_interna_responsabilidad_pre', 'pre_area_interna'])}</td>
             </tr>
             <tr>
                 <td class="lbl">Firma:</td>
@@ -438,17 +444,17 @@ def generar_pdf_100_porciento(
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
         <tr>
-            <td style="width: 9%;">{trab.get('paterno','-')}</td>
-            <td style="width: 9%;">{trab.get('materno','-')}</td>
-            <td style="width: 11%;">{trab.get('nombres','-')}</td>
-            <td style="width: 11%;">{trab.get('ocupacion','-')}</td>
-            <td style="width: 13%;">{trab.get('area_interna','-')}</td>
+            <td style="width: 9%;">{html_lib.escape(str(trab.get('paterno','-')))}</td>
+            <td style="width: 9%;">{html_lib.escape(str(trab.get('materno','-')))}</td>
+            <td style="width: 11%;">{html_lib.escape(str(trab.get('nombres','-')))}</td>
+            <td style="width: 11%;">{html_lib.escape(str(trab.get('ocupacion','-')))}</td>
+            <td style="width: 13%;">{html_lib.escape(str(trab.get('area_interna','-')))}</td>
             <td style="width: 9%;">{trab.get('jefe_inmediato', trab.get('condicion','-'))}</td>
-            <td style="width: 5%;">{trab.get('sexo','-')}</td>
-            <td style="width: 8%;">{trab.get('dni','-')}</td>
-            <td style="width: 5%;">{trab.get('edad','-')}</td>
-            <td style="width: 6%;">{trab.get('turno','-')}</td>
-            <td style="width: 14%;">{trab.get('personal','-')}</td>
+            <td style="width: 5%;">{html_lib.escape(str(trab.get('sexo','-')))}</td>
+            <td style="width: 8%;">{html_lib.escape(str(trab.get('dni','-')))}</td>
+            <td style="width: 5%;">{html_lib.escape(str(trab.get('edad','-')))}</td>
+            <td style="width: 6%;">{html_lib.escape(str(trab.get('turno','-')))}</td>
+            <td style="width: 14%;">{html_lib.escape(str(trab.get('personal','-')))}</td>
         </tr>
         """
     if not filas_trabajadores:
@@ -460,10 +466,10 @@ def generar_pdf_100_porciento(
     for ci in f.get("causas_inmediatas_list", []):
         filas_causas_inmediatas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{ci.get('fila','-')}</td>
-            <td style="width: 24%;">{ci.get('tipo','-')}</td>
-            <td style="width: 35%;">{ci.get('causa','-')}</td>
-            <td style="width: 35%;">{ci.get('obs','-')}</td>
+            <td style="text-align:center; width: 6%;">{html_lib.escape(str(ci.get('fila','-')))}</td>
+            <td style="width: 24%;">{html_lib.escape(str(ci.get('tipo','-')))}</td>
+            <td style="width: 35%;">{html_lib.escape(str(ci.get('causa','-')))}</td>
+            <td style="width: 35%;">{html_lib.escape(str(ci.get('obs','-')))}</td>
         </tr>
         """
     if not filas_causas_inmediatas:
@@ -473,11 +479,11 @@ def generar_pdf_100_porciento(
     for cb in f.get("causas_basicas_list", []):
         filas_causas_basicas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{cb.get('fila','-')}</td>
-            <td style="width: 20%;">{cb.get('tipo','-')}</td>
-            <td style="width: 24%;">{cb.get('causa','-')}</td>
-            <td style="width: 25%;">{cb.get('subyacente','-')}</td>
-            <td style="width: 25%;">{cb.get('obs','-')}</td>
+            <td style="text-align:center; width: 6%;">{html_lib.escape(str(cb.get('fila','-')))}</td>
+            <td style="width: 20%;">{html_lib.escape(str(cb.get('tipo','-')))}</td>
+            <td style="width: 24%;">{html_lib.escape(str(cb.get('causa','-')))}</td>
+            <td style="width: 25%;">{html_lib.escape(str(cb.get('subyacente','-')))}</td>
+            <td style="width: 25%;">{html_lib.escape(str(cb.get('obs','-')))}</td>
         </tr>
         """
     if not filas_causas_basicas:
@@ -487,13 +493,13 @@ def generar_pdf_100_porciento(
     for mc in f.get("medidas_correctivas_list", []):
         filas_medidas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{mc.get('fila','-')}</td>
-            <td style="width: 16%;">{mc.get('tipo','-')}</td>
-            <td style="width: 28%;">{mc.get('accion','-')}</td>
-            <td style="width: 16%;">{mc.get('responsable','-')}</td>
-            <td style="width: 10%;">{mc.get('fecha','-')}</td>
-            <td style="width: 10%;">{mc.get('situacion','-')}</td>
-            <td style="width: 14%;">{mc.get('obs','-')}</td>
+            <td style="text-align:center; width: 6%;">{html_lib.escape(str(mc.get('fila','-')))}</td>
+            <td style="width: 16%;">{html_lib.escape(str(mc.get('tipo','-')))}</td>
+            <td style="width: 28%;">{html_lib.escape(str(mc.get('accion','-')))}</td>
+            <td style="width: 16%;">{html_lib.escape(str(mc.get('responsable','-')))}</td>
+            <td style="width: 10%;">{html_lib.escape(str(mc.get('fecha','-')))}</td>
+            <td style="width: 10%;">{html_lib.escape(str(mc.get('situacion','-')))}</td>
+            <td style="width: 14%;">{html_lib.escape(str(mc.get('obs','-')))}</td>
         </tr>
         """
     if not filas_medidas:
@@ -716,23 +722,23 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Razón Social:</td>
-                <td style="width: 28%;" colspan="3">{g(f, ['emp_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td style="width: 28%;" colspan="3">{safe_g(f, ['emp_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">RUC:</td>
-                <td style="width: 28%;">{g(f, ['emp_ruc', 'ruc'], '20100063337')}</td>
+                <td style="width: 28%;">{safe_g(f, ['emp_ruc', 'ruc'], '20100063337')}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Sede:</td>
-                <td>{g(f, ['emp_sede', 'sede'])}</td>
+                <td>{safe_g(f, ['emp_sede', 'sede'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Dirección:</td>
-                <td colspan="3">{g(f, ['emp_direccion', 'direccion'])}</td>
+                <td colspan="3">{safe_g(f, ['emp_direccion', 'direccion'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
-                <td>{g(f, ['emp_num_trabajadores', 'emp_num_trab', 'num_trabajadores'])}</td>
+                <td>{safe_g(f, ['emp_num_trabajadores', 'emp_num_trab', 'num_trabajadores'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
-                <td>{g(f, ['emp_num_sctr', 'num_sctr'])}</td>
+                <td>{safe_g(f, ['emp_num_sctr', 'num_sctr'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora SCTR:</td>
-                <td>{g(f, ['emp_aseguradora', 'aseguradora'])}</td>
+                <td>{safe_g(f, ['emp_aseguradora', 'aseguradora'])}</td>
             </tr>
         </table>
 
@@ -743,19 +749,19 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Fecha Evento:</td>
-                <td style="width: 28%;">{g(f, ['fin_fecha_evento', 'fecha_evento'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['fin_fecha_evento', 'fecha_evento'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Hora Evento:</td>
-                <td style="width: 28%;">{g(f, ['fin_hora_evento', 'hora_evento'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['fin_hora_evento', 'hora_evento'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Lugar Exacto:</td>
-                <td style="width: 28%;">{g(f, ['fin_lugar_exacto', 'lugar_exacto', 'lugar_evento'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['fin_lugar_exacto', 'lugar_exacto', 'lugar_evento'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Tipo de Evento:</td>
-                <td>{g(f, ['fin_tipo_evento', 'tipo_evento'])}</td>
+                <td>{safe_g(f, ['fin_tipo_evento', 'tipo_evento'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Clasificación Evento:</td>
-                <td>{g(f, ['fin_clasificacion', 'clasificacion'])}</td>
+                <td>{safe_g(f, ['fin_clasificacion', 'clasificacion'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Solo Incidente:</td>
-                <td>{g(f, ['fin_incidente_peligro', 'fin_solo_incidente', 'solo_incidente'])}</td>
+                <td>{safe_g(f, ['fin_incidente_peligro', 'fin_solo_incidente', 'solo_incidente'])}</td>
             </tr>
         </table>
 
@@ -785,42 +791,42 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Gravedad Accidente:</td>
-                <td style="width: 28%;">{g(f, ['acc_gravedad', 'fin_gravedad_evento', 'gravedad'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['acc_gravedad', 'fin_gravedad_evento', 'gravedad'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Grado Incapacitante:</td>
-                <td style="width: 28%;">{g(f, ['acc_grado_incapacitante', 'grado_incapacitante'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['acc_grado_incapacitante', 'grado_incapacitante'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Días Descanso Médico:</td>
-                <td style="width: 28%;">{g(f, ['acc_dias_descanso', 'dias_descanso'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['acc_dias_descanso', 'dias_descanso'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Días Cargados:</td>
-                <td>{g(f, ['acc_dias_cargados', 'dias_cargados'])}</td>
+                <td>{safe_g(f, ['acc_dias_cargados', 'dias_cargados'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Afectados:</td>
-                <td colspan="3">{g(f, ['acc_num_afectados', 'num_afectados'])}</td>
+                <td colspan="3">{safe_g(f, ['acc_num_afectados', 'num_afectados'])}</td>
             </tr>
         </table>
 
         <div class="sec-header">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
         <div class="text-box">
-            <b>Tipo de Atención en Primeros Auxilios:</b> {g(f, ['inc_primeros_auxilios', 'pa_tipo_atencion', 'primeros_auxilios'])}
+            <b>Tipo de Atención en Primeros Auxilios:</b> {safe_g(f, ['inc_primeros_auxilios', 'pa_tipo_atencion', 'primeros_auxilios'])}
         </div>
 
         <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Forma Accidente/Incidente:</td>
-                <td style="width: 28%;">{g(f, ['les_forma_evento', 'les_forma', 'forma_evento'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['les_forma_evento', 'les_forma', 'forma_evento'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Tipo de Lesión:</td>
-                <td style="width: 28%;" colspan="3">{g(f, ['les_tipo_lesion', 'les_tipo', 'tipo_lesion'])}</td>
+                <td style="width: 28%;" colspan="3">{safe_g(f, ['les_tipo_lesion', 'les_tipo', 'tipo_lesion'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Agente Causante:</td>
-                <td>{g(f, ['les_agente_causante', 'les_agente', 'agente_causante'])}</td>
+                <td>{safe_g(f, ['les_agente_causante', 'les_agente', 'agente_causante'])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Parte Cuerpo Afectada:</td>
-                <td colspan="3">{g(f, ['les_parte_cuerpo', 'parte_cuerpo'])}</td>
+                <td colspan="3">{safe_g(f, ['les_parte_cuerpo', 'parte_cuerpo'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Hospital / Clínica / Tópico:</td>
-                <td colspan="5">{g(f, ['les_hospital_atencion', 'les_hospital', 'hospital_atencion'])}</td>
+                <td colspan="5">{safe_g(f, ['les_hospital_atencion', 'les_hospital', 'hospital_atencion'])}</td>
             </tr>
         </table>
 
@@ -828,13 +834,13 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Daño Material:</td>
-                <td style="width: 28%;">{g(f, ['dan_material', 'dano_material'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['dan_material', 'dano_material'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Agente Causante del Daño:</td>
-                <td style="width: 28%;">{g(f, ['dan_agente_causante', 'dan_agente'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['dan_agente_causante', 'dan_agente'])}</td>
             </tr>
         </table>
         <div class="text-box">
-            <b>Descripción del Evento (Daños / M.A.):</b> {g(f, ['dan_descripcion_evento', 'dan_descripcion'])}
+            <b>Descripción del Evento (Daños / M.A.):</b> {safe_g(f, ['dan_descripcion_evento', 'dan_descripcion'])}
         </div>
 
         <div class="sec-header sec-green">VALORACIÓN DETALLADA DE LOS COSTES DEL ACCIDENTE</div>
@@ -849,21 +855,21 @@ def generar_pdf_100_porciento(
                 </tr>
             </thead>
             <tbody>
-                <tr><td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td><td class="cost-val">S/ {g(f, 'coste_total_personal', '0.00')}</td></tr>
-                <tr><td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td><td class="cost-val">S/ {g(f, 'coste_total_danos_materiales', '0.00')}</td></tr>
-                <tr><td class="cost-title">3. SUBTOTAL OTROS COSTOS</td><td class="cost-val">S/ {g(f, 'coste_subtotal_otros', '0.00')}</td></tr>
-                <tr><td class="cost-title">4. GASTOS DIVERSOS (2%)</td><td class="cost-val">S/ {g(f, 'coste_gastos_diversos', '0.00')}</td></tr>
-                <tr><td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td><td class="cost-total-val">S/ {g(f, 'coste_total_accidente', '0.00')}</td></tr>
+                <tr><td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td><td class="cost-val">S/ {safe_g(f, 'coste_total_personal', '0.00')}</td></tr>
+                <tr><td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td><td class="cost-val">S/ {safe_g(f, 'coste_total_danos_materiales', '0.00')}</td></tr>
+                <tr><td class="cost-title">3. SUBTOTAL OTROS COSTOS</td><td class="cost-val">S/ {safe_g(f, 'coste_subtotal_otros', '0.00')}</td></tr>
+                <tr><td class="cost-title">4. GASTOS DIVERSOS (2%)</td><td class="cost-val">S/ {safe_g(f, 'coste_gastos_diversos', '0.00')}</td></tr>
+                <tr><td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td><td class="cost-total-val">S/ {safe_g(f, 'coste_total_accidente', '0.00')}</td></tr>
             </tbody>
         </table>
 
         <div class="sec-header">ANÁLISIS DEL ACCIDENTE</div>
         <table class="grid-table">
-            <tr><td style="width: 22%; font-weight: bold; background-color: #f7fafc;">¿Qué sucedió?:</td><td colspan="5">{g(f, 'ana_que_sucedio')}</td></tr>
-            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Tipo Contacto:</td><td colspan="5">{g(f, 'ana_tipo_contacto')}</td></tr>
-            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Causa Inmediata:</td><td colspan="5">{g(f, 'ana_causa_inmediata')}</td></tr>
-            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Causa Básica:</td><td colspan="5">{g(f, 'ana_causa_basica')}</td></tr>
-            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Falta Control:</td><td colspan="5">{g(f, 'ana_falta_control')}</td></tr>
+            <tr><td style="width: 22%; font-weight: bold; background-color: #f7fafc;">¿Qué sucedió?:</td><td colspan="5">{safe_g(f, 'ana_que_sucedio')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Tipo Contacto:</td><td colspan="5">{safe_g(f, 'ana_tipo_contacto')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Causa Inmediata:</td><td colspan="5">{safe_g(f, 'ana_causa_inmediata')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Causa Básica:</td><td colspan="5">{safe_g(f, 'ana_causa_basica')}</td></tr>
+            <tr><td style="font-weight: bold; background-color: #f7fafc;">¿Por qué? / Falta Control:</td><td colspan="5">{safe_g(f, 'ana_falta_control')}</td></tr>
         </table>
 
         <div class="sec-header">CAUSAS INMEDIATAS O DIRECTAS</div>
@@ -919,13 +925,13 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Nombre Resp./Investigador:</td>
-                <td style="width: 28%;">{g(f, ['inv_nombre', 'resp_nombre'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['inv_nombre', 'resp_nombre'])}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Cargo:</td>
-                <td style="width: 28%;">{g(f, ['inv_cargo', 'resp_cargo'])}</td>
+                <td style="width: 28%;">{safe_g(f, ['inv_cargo', 'resp_cargo'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Área interna de responsabilidad:</td>
-                <td colspan="3">{g(f, ['inv_area_interna_responsabilidad', 'inv_area_interna', 'area_interna_responsabilidad_inv', 'area_interna_responsabilidad'])}</td>
+                <td colspan="3">{safe_g(f, ['inv_area_interna_responsabilidad', 'inv_area_interna', 'area_interna_responsabilidad_inv', 'area_interna_responsabilidad'])}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Firma Investigador:</td>
@@ -933,13 +939,13 @@ def generar_pdf_100_porciento(
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Nombre Completo Testigo:</td>
-                <td>{g(f, 'tes_nombre')}</td>
+                <td>{safe_g(f, 'tes_nombre')}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Cargo / Vínculo:</td>
-                <td>{g(f, 'tes_cargo')}</td>
+                <td>{safe_g(f, 'tes_cargo')}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Firma del Testigo:</td>
-                <td colspan="3">{g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
+                <td colspan="3">{safe_g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
             </tr>
         </table>
 
