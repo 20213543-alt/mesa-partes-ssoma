@@ -269,7 +269,7 @@ def generar_tabla_campos_completos(formulario: dict) -> str:
     if not filas:
         filas.append("<tr><td class='val' colspan='4'>No se recibieron campos adicionales.</td></tr>")
     return """
-        <div class="sec-header">REGISTRO ÍNTEGRO DE RESPUESTAS RECIBIDAS</div>
+        <div class="sec-header"></div>
         <table class="grid-table">
             <tr><td class="lbl">Campo</td><td class="val" colspan="3">Valor registrado</td></tr>
             {filas}
@@ -308,7 +308,7 @@ def generar_pdf_preliminar(
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px; text-align: center;">Sin fotografía adjunta</p>'
 
-    tabla_campos_completos = generar_tabla_campos_completos(f)
+    tabla_campos_completos = ""
 
     html_content = f"""
     <!DOCTYPE html>
@@ -590,25 +590,12 @@ def generar_pdf_100_porciento(
             <td style="text-align:right;">S/ {dinero(monto)}</td>
         </tr>"""
 
-    personal_items = [
-        ("Trabajador accidentado", "salario_accidentado", "coste_hrs_accidentado"),
-        ("Otros trabajadores", "salario_otros", "coste_hrs_otros_trabajadores"),
-        ("Supervisor", "salario_supervisor", "coste_hrs_supervisor"),
-        ("Personal SSOMA", "salario_ssoma", "coste_hrs_ssoma"),
-    ]
-    filas_personal_detalle = ""
-    for etiqueta, salario_key, horas_key in personal_items:
-        salario = costo_numero(g(f, salario_key, "0"))
-        horas = costo_numero(g(f, horas_key, "0"))
-        importe = salario / 240 * horas
-        filas_personal_detalle += fila_detalle(
-            etiqueta, f"Salario S/ {dinero(salario)} · {dinero(horas)} h", importe
-        )
-    filas_personal_detalle += fila_detalle(
-        "Socorro y transporte", "Importe directo", g(f, "coste_socorro_transporte", "0")
-    )
-    filas_personal_detalle += fila_detalle(
-        "Días de descanso médico", "Importe directo", g(f, "coste_dias_descanso_medico", "0")
+    # Por confidencialidad, no se imprimen salarios individuales ni horas
+    # asociadas a trabajadores. Solo se muestra el costo total calculado.
+    filas_personal_detalle = fila_detalle(
+        "Costo total del personal",
+        "Resultado total calculado",
+        g(f, "coste_total_personal", "0"),
     )
 
     danos_items = [
@@ -665,7 +652,7 @@ def generar_pdf_100_porciento(
         </table>
     """
 
-    tabla_campos_completos = generar_tabla_campos_completos(f)
+    tabla_campos_completos = ""
 
     html_content = f"""
     <!DOCTYPE html>
