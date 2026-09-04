@@ -296,7 +296,7 @@ def generar_pdf_preliminar(
         for b64 in fotos_base64:
             celdas.append(
                 f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
-                f'<img src="data:image/jpeg;base64,{b64}" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 3px;" />'
+                f'<img src="data:image/jpeg;base64,{b64}" style="max-width: 100%; width: auto; height: auto; max-height: 125mm; border: 1px solid #cbd5e0; border-radius: 3px;" />'
                 f"</td>"
             )
 
@@ -1046,34 +1046,43 @@ async def enviar_reporte(
 
         fotos_base64 = []
 
-        if fotografia_pre:
-            for foto in fotografia_pre:
-                if foto and hasattr(foto, "filename") and foto.filename:
-                    try:
-                        contenido = await foto.read()
-                        if contenido and len(contenido) > 0:
-                            encoded = optimizar_imagen_base64(contenido)
-                            if encoded:
-                                fotos_base64.append(encoded)
-                    except Exception as err_img:
-                        print(f"Error procesando la fotografía: {err_img}")
+        async def procesar_fotografia(foto, etiqueta="fotografía"):
+            """Lee y codifica una imagen recibida por multipart/form-data."""
+            if not foto or not getattr(foto, "filename", ""):
+                return
+            try:
+                contenido = await foto.read()
+                if contenido:
+                    encoded = optimizar_imagen_base64(contenido)
+                    if encoded:
+                        fotos_base64.append(encoded)
+            except Exception as err_img:
+                print(f"Error procesando {etiqueta}: {err_img}")
 
-        if not fotos_base64:
-            archivos_alt = form_data.getlist(
-                "foto_evento_pre"
-            ) or form_data.getlist("foto_evento")
-            for foto in archivos_alt:
-                if hasattr(foto, "filename") and foto.filename:
-                    try:
-                        contenido = await foto.read()
-                        if contenido and len(contenido) > 0:
-                            encoded = optimizar_imagen_base64(contenido)
-                            if encoded:
-                                fotos_base64.append(encoded)
-                    except Exception as err_img:
-                        print(
-                            f"Error procesando la imagen alternativa: {err_img}"
-                        )
+        # El HTML usa fotografia_pre[]; también se aceptan nombres sin [] y
+        # los aliases históricos para evitar que el motor pierda las imágenes.
+        archivos_fotografia = []
+        vistos = set()
+        for nombre_campo in (
+            "fotografia_pre[]", "fotografia_pre", "foto_evento_pre[]",
+            "foto_evento_pre", "foto_evento[]", "foto_evento"
+        ):
+            for foto in form_data.getlist(nombre_campo):
+                identificador = id(foto)
+                if identificador not in vistos:
+                    vistos.add(identificador)
+                    archivos_fotografia.append(foto)
+
+        # Compatibilidad con el parámetro FastAPI en instalaciones que lo
+        # hayan resuelto directamente fuera del FormData.
+        for foto in fotografia_pre or []:
+            identificador = id(foto)
+            if identificador not in vistos:
+                vistos.add(identificador)
+                archivos_fotografia.append(foto)
+
+        for foto in archivos_fotografia:
+            await procesar_fotografia(foto)
 
         # Extracción de trabajadores
         lista_trabajadores = []
