@@ -242,10 +242,19 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
+def pdf_text(value) -> str:
+    """Escapa texto y agrega puntos de corte para cadenas sin espacios."""
+    texto = html_lib.escape(str(value if value is not None else ""), quote=True)
+    texto = texto.replace("\r\n", "\n").replace("\r", "\n")
+    # Zero-width space permite que xhtml2pdf quiebre identificadores o palabras
+    # extremadamente largas sin alterar visualmente el contenido mostrado.
+    texto = texto.replace("\n", "<br/>")
+    return "&#8203;".join(texto[i:i + 32] for i in range(0, len(texto), 32))
+
+
 def safe_g(form_dict, key_or_keys, default="-"):
-    """Obtiene un campo y lo escapa para insertarlo de forma segura en HTML/PDF."""
-    value = g(form_dict, key_or_keys, default)
-    return html_lib.escape(str(value), quote=True).replace("\n", "<br/>").replace("\n", "<br/>")
+    """Obtiene un campo y lo prepara de forma segura para HTML/PDF."""
+    return pdf_text(g(form_dict, key_or_keys, default))
 
 
 def generar_tabla_campos_completos(formulario: dict) -> str:
@@ -319,7 +328,9 @@ def generar_pdf_preliminar(
             @page {{ size: a4 portrait; margin: 10mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; background-color: #1a365d; }}
-            .header-table td {{ padding: 8px; border: none; vertical-align: middle; }}
+            .header-table td {{ padding: 8px; border: none; vertical-align: middle; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: normal; }}
+            table, tbody, thead, tr {{ max-width: 100%; width: 100%; table-layout: fixed; }}
+            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: normal; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 8pt; color: #ffffff; margin-top: 3px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; text-align: center; border-radius: 3px; }}
@@ -445,17 +456,17 @@ def generar_pdf_100_porciento(
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
         <tr>
-            <td style="width: 9%;">{html_lib.escape(str(trab.get('paterno','-')))}</td>
-            <td style="width: 9%;">{html_lib.escape(str(trab.get('materno','-')))}</td>
-            <td style="width: 11%;">{html_lib.escape(str(trab.get('nombres','-')))}</td>
-            <td style="width: 11%;">{html_lib.escape(str(trab.get('ocupacion','-')))}</td>
-            <td style="width: 13%;">{html_lib.escape(str(trab.get('area_interna','-')))}</td>
+            <td style="width: 9%;">{pdf_text(trab.get('paterno','-'))}</td>
+            <td style="width: 9%;">{pdf_text(trab.get('materno','-'))}</td>
+            <td style="width: 11%;">{pdf_text(trab.get('nombres','-'))}</td>
+            <td style="width: 11%;">{pdf_text(trab.get('ocupacion','-'))}</td>
+            <td style="width: 13%;">{pdf_text(trab.get('area_interna','-'))}</td>
             <td style="width: 9%;">{trab.get('jefe_inmediato', trab.get('condicion','-'))}</td>
-            <td style="width: 5%;">{html_lib.escape(str(trab.get('sexo','-')))}</td>
-            <td style="width: 8%;">{html_lib.escape(str(trab.get('dni','-')))}</td>
-            <td style="width: 5%;">{html_lib.escape(str(trab.get('edad','-')))}</td>
-            <td style="width: 6%;">{html_lib.escape(str(trab.get('turno','-')))}</td>
-            <td style="width: 14%;">{html_lib.escape(str(trab.get('personal','-')))}</td>
+            <td style="width: 5%;">{pdf_text(trab.get('sexo','-'))}</td>
+            <td style="width: 8%;">{pdf_text(trab.get('dni','-'))}</td>
+            <td style="width: 5%;">{pdf_text(trab.get('edad','-'))}</td>
+            <td style="width: 6%;">{pdf_text(trab.get('turno','-'))}</td>
+            <td style="width: 14%;">{pdf_text(trab.get('personal','-'))}</td>
         </tr>
         """
     if not filas_trabajadores:
@@ -467,10 +478,10 @@ def generar_pdf_100_porciento(
     for ci in f.get("causas_inmediatas_list", []):
         filas_causas_inmediatas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{html_lib.escape(str(ci.get('fila','-')))}</td>
-            <td style="width: 24%;">{html_lib.escape(str(ci.get('tipo','-')))}</td>
-            <td style="width: 35%;">{html_lib.escape(str(ci.get('causa','-')))}</td>
-            <td style="width: 35%;">{html_lib.escape(str(ci.get('obs','-')))}</td>
+            <td style="text-align:center; width: 6%;">{pdf_text(ci.get('fila','-'))}</td>
+            <td style="width: 24%;">{pdf_text(ci.get('tipo','-'))}</td>
+            <td style="width: 35%;">{pdf_text(ci.get('causa','-'))}</td>
+            <td style="width: 35%;">{pdf_text(ci.get('obs','-'))}</td>
         </tr>
         """
     if not filas_causas_inmediatas:
@@ -480,11 +491,11 @@ def generar_pdf_100_porciento(
     for cb in f.get("causas_basicas_list", []):
         filas_causas_basicas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{html_lib.escape(str(cb.get('fila','-')))}</td>
-            <td style="width: 20%;">{html_lib.escape(str(cb.get('tipo','-')))}</td>
-            <td style="width: 24%;">{html_lib.escape(str(cb.get('causa','-')))}</td>
-            <td style="width: 25%;">{html_lib.escape(str(cb.get('subyacente','-')))}</td>
-            <td style="width: 25%;">{html_lib.escape(str(cb.get('obs','-')))}</td>
+            <td style="text-align:center; width: 6%;">{pdf_text(cb.get('fila','-'))}</td>
+            <td style="width: 20%;">{pdf_text(cb.get('tipo','-'))}</td>
+            <td style="width: 24%;">{pdf_text(cb.get('causa','-'))}</td>
+            <td style="width: 25%;">{pdf_text(cb.get('subyacente','-'))}</td>
+            <td style="width: 25%;">{pdf_text(cb.get('obs','-'))}</td>
         </tr>
         """
     if not filas_causas_basicas:
@@ -494,13 +505,13 @@ def generar_pdf_100_porciento(
     for mc in f.get("medidas_correctivas_list", []):
         filas_medidas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{html_lib.escape(str(mc.get('fila','-')))}</td>
-            <td style="width: 16%;">{html_lib.escape(str(mc.get('tipo','-')))}</td>
-            <td style="width: 28%;">{html_lib.escape(str(mc.get('accion','-')))}</td>
-            <td style="width: 16%;">{html_lib.escape(str(mc.get('responsable','-')))}</td>
-            <td style="width: 10%;">{html_lib.escape(str(mc.get('fecha','-')))}</td>
-            <td style="width: 10%;">{html_lib.escape(str(mc.get('situacion','-')))}</td>
-            <td style="width: 14%;">{html_lib.escape(str(mc.get('obs','-')))}</td>
+            <td style="text-align:center; width: 6%;">{pdf_text(mc.get('fila','-'))}</td>
+            <td style="width: 16%;">{pdf_text(mc.get('tipo','-'))}</td>
+            <td style="width: 28%;">{pdf_text(mc.get('accion','-'))}</td>
+            <td style="width: 16%;">{pdf_text(mc.get('responsable','-'))}</td>
+            <td style="width: 10%;">{pdf_text(mc.get('fecha','-'))}</td>
+            <td style="width: 10%;">{pdf_text(mc.get('situacion','-'))}</td>
+            <td style="width: 14%;">{pdf_text(mc.get('obs','-'))}</td>
         </tr>
         """
     if not filas_medidas:
@@ -664,7 +675,9 @@ def generar_pdf_100_porciento(
             @page {{ size: a4 portrait; margin: 8mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 7.5pt; color: #111; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; background-color: #1a365d; }}
-            .header-table td {{ padding: 6px; border: none; vertical-align: middle; }}
+            .header-table td {{ padding: 6px; border: none; vertical-align: middle; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: normal; }}
+            table, tbody, thead, tr {{ max-width: 100%; width: 100%; table-layout: fixed; }}
+            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: normal; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 7.5pt; color: #ffffff; margin-top: 2px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
