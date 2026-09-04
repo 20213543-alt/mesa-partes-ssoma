@@ -6,6 +6,7 @@ from io import BytesIO
 from itertools import zip_longest
 import json
 import os
+import re
 import socket
 import traceback
 from typing import List
@@ -242,16 +243,39 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
+def insertar_puntos_de_corte(texto: str, limite: int = 12) -> str:
+    """Inserta saltos invisibles solo dentro de palabras continuas largas."""
+    partes = re.split(r"(\s+)", texto)
+    resultado = []
+    for parte in partes:
+        if parte and not parte.isspace() and len(parte) > limite:
+            resultado.append("\u200b".join(
+                parte[i:i + limite] for i in range(0, len(parte), limite)
+            ))
+        else:
+            resultado.append(parte)
+    return "".join(resultado)
+
+
+def sanitizar_pdf_recursivo(valor):
+    """Prepara recursivamente valores del formulario para insertarlos en HTML."""
+    if isinstance(valor, dict):
+        return {str(k): sanitizar_pdf_recursivo(v) for k, v in valor.items()}
+    if isinstance(valor, (list, tuple)):
+        return [sanitizar_pdf_recursivo(v) for v in valor]
+    if valor is None:
+        return ""
+    return insertar_puntos_de_corte(str(valor))
+
+
 def pdf_text(value) -> str:
-    """Escapa texto y agrega puntos de corte para cadenas sin espacios."""
+    """Escapa texto y agrega puntos de corte compatibles con xhtml2pdf."""
     bruto = str(value if value is not None else "")
     bruto = bruto.replace("\r\n", "\n").replace("\r", "\n")
-    # Zero-width space permite que xhtml2pdf quiebre identificadores o palabras
-    # extremadamente largas sin alterar visualmente el contenido mostrado.
     lineas = []
     for linea in bruto.split("\n"):
         texto = html_lib.escape(linea, quote=True)
-        lineas.append("&#8203;".join(texto[i:i + 10] for i in range(0, len(texto), 10)))
+        lineas.append(insertar_puntos_de_corte(texto, 12).replace("\u200b", "&#8203;"))
     return "<br/>".join(lineas)
 
 
@@ -263,9 +287,21 @@ def safe_g(form_dict, key_or_keys, default="-"):
 def generar_tabla_campos_completos(formulario: dict) -> str:
     """Renderiza todos los valores recibidos del formulario en una tabla de respaldo PDF."""
     filas = []
-    claves_omitidas = {"fotos_base64", "fotografia_pre", "foto_evento_pre", "foto_evento", "lista_trabajadores", "causas_inmediatas_list", "causas_basicas_list", "medidas_correctivas_list"}
+    claves_omitidas = {
+        "fotos_base64", "fotografia_pre", "foto_evento_pre", "foto_evento",
+        "lista_trabajadores", "causas_inmediatas_list", "causas_basicas_list",
+        "medidas_correctivas_list",
+        # Nunca imprimir salarios, horas ni tarifas individuales.
+        "salario", "sueldo", "trab_salario", "trab_sueldo",
+        "costo_hora", "trab_costo_hora", "horas_trabajadas",
+    }
     for clave, valor in formulario.items():
-        if clave in claves_omitidas or clave.startswith("__"):
+        clave_normalizada = str(clave).strip().lower()
+        es_dato_sensible = any(
+            termino in clave_normalizada
+            for termino in ("salario", "sueldo", "costo_hora", "coste_hora", "horas_trabajadas", "tarifa_hora")
+        )
+        if clave in claves_omitidas or clave.startswith("__") or es_dato_sensible:
             continue
         if isinstance(valor, list):
             if not valor:
@@ -303,6 +339,7 @@ def generar_pdf_preliminar(
     pdf_path: str,
     fotos_base64: list = None,
 ):
+    f = sanitizar_pdf_recursivo(f)
     if fotos_base64 and len(fotos_base64) > 0:
         celdas = []
         for b64 in fotos_base64:
@@ -320,7 +357,7 @@ def generar_pdf_preliminar(
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px; text-align: center;">Sin fotografía adjunta</p>'
 
-    tabla_campos_completos = ""
+    tabla_campos_completos = generar_tabla_campos_completos(f)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -331,9 +368,10 @@ def generar_pdf_preliminar(
             @page {{ size: a4 portrait; margin: 10mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; background-color: #1a365d; }}
-            .header-table td {{ padding: 8px; border: none; vertical-align: middle; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: pre-wrap; }}
-            table, tbody, thead, tr {{ max-width: 100%; table-layout: fixed; width: 100%; }}
-            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: pre-wrap; vertical-align: top; }}
+            .header-table td {{ padding: 8px; border: none; vertical-align: middle; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
+            table {{ max-width: 100%; width: 100%; table-layout: fixed; }}
+            tbody, thead, tr {{ max-width: 100%; width: 100%; }}
+            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 8pt; color: #ffffff; margin-top: 3px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; text-align: center; border-radius: 3px; }}
@@ -455,6 +493,7 @@ def generar_pdf_preliminar(
 def generar_pdf_100_porciento(
     f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str
 ):
+    f = sanitizar_pdf_recursivo(f)
     filas_trabajadores = ""
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
@@ -667,7 +706,7 @@ def generar_pdf_100_porciento(
         </table>
     """
 
-    tabla_campos_completos = ""
+    tabla_campos_completos = generar_tabla_campos_completos(f)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -678,9 +717,10 @@ def generar_pdf_100_porciento(
             @page {{ size: a4 portrait; margin: 8mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 7.5pt; color: #111; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; background-color: #1a365d; }}
-            .header-table td {{ padding: 6px; border: none; vertical-align: middle; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: pre-wrap; }}
-            table, tbody, thead, tr {{ max-width: 100%; table-layout: fixed; width: 100%; }}
-            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; word-wrap: break-word; word-break: break-all; white-space: pre-wrap; vertical-align: top; }}
+            .header-table td {{ padding: 6px; border: none; vertical-align: middle; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
+            table {{ max-width: 100%; width: 100%; table-layout: fixed; }}
+            tbody, thead, tr {{ max-width: 100%; width: 100%; }}
+            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 7.5pt; color: #ffffff; margin-top: 2px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
