@@ -29,6 +29,8 @@
       border-color: #1e3a8a !important;
       color: #1e3a8a !important;
     }
+    .cost-content-collapsed { display: none !important; }
+    .cost-content-expanded { display: block !important; }
     .cost-toggle-indicator {
       display: inline-flex;
       align-items: center;
@@ -549,7 +551,7 @@
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
           <div class="p-4 bg-slate-50">
             <label class="font-bold block text-slate-700 mb-1">Detallar Tipo de Atención en Primeros Auxilios:</label>
-            <textarea name="inc_primeros_auxilios" rows="6" placeholder="Ej. Curación superficial, lavado de herida, aplicación de vendaje..." class="w-full border rounded p-2 bg-white"></textarea>
+            <textarea name="inc_primeros_auxilios" rows="6" style="min-height: 9rem;" placeholder="Ej. Curación superficial, lavado de herida, aplicación de vendaje..." class="w-full border rounded p-2 bg-white"></textarea>
           </div>
         </div>
 
@@ -650,7 +652,7 @@
             </div>
             <div class="md:col-span-2">
               <label class="font-bold block text-slate-700 mb-1">Descripción del Evento (Daños Materiales/M.A.):</label>
-              <textarea name="dan_descripcion_evento" rows="3" class="w-full border rounded p-2 bg-white"></textarea>
+              <textarea name="dan_descripcion_evento" rows="6" style="min-height: 12rem;" class="w-full border rounded p-2 bg-white"></textarea>
             </div>
           </div>
         </div>
@@ -2027,40 +2029,43 @@
       });
     }
 
-    // Convierte únicamente los cuatro bloques de costos en acordeones.
+    // Los módulos de costos empiezan colapsados y muestran un control visible.
     function iniciarAcordeonesCostos() {
       const titulos = [
         'VALORACIÓN DE LOS COSTES DEL ACCIDENTE',
         'VALORACIÓN DE LOS COSTES DE DAÑOS MATERIALES',
         'OTROS COSTES',
-        'GASTOS DIVERSOS (INFORMES, INVESTIGACIONES'
+        'GASTOS DIVERSOS'
       ];
 
-      document.querySelectorAll('.border.border-blue-900.overflow-hidden').forEach(bloque => {
-        const encabezado = Array.from(bloque.children).find(el =>
-          el.classList.contains('bg-blue-900') && titulos.some(t => el.textContent.trim().includes(t))
-        );
-        if (!encabezado || encabezado.dataset.accordionReady === '1') return;
+      document.querySelectorAll('#ssomaForm .border.border-blue-900.overflow-hidden').forEach(bloque => {
+        const encabezado = Array.from(bloque.children).find(el => {
+          const texto = (el.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
+          return el.classList.contains('bg-blue-900') && titulos.some(titulo => texto.includes(titulo));
+        });
+        if (!encabezado) return;
 
         const contenido = encabezado.nextElementSibling;
-        if (!contenido) return;
+        if (!contenido || contenido.dataset.costAccordionReady === '1') return;
 
         encabezado.classList.add('accordion-header', 'flex', 'justify-between', 'items-center', 'gap-2');
         encabezado.setAttribute('role', 'button');
         encabezado.setAttribute('tabindex', '0');
         encabezado.setAttribute('aria-expanded', 'false');
-        encabezado.dataset.accordionReady = '1';
 
         const indicador = document.createElement('span');
         indicador.className = 'accordion-indicator cost-toggle-indicator ml-auto';
         indicador.setAttribute('aria-hidden', 'true');
         indicador.textContent = 'Mostrar ▼';
-        contenido.classList.add('hidden');
-        contenido.dataset.costContent = '1';
         encabezado.appendChild(indicador);
 
+        contenido.classList.add('cost-content-collapsed');
+        contenido.dataset.costContent = '1';
+        contenido.dataset.costAccordionReady = '1';
+
         function alternar() {
-          const cerrado = contenido.classList.toggle('hidden');
+          const cerrado = contenido.classList.toggle('cost-content-collapsed');
+          contenido.classList.toggle('cost-content-expanded', !cerrado);
           encabezado.setAttribute('aria-expanded', String(!cerrado));
           indicador.textContent = cerrado ? 'Mostrar ▼' : 'Ocultar ▲';
         }
