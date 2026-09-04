@@ -251,7 +251,7 @@ def pdf_text(value) -> str:
     lineas = []
     for linea in bruto.split("\n"):
         texto = html_lib.escape(linea, quote=True)
-        lineas.append("&#8203;".join(texto[i:i + 32] for i in range(0, len(texto), 32)))
+        lineas.append("&#8203;".join(texto[i:i + 10] for i in range(0, len(texto), 10)))
     return "<br/>".join(lineas)
 
 
@@ -464,7 +464,7 @@ def generar_pdf_100_porciento(
             <td style="width: 11%;">{pdf_text(trab.get('nombres','-'))}</td>
             <td style="width: 11%;">{pdf_text(trab.get('ocupacion','-'))}</td>
             <td style="width: 13%;">{pdf_text(trab.get('area_interna','-'))}</td>
-            <td style="width: 9%;">{trab.get('jefe_inmediato', trab.get('condicion','-'))}</td>
+            <td style="width: 9%;">{pdf_text(trab.get('jefe_inmediato', trab.get('condicion','-')))}</td>
             <td style="width: 5%;">{pdf_text(trab.get('sexo','-'))}</td>
             <td style="width: 8%;">{pdf_text(trab.get('dni','-'))}</td>
             <td style="width: 5%;">{pdf_text(trab.get('edad','-'))}</td>
@@ -526,14 +526,14 @@ def generar_pdf_100_porciento(
 
     # Mapeo explícito del bloque de tercerización/locación. El formulario usa
     # nombres loc_* para el locador y ter_* para una empresa contratista.
-    tipo_vinculo_pdf = g(f, ["tipo_persona", "tipo_vinculo", "vinculo_entidad"], "-")
+    tipo_vinculo_pdf = pdf_text(g(f, ["tipo_persona", "tipo_vinculo", "vinculo_entidad"], "-"))
     es_locador_pdf = tipo_vinculo_pdf.strip().lower() == "locador"
 
     if es_locador_pdf:
-        nombre_tercero_pdf = g(f, ["loc_nombre_razon", "loc_nombre", "nombre_locador"], "-")
-        identificacion_tercero_pdf = g(f, ["loc_dni_ruc", "loc_dni", "loc_ruc", "dni_ruc_locador"], "-")
-        domicilio_tercero_pdf = g(f, ["loc_domicilio", "domicilio_locador"], "-")
-        detalle_tercero_pdf = g(f, ["loc_descripcion_servicio", "loc_servicio", "descripcion_servicio"], "-")
+        nombre_tercero_pdf = pdf_text(g(f, ["loc_nombre_razon", "loc_nombre", "nombre_locador"], "-"))
+        identificacion_tercero_pdf = pdf_text(g(f, ["loc_dni_ruc", "loc_dni", "loc_ruc", "dni_ruc_locador"], "-"))
+        domicilio_tercero_pdf = pdf_text(g(f, ["loc_domicilio", "domicilio_locador"], "-"))
+        detalle_tercero_pdf = pdf_text(g(f, ["loc_descripcion_servicio", "loc_servicio", "descripcion_servicio"], "-"))
         tercerizado_html = f"""
         <table class="grid-table">
             <tr>
@@ -557,9 +557,9 @@ def generar_pdf_100_porciento(
         </table>
         """
     else:
-        nombre_tercero_pdf = g(f, "ter_razon_social")
-        identificacion_tercero_pdf = g(f, "ter_ruc")
-        domicilio_tercero_pdf = g(f, "ter_domicilio")
+        nombre_tercero_pdf = pdf_text(g(f, "ter_razon_social"))
+        identificacion_tercero_pdf = pdf_text(g(f, "ter_ruc"))
+        domicilio_tercero_pdf = pdf_text(g(f, "ter_domicilio"))
         tercerizado_html = f"""
         <table class="grid-table">
             <tr>
@@ -576,15 +576,15 @@ def generar_pdf_100_porciento(
                 <td style="font-weight: bold; background-color: #f7fafc;">Domicilio:</td>
                 <td colspan="3">{domicilio_tercero_pdf}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Actividad Económica:</td>
-                <td>{g(f, "ter_actividad")}</td>
+                <td>{safe_g(f, "ter_actividad")}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
-                <td>{g(f, ["ter_num_trabajadores", "ter_num_trab"])}</td>
+                <td>{safe_g(f, ["ter_num_trabajadores", "ter_num_trab"])}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
-                <td>{g(f, "ter_num_sctr")}</td>
+                <td>{safe_g(f, "ter_num_sctr")}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora:</td>
-                <td>{g(f, "ter_aseguradora")}</td>
+                <td>{safe_g(f, "ter_aseguradora")}</td>
             </tr>
         </table>
         """
