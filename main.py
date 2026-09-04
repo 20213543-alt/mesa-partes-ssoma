@@ -243,6 +243,31 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
+def pdf_text(val, max_len=12):
+    """
+    Sanitiza valores para HTML/xhtml2pdf y fuerza el ajuste vertical de
+    palabras continuas largas. También acepta diccionarios y listas.
+    """
+    if isinstance(val, dict):
+        return {k: pdf_text(v, max_len) for k, v in val.items()}
+    if isinstance(val, list):
+        return [pdf_text(item, max_len) for item in val]
+    if isinstance(val, tuple):
+        return tuple(pdf_text(item, max_len) for item in val)
+    if val is None:
+        return "-"
+    val_str = str(val).strip()
+    if not val_str:
+        return "-"
+    val_str = val_str.replace("\r\n", "\n").replace("\r", "\n")
+    lineas = []
+    for linea in val_str.split("\n"):
+        linea_escapada = html_lib.escape(linea, quote=True)
+        linea_ajustada = insertar_puntos_de_corte(linea_escapada, max_len)
+        lineas.append(linea_ajustada)
+    return "<br/>".join(lineas)
+
+
 def insertar_puntos_de_corte(texto: str, limite: int = 10) -> str:
     """Inserta saltos invisibles solo dentro de palabras continuas largas."""
     partes = re.split(r"(\s+)", texto)
