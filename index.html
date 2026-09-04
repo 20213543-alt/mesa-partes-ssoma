@@ -9,7 +9,7 @@
   <style>
     textarea.auto-resize { overflow-y: hidden; resize: none; }
     table { width: 100%; table-layout: fixed; }
-    td, th { height: auto; vertical-align: top; word-wrap: break-word; overflow-wrap: anywhere; white-space: pre-wrap; }
+    td, th { height: auto !important; vertical-align: top; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: anywhere; }
     .accordion-header { cursor: pointer; user-select: none; }
     #modalObservaciones.flex { display: flex; }
     #observacion_modal_input { overflow-y: auto; resize: vertical; }
@@ -17,7 +17,7 @@
       overflow-wrap: anywhere;
       word-break: break-all;
       overflow-wrap: anywhere;
-      white-space: pre-wrap;
+      white-space: normal !important;
     }
     @media print {
       body { background: #fff !important; padding: 0 !important; }
@@ -48,7 +48,7 @@
       line-height: 1.1;
       letter-spacing: .03em;
       box-shadow: 0 1px 3px rgba(0,0,0,.35);
-      white-space: nowrap;
+      white-space: normal !important;
     }
   </style>
 </head>
