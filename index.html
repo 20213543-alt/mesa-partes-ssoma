@@ -13,8 +13,9 @@
     #observacion_modal_input { overflow-y: auto; resize: vertical; }
     td, th, label, p, span, .text-box {
       overflow-wrap: anywhere;
-      word-break: break-word;
-      white-space: normal;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
     }
     @media print {
       body { background: #fff !important; padding: 0 !important; }
