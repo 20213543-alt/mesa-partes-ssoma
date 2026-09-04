@@ -249,7 +249,7 @@ def insertar_puntos_de_corte(texto: str, limite: int = 12) -> str:
     resultado = []
     for parte in partes:
         if parte and not parte.isspace() and len(parte) > limite:
-            resultado.append("\u200b".join(
+            resultado.append(" ".join(
                 parte[i:i + limite] for i in range(0, len(parte), limite)
             ))
         else:
@@ -275,8 +275,13 @@ def pdf_text(value) -> str:
     lineas = []
     for linea in bruto.split("\n"):
         texto = html_lib.escape(linea, quote=True)
-        lineas.append(insertar_puntos_de_corte(texto, 12).replace("\u200b", "&#8203;"))
+        lineas.append(insertar_puntos_de_corte(texto, 12))
     return "<br/>".join(lineas)
+
+
+def sanitizar_texto_pdf(val, max_len=12):
+    """Alias público para sanitizar recursivamente datos destinados al PDF."""
+    return sanitizar_pdf_recursivo(val)
 
 
 def safe_g(form_dict, key_or_keys, default="-"):
@@ -284,45 +289,6 @@ def safe_g(form_dict, key_or_keys, default="-"):
     return pdf_text(g(form_dict, key_or_keys, default))
 
 
-def generar_tabla_campos_completos(formulario: dict) -> str:
-    """Renderiza todos los valores recibidos del formulario en una tabla de respaldo PDF."""
-    filas = []
-    claves_omitidas = {
-        "fotos_base64", "fotografia_pre", "foto_evento_pre", "foto_evento",
-        "lista_trabajadores", "causas_inmediatas_list", "causas_basicas_list",
-        "medidas_correctivas_list",
-        # Nunca imprimir salarios, horas ni tarifas individuales.
-        "salario", "sueldo", "trab_salario", "trab_sueldo",
-        "costo_hora", "trab_costo_hora", "horas_trabajadas",
-    }
-    for clave, valor in formulario.items():
-        clave_normalizada = str(clave).strip().lower()
-        es_dato_sensible = any(
-            termino in clave_normalizada
-            for termino in ("salario", "sueldo", "costo_hora", "coste_hora", "horas_trabajadas", "tarifa_hora")
-        )
-        if clave in claves_omitidas or clave.startswith("__") or es_dato_sensible:
-            continue
-        if isinstance(valor, list):
-            if not valor:
-                continue
-            valor = ", ".join(str(item) for item in valor if item not in (None, ""))
-        elif isinstance(valor, dict):
-            valor = json.dumps(valor, ensure_ascii=False)
-        if valor is None or str(valor).strip() == "":
-            continue
-        clave_segura = html_lib.escape(str(clave), quote=True)
-        valor_seguro = html_lib.escape(str(valor), quote=True).replace("\\n", "<br/>").replace("\n", "<br/>")
-        filas.append(f"<tr><td class='lbl'>{clave_segura}</td><td class='val' colspan='3'>{valor_seguro}</td></tr>")
-    if not filas:
-        filas.append("<tr><td class='val' colspan='4'>No se recibieron campos adicionales.</td></tr>")
-    return """
-        <div class="sec-header"></div>
-        <table class="grid-table">
-            <tr><td class="lbl">Campo</td><td class="val" colspan="3">Valor registrado</td></tr>
-            {filas}
-        </table>
-    """.format(filas="".join(filas))
 
 def html_to_pdf_file(html_string: str, pdf_path: str):
     with open(pdf_path, "wb") as pdf_file:
@@ -344,8 +310,8 @@ def generar_pdf_preliminar(
         celdas = []
         for b64 in fotos_base64:
             celdas.append(
-                f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: middle;">'
-                f'<img src="data:image/jpeg;base64,{b64}" style="max-width: 100%; width: auto; height: auto; max-height: 125mm; border: 1px solid #cbd5e0; border-radius: 3px;" />'
+                f'<td style="text-align: center; padding: 4px; width: 50%; vertical-align: top;">'
+                f'<img src="data:image/jpeg;base64,{b64}" style=" width: auto; height: auto; max-height: 125mm; border: 1px solid #cbd5e0; border-radius: 3px;" />'
                 f"</td>"
             )
 
@@ -357,8 +323,6 @@ def generar_pdf_preliminar(
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px; text-align: center;">Sin fotografía adjunta</p>'
 
-    tabla_campos_completos = generar_tabla_campos_completos(f)
-
     html_content = f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -367,21 +331,23 @@ def generar_pdf_preliminar(
         <style>
             @page {{ size: a4 portrait; margin: 10mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; }}
+            table {{ table-layout: fixed; width: 100%; border-collapse: collapse; }}
+            td, th {{ height: auto; word-wrap: break-word; word-break: normal; white-space: pre-wrap; vertical-align: top; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; background-color: #1a365d; }}
-            .header-table td {{ padding: 8px; border: none; vertical-align: middle; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
-            table {{ max-width: 100%; width: 100%; table-layout: fixed; }}
-            tbody, thead, tr {{ max-width: 100%; width: 100%; }}
-            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
+            .header-table td {{ padding: 8px; border: none; vertical-align: top; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
+            table {{  width: 100%; table-layout: fixed; }}
+            tbody, thead, tr {{  width: 100%; }}
+            td, th {{    word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 8pt; color: #ffffff; margin-top: 3px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; text-align: center; border-radius: 3px; }}
             .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8.5pt; padding: 4px; margin-top: 8px; margin-bottom: 4px; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; }}
-            .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
-            .grid-table th {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
-            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
-            .val {{ color: #1a202c; width: 28%; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
+            .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .grid-table th {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .val {{ color: #1a202c; width: 28%; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
             .photo-box {{ text-align: center; padding: 6px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
             .footer {{ margin-top: 15px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
@@ -478,8 +444,6 @@ def generar_pdf_preliminar(
                 <td class="val" colspan="3"><b>[FIRMA REGISTRADA]</b></td>
             </tr>
         </table>
-
-        {tabla_campos_completos}
 
         <div class="footer">
             Documento Digital Generado por el Sistema SSOMA - EMAPE S.A. | Fecha Registro System: {fecha_registro}
@@ -706,8 +670,6 @@ def generar_pdf_100_porciento(
         </table>
     """
 
-    tabla_campos_completos = generar_tabla_campos_completos(f)
-
     html_content = f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -716,11 +678,13 @@ def generar_pdf_100_porciento(
         <style>
             @page {{ size: a4 portrait; margin: 8mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 7.5pt; color: #111; }}
+            table {{ table-layout: fixed; width: 100%; border-collapse: collapse; }}
+            td, th {{ height: auto; word-wrap: break-word; word-break: normal; white-space: pre-wrap; vertical-align: top; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; background-color: #1a365d; }}
-            .header-table td {{ padding: 6px; border: none; vertical-align: middle; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
-            table {{ max-width: 100%; width: 100%; table-layout: fixed; }}
-            tbody, thead, tr {{ max-width: 100%; width: 100%; }}
-            td, th {{ min-width: 0; max-width: 100%; overflow: hidden; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
+            .header-table td {{ padding: 6px; border: none; vertical-align: top; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
+            table {{  width: 100%; table-layout: fixed; }}
+            tbody, thead, tr {{  width: 100%; }}
+            td, th {{    word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 7.5pt; color: #ffffff; margin-top: 2px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
@@ -728,9 +692,9 @@ def generar_pdf_100_porciento(
             .sec-red {{ background-color: #742a2a; color: #ffffff; }}
             .sec-green {{ background-color: #1a365d; color: #ffffff; border-bottom: 2px solid #d69e2e; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; width: 100%; }}
-            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
-            .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
+            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
             /* ESTILOS ESPECÍFICOS COSTOS */
@@ -742,7 +706,7 @@ def generar_pdf_100_porciento(
             .cost-total-val {{ font-weight: bold; color: #d69e2e; background-color: #1a365d; text-align: right; font-size: 8pt; padding: 5px; }}
             .cost-category-title {{ background-color: #e2e8f0; color: #1a365d; font-weight: bold; font-size: 7pt; padding: 4px; margin-top: 5px; }}
             .cost-detail-table {{ width: 100%; border-collapse: collapse; table-layout: fixed; width: 100%; margin-bottom: 5px; page-break-inside: auto; }}
-            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: middle; word-wrap: break-word; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }}
+            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
             .cost-detail-table th {{ background-color: #2b6cb0; color: #ffffff; text-align: left; }}
             .cost-detail-table th:nth-child(1) {{ width: 30%; }}
             .cost-detail-table th:nth-child(2) {{ width: 50%; }}
@@ -992,8 +956,6 @@ def generar_pdf_100_porciento(
                 <td colspan="3">{safe_g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
             </tr>
         </table>
-
-        {tabla_campos_completos}
 
         <div class="footer">
             Documento Digital Generado por el Sistema de Gestión SSOMA - EMAPE S.A. | Fecha Registro: {fecha_registro}
