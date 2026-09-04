@@ -243,7 +243,7 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
-def insertar_puntos_de_corte(texto: str, limite: int = 12) -> str:
+def insertar_puntos_de_corte(texto: str, limite: int = 10) -> str:
     """Inserta saltos invisibles solo dentro de palabras continuas largas."""
     partes = re.split(r"(\s+)", texto)
     resultado = []
@@ -257,31 +257,27 @@ def insertar_puntos_de_corte(texto: str, limite: int = 12) -> str:
     return "".join(resultado)
 
 
+def aplicar_text_wrap_global(datos, max_chars=10):
+    """Recorre recursivamente todo el formulario y parte palabras continuas largas."""
+    if isinstance(datos, str):
+        return insertar_puntos_de_corte(datos, max_chars)
+    if isinstance(datos, dict):
+        return {k: aplicar_text_wrap_global(v, max_chars) for k, v in datos.items()}
+    if isinstance(datos, list):
+        return [aplicar_text_wrap_global(item, max_chars) for item in datos]
+    if isinstance(datos, tuple):
+        return tuple(aplicar_text_wrap_global(item, max_chars) for item in datos)
+    return datos
+
+
 def sanitizar_pdf_recursivo(valor):
-    """Prepara recursivamente valores del formulario para insertarlos en HTML."""
-    if isinstance(valor, dict):
-        return {str(k): sanitizar_pdf_recursivo(v) for k, v in valor.items()}
-    if isinstance(valor, (list, tuple)):
-        return [sanitizar_pdf_recursivo(v) for v in valor]
-    if valor is None:
-        return ""
-    return insertar_puntos_de_corte(str(valor))
-
-
-def pdf_text(value) -> str:
-    """Escapa texto y agrega puntos de corte compatibles con xhtml2pdf."""
-    bruto = str(value if value is not None else "")
-    bruto = bruto.replace("\r\n", "\n").replace("\r", "\n")
-    lineas = []
-    for linea in bruto.split("\n"):
-        texto = html_lib.escape(linea, quote=True)
-        lineas.append(insertar_puntos_de_corte(texto, 12))
-    return "<br/>".join(lineas)
+    """Compatibilidad interna: aplica el ajuste global a cualquier estructura."""
+    return aplicar_text_wrap_global(valor, 10)
 
 
 def sanitizar_texto_pdf(val, max_len=12):
     """Alias público para sanitizar recursivamente datos destinados al PDF."""
-    return sanitizar_pdf_recursivo(val)
+    return aplicar_text_wrap_global(val, max_len)
 
 
 def safe_g(form_dict, key_or_keys, default="-"):
@@ -305,7 +301,7 @@ def generar_pdf_preliminar(
     pdf_path: str,
     fotos_base64: list = None,
 ):
-    f = sanitizar_pdf_recursivo(f)
+    f = aplicar_text_wrap_global(f, max_chars=10)
     if fotos_base64 and len(fotos_base64) > 0:
         celdas = []
         for b64 in fotos_base64:
@@ -457,7 +453,7 @@ def generar_pdf_preliminar(
 def generar_pdf_100_porciento(
     f: dict, codigo: str, tipo_informe: str, fecha_registro: str, pdf_path: str
 ):
-    f = sanitizar_pdf_recursivo(f)
+    f = aplicar_text_wrap_global(f, max_chars=10)
     filas_trabajadores = ""
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
