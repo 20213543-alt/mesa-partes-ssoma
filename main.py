@@ -243,29 +243,30 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
-def pdf_text(val, max_len=12):
-    """
-    Sanitiza valores para HTML/xhtml2pdf y fuerza el ajuste vertical de
-    palabras continuas largas. También acepta diccionarios y listas.
-    """
+def formatear_texto_para_pdf(val, max_len=12):
+    """Convierte texto de formularios a HTML seguro y multilínea para xhtml2pdf."""
     if isinstance(val, dict):
-        return {k: pdf_text(v, max_len) for k, v in val.items()}
+        return {k: formatear_texto_para_pdf(v, max_len) for k, v in val.items()}
     if isinstance(val, list):
-        return [pdf_text(item, max_len) for item in val]
+        return [formatear_texto_para_pdf(item, max_len) for item in val]
     if isinstance(val, tuple):
-        return tuple(pdf_text(item, max_len) for item in val)
+        return tuple(formatear_texto_para_pdf(item, max_len) for item in val)
     if val is None:
         return "-"
-    val_str = str(val).strip()
-    if not val_str:
+    texto = str(val).strip()
+    if not texto:
         return "-"
-    val_str = val_str.replace("\r\n", "\n").replace("\r", "\n")
+    texto = texto.replace("\r\n", "\n").replace("\r", "\n")
     lineas = []
-    for linea in val_str.split("\n"):
-        linea_escapada = html_lib.escape(linea, quote=True)
-        linea_ajustada = insertar_puntos_de_corte(linea_escapada, max_len)
-        lineas.append(linea_ajustada)
+    for linea in texto.split("\n"):
+        escapada = html_lib.escape(linea, quote=True)
+        lineas.append(insertar_puntos_de_corte(escapada, max_len))
     return "<br/>".join(lineas)
+
+
+def pdf_text(val, max_len=12):
+    """Alias global utilizado por todas las plantillas de generación del PDF."""
+    return formatear_texto_para_pdf(val, max_len)
 
 
 def insertar_puntos_de_corte(texto: str, limite: int = 10) -> str:
@@ -353,22 +354,22 @@ def generar_pdf_preliminar(
             @page {{ size: a4 portrait; margin: 10mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 8.5pt; color: #111; }}
             table {{ table-layout: fixed; width: 100%; border-collapse: collapse; }}
-            td, th {{ height: auto; word-wrap: break-word; word-break: normal; white-space: pre-wrap; vertical-align: top; }}
+            td, th {{ height: auto; word-wrap: break-word; word-break: normal; white-space: normal; vertical-align: top; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 10px; background-color: #1a365d; }}
-            .header-table td {{ padding: 8px; border: none; vertical-align: top; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
+            .header-table td {{ padding: 8px; border: none; vertical-align: top; word-wrap: break-word; word-break: break-word; white-space: normal; height: auto; }}
             table {{  width: 100%; table-layout: fixed; }}
             tbody, thead, tr {{  width: 100%; }}
-            td, th {{    word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
+            td, th {{    word-wrap: break-word; word-break: break-word; white-space: normal; height: auto; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 8pt; color: #ffffff; margin-top: 3px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 4px 8px; font-weight: bold; font-size: 9pt; text-align: center; border-radius: 3px; }}
             .sec-header {{ background-color: #1a365d; color: #ffffff; font-weight: bold; font-size: 8.5pt; padding: 4px; margin-top: 8px; margin-bottom: 4px; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 6px; }}
-            .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
-            .grid-table th {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
-            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
-            .val {{ color: #1a202c; width: 28%; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .grid-table td {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: normal; }}
+            .grid-table th {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: normal; }}
+            .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; word-wrap: break-word;  word-break: normal; white-space: normal; }}
+            .val {{ color: #1a202c; width: 28%; word-wrap: break-word;  word-break: normal; white-space: normal; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; word-wrap: break-word;  word-break: normal; white-space: normal; }}
             .photo-box {{ text-align: center; padding: 6px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
             .footer {{ margin-top: 15px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
@@ -700,12 +701,12 @@ def generar_pdf_100_porciento(
             @page {{ size: a4 portrait; margin: 8mm; }}
             body {{ font-family: Helvetica, Arial, sans-serif; font-size: 7.5pt; color: #111; }}
             table {{ table-layout: fixed; width: 100%; border-collapse: collapse; }}
-            td, th {{ height: auto; word-wrap: break-word; word-break: normal; white-space: pre-wrap; vertical-align: top; }}
+            td, th {{ height: auto; word-wrap: break-word; word-break: normal; white-space: normal; vertical-align: top; }}
             .header-table {{ width: 100%; border-collapse: collapse; margin-bottom: 8px; background-color: #1a365d; }}
-            .header-table td {{ padding: 6px; border: none; vertical-align: top; word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; }}
+            .header-table td {{ padding: 6px; border: none; vertical-align: top; word-wrap: break-word; word-break: break-word; white-space: normal; height: auto; }}
             table {{  width: 100%; table-layout: fixed; }}
             tbody, thead, tr {{  width: 100%; }}
-            td, th {{    word-wrap: break-word; word-break: break-word; white-space: pre-wrap; height: auto; vertical-align: top; }}
+            td, th {{    word-wrap: break-word; word-break: break-word; white-space: normal; height: auto; vertical-align: top; }}
             .title {{ font-size: 11pt; font-weight: bold; color: #ffffff; }}
             .subtitle {{ font-size: 7.5pt; color: #ffffff; margin-top: 2px; }}
             .badge-box {{ background-color: #d69e2e; color: #1a365d; padding: 3px 6px; font-weight: bold; font-size: 8.5pt; text-align: center; border-radius: 3px; }}
@@ -713,9 +714,9 @@ def generar_pdf_100_porciento(
             .sec-red {{ background-color: #742a2a; color: #ffffff; }}
             .sec-green {{ background-color: #1a365d; color: #ffffff; border-bottom: 2px solid #d69e2e; }}
             .grid-table {{ width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; width: 100%; }}
-            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
-            .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: normal; }}
+            .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; word-wrap: break-word;  word-break: normal; white-space: normal; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word;  word-break: normal; white-space: normal; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
             /* ESTILOS ESPECÍFICOS COSTOS */
@@ -727,7 +728,7 @@ def generar_pdf_100_porciento(
             .cost-total-val {{ font-weight: bold; color: #d69e2e; background-color: #1a365d; text-align: right; font-size: 8pt; padding: 5px; }}
             .cost-category-title {{ background-color: #e2e8f0; color: #1a365d; font-weight: bold; font-size: 7pt; padding: 4px; margin-top: 5px; }}
             .cost-detail-table {{ width: 100%; border-collapse: collapse; table-layout: fixed; width: 100%; margin-bottom: 5px; page-break-inside: auto; }}
-            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: pre-wrap; }}
+            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: top; word-wrap: break-word;  word-break: normal; white-space: normal; }}
             .cost-detail-table th {{ background-color: #2b6cb0; color: #ffffff; text-align: left; }}
             .cost-detail-table th:nth-child(1) {{ width: 30%; }}
             .cost-detail-table th:nth-child(2) {{ width: 50%; }}
