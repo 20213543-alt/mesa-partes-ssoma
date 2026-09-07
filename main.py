@@ -7,6 +7,7 @@ from itertools import zip_longest
 import json
 import os
 import re
+import textwrap
 import socket
 import traceback
 from typing import List
@@ -266,13 +267,31 @@ def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
 
 
 def procesar_texto_multilinea(val, predeterminado="-") -> str:
-    """Convierte texto del formulario en HTML seguro y adaptable a xhtml2pdf."""
-    if not val or not isinstance(val, str):
-        return predeterminado if not val else html_lib.escape(str(val), quote=True)
-    texto = html_lib.escape(val, quote=True)
-    texto = texto.replace("\r\n", "\n").replace("\r", "\n")
-    texto = re.sub(r"(\S{12})", r"\1 ", texto)
-    return texto.replace("\n", "<br/>")
+    """Escapa y divide físicamente el texto para garantizar wrapping en xhtml2pdf."""
+    if val is None or not isinstance(val, str) or not val.strip():
+        return predeterminado
+
+    texto = val.replace("\r\n", "\n").replace("\r", "\n")
+    resultado = []
+
+    # Se fuerza un salto físico aproximadamente cada 75 caracteres.
+    # Esto evita depender únicamente de word-wrap, que algunas versiones
+    # de xhtml2pdf no aplican de forma consistente dentro de tablas.
+    for linea in texto.split("\n"):
+        partes = textwrap.wrap(
+            linea,
+            width=75,
+            break_long_words=True,
+            break_on_hyphens=False,
+            replace_whitespace=False,
+            drop_whitespace=True,
+        )
+        if not partes:
+            resultado.append("")
+        else:
+            resultado.extend(html_lib.escape(parte, quote=True) for parte in partes)
+
+    return "<br/>".join(resultado) or predeterminado
 
 
 def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
@@ -286,34 +305,6 @@ def pdf_valor(valor, predeterminado="-") -> str:
     if valor is None or str(valor).strip() == "":
         return predeterminado
     return procesar_texto_multilinea(str(valor), predeterminado)
-
-def generar_tabla_campos_completos(formulario: dict) -> str:
-    """Renderiza todos los valores recibidos del formulario en una tabla de respaldo PDF."""
-    filas = []
-    claves_omitidas = {"fotos_base64", "lista_trabajadores", "causas_inmediatas_list", "causas_basicas_list", "medidas_correctivas_list"}
-    for clave, valor in formulario.items():
-        if clave in claves_omitidas or clave.startswith("__"):
-            continue
-        if isinstance(valor, list):
-            if not valor:
-                continue
-            valor = ", ".join(str(item) for item in valor if item not in (None, ""))
-        elif isinstance(valor, dict):
-            valor = json.dumps(valor, ensure_ascii=False)
-        if valor is None or str(valor).strip() == "":
-            continue
-        clave_segura = html_lib.escape(str(clave), quote=True)
-        valor_seguro = html_lib.escape(str(valor), quote=True).replace("\\n", "<br/>").replace("\n", "<br/>")
-        filas.append(f"<tr><td class='lbl'>{clave_segura}</td><td class='val' colspan='3'>{valor_seguro}</td></tr>")
-    if not filas:
-        filas.append("<tr><td class='val' colspan='4'>No se recibieron campos adicionales.</td></tr>")
-    return """
-        <div class="sec-header">REGISTRO ÍNTEGRO DE RESPUESTAS RECIBIDAS</div>
-        <table class="grid-table">
-            <tr><td class="lbl">Campo</td><td class="val" colspan="3">Valor registrado</td></tr>
-            {filas}
-        </table>
-    """.format(filas="".join(filas))
 
 def html_to_pdf_file(html_string: str, pdf_path: str):
     with open(pdf_path, "wb") as pdf_file:
@@ -346,8 +337,6 @@ def generar_pdf_preliminar(
         img_html = f'<table style="width: 100%; border-collapse: collapse; margin: 0 auto;">{filas_html}</table>'
     else:
         img_html = '<p style="color: #718096; font-size: 8pt; padding: 15px; text-align: center;">Sin fotografía adjunta</p>'
-
-    tabla_campos_completos = generar_tabla_campos_completos(f)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -484,8 +473,6 @@ def generar_pdf_preliminar(
                 <td class="val" colspan="3"><b>[FIRMA REGISTRADA]</b></td>
             </tr>
         </table>
-
-        {tabla_campos_completos}
 
         <div class="footer">
             Documento Digital Generado por el Sistema SSOMA - EMAPE S.A. | Fecha Registro System: {fecha_registro}
@@ -724,7 +711,6 @@ def generar_pdf_100_porciento(
         </table>
     """
 
-    tabla_campos_completos = generar_tabla_campos_completos(f)
     detalle_accidente_pdf = procesar_texto_multilinea(f.get("detalle_accidente", ""))
 
     html_content = f"""
@@ -1023,8 +1009,6 @@ def generar_pdf_100_porciento(
                 <td colspan="3">{g(f, 'tes_firma', '<b>[FIRMA EN NEGRITAS]</b>')}</td>
             </tr>
         </table>
-
-        {tabla_campos_completos}
 
         <div class="footer">
             Documento Digital Generado por el Sistema de Gestión SSOMA - EMAPE S.A. | Fecha Registro: {fecha_registro}
