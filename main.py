@@ -399,9 +399,9 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Razón Social:</td>
-                <td class="val" colspan="2">{g(f, ['pre_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td class="val" colspan="2" style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['pre_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.'), ancho=24)}</span></td>
                 <td class="lbl">RUC:</td>
-                <td class="val">{g(f, ['pre_ruc', 'ruc'], '20100063337')}</td>
+                <td class="val" style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['pre_ruc', 'ruc'], '20100063337'), ancho=16)}</span></td>
             </tr>
             <tr>
                 <td class="lbl">Tipo de Evento:</td>
@@ -773,23 +773,23 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Razón Social:</td>
-                <td style="width: 28%;" colspan="3">{g(f, ['emp_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.')}</td>
+                <td width="28%" style="width: 28%; vertical-align: top;" colspan="3"><span class="pdf-answer">{pdf_valor(g(f, ['emp_razon_social', 'razon_social'], 'EMPRESA MUNICIPAL DE APOYO A PROYECTOS ESTRATÉGICOS S.A.'), ancho=24)}</span></td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">RUC:</td>
-                <td style="width: 28%;">{g(f, ['emp_ruc', 'ruc'], '20100063337')}</td>
+                <td width="28%" style="width: 28%; vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['emp_ruc', 'ruc'], '20100063337'), ancho=16)}</span></td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Sede:</td>
-                <td>{g(f, ['emp_sede', 'sede'])}</td>
+                <td style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['emp_sede', 'sede']), ancho=18)}</span></td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Dirección:</td>
-                <td colspan="3">{g(f, ['emp_direccion', 'direccion'])}</td>
+                <td colspan="3" style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['emp_direccion', 'direccion']), ancho=32)}</span></td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
-                <td>{g(f, ['emp_num_trabajadores', 'emp_num_trab', 'num_trabajadores'])}</td>
+                <td style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['emp_num_trabajadores', 'emp_num_trab', 'num_trabajadores']), ancho=16)}</span></td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
-                <td>{g(f, ['emp_num_sctr', 'num_sctr'])}</td>
+                <td style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['emp_num_sctr', 'num_sctr']), ancho=16)}</span></td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora SCTR:</td>
-                <td>{g(f, ['emp_aseguradora', 'aseguradora'])}</td>
+                <td style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['emp_aseguradora', 'aseguradora']), ancho=20)}</span></td>
             </tr>
         </table>
 
