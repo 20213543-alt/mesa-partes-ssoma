@@ -511,15 +511,6 @@
           </div>
         </div>
 
-        <!-- SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS -->
-        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
-          <div class="p-4 bg-slate-50">
-            <label class="font-bold block text-slate-700 mb-1">Detallar Tipo de Atención en Primeros Auxilios:</label>
-            <textarea name="inc_primeros_auxilios" rows="2" placeholder="Ej. Curación superficial, lavado de herida, aplicación de vendaje..." class="w-full border rounded p-2 bg-white"></textarea>
-          </div>
-        </div>
-
         <!-- DETALLE DE LESIONES Y LUGAR DE ATENCIÓN -->
         <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
@@ -543,105 +534,45 @@
             <div>
               <label class="font-bold block text-slate-700 mb-1">Agente Causante de la Lesión (EMAPE):</label>
               <select name="les_agente_causante" class="w-full border rounded p-2 bg-white">
-                <option value="1 Máquinas y energía, excepto máquinas de transporte y combustión">1 Máquinas y energía, excepto máquinas de transporte y combustión</option>
-                <option value="119 Otros">119 Otros</option>
-                <option value="129 Otros sistemas de transmisión, árboles de transmisión, poleas, cadenas">129 Otros sistemas de transmisión, árboles de transmisión, poleas, cadenas</option>
-                <option value="132 Tornos">132 Tornos</option>
-                <option value="133 Fresadoras">133 Fresadoras</option>
-                <option value="134 Rectificadoras y pulidoras">134 Rectificadoras y pulidoras</option>
-                <option value="135 Cizallas">135 Cizallas</option>
-                <option value="136 Forjadoras">136 Forjadoras</option>
-                <option value="137 Laminadoras">137 Laminadoras</option>
-                <option value="139 Otras para el trabajo de metales">139 Otras para el trabajo de metales</option>
-                <option value="Sierras circulares">Sierras circulares</option>
-                <option value="142 Otras sierras">142 Otras sierras</option>
-                <option value="144 Cepilladoras">144 Cepilladoras</option>
-                <option value="149 Otras máquinas para el trabajo en madera">149 Otras máquinas para el trabajo en madera</option>
-                <option value="152 Trilladoras">152 Trilladoras</option>
-                <option value="159 Otras máquinas agrícolas">159 Otras máquinas agrícolas</option>
-                <option value="169 Otras no clasificadas (fabricación de productos, imprentas, etc.)">169 Otras no clasificadas (fabricación de productos, imprentas, etc.)</option>
-                <option value="199 Otras">199 Otras</option>
-                <option value="211 Grúas">211 Grúas</option>
-                <option value="213 Cabrestantes, ascensores, montacargas">213 Cabrestantes, ascensores, montacargas</option>
-                <option value="214 Poleas">214 Poleas</option>
-                <option value="219 Otros aparatos de izaje">219 Otros aparatos de izaje</option>
-                <option value="229 Otros medios de transporte por ferrocarriles internos">229 Otros medios de transporte por ferrocarriles internos</option>
-                <option value="231 Tractores">231 Tractores</option>
-                <option value="232 Camiones, carretillas motorizadas">232 Camiones, carretillas motorizadas</option>
-                <option value="239 Otros vehículos de tracción">239 Otros vehículos de tracción</option>
-                <option value="269 Otros medios de transporte (portadores aéreos, etc.)">269 Otros medios de transporte (portadores aéreos, etc.)</option>
-                <option value="299 Otros aparatos de transporte">299 Otros aparatos de transporte</option>
-                <option value="311 Calderas">311 Calderas</option>
-                <option value="319 Otros recipientes de presión">319 Otros recipientes de presión</option>
-                <option value="321 Altos hornos, fogones, hornos de refinación">321 Altos hornos, fogones, hornos de refinación</option>
-                <option value="323 Otros hornos">323 Otros hornos</option>
-                <option value="324 Estufas">324 Estufas</option>
-                <option value="325 Fogones y plantas refrigerantes">325 Fogones y plantas refrigerantes</option>
-                <option value="349 Otros conectores y cables eléctricos">349 Otros conectores y cables eléctricos</option>
-                <option value="Transformadores, equipos de mando y distribución">Transformadores, equipos de mando y distribución</option>
-                <option value="369 Otras herramientas eléctricas">369 Otras herramientas eléctricas</option>
-                <option value="338 Andamios y estructuras temporales">338 Andamios y estructuras temporales</option>
-                <option value="421 Polvos, gases, vapores y sustancias químicas">421 Polvos, gases, vapores y sustancias químicas</option>
-                <option value="429 Otros fragmentos volantes y radiaciones">429 Otros fragmentos volantes y radiaciones</option>
-                <option value="51 Exterior: condiciones climáticas, vías de tránsito">51 Exterior: condiciones climáticas, vías de tránsito</option>
-                <option value="513 Agua">513 Agua</option>
-                <option value="519 Otros">519 Otros</option>
-                <option value="521 Pisos y espacios de trabajo">521 Pisos y espacios de trabajo</option>
-                <option value="523 Escaleras y superficies de tránsito">523 Escaleras y superficies de tránsito</option>
-                <option value="529 Otros">529 Otros</option>
-                <option value="535 Fuego">535 Fuego</option>
-                <option value="536 Agua">536 Agua</option>
-                <option value="539 Otros no clasificados">539 Otros no clasificados</option>
-                <option value="61 Animales vivos y productos animales">61 Animales vivos y productos animales</option>
+                <option value="">-- Seleccionar agente causante --</option>
+                <optgroup label="Riesgos e instalaciones eléctricas">
+                  <option value="Tableros eléctricos">Tableros eléctricos</option>
+                  <option value="Cables energizados">Cables energizados</option>
+                  <option value="Arcos eléctricos">Arcos eléctricos</option>
+                  <option value="Herramientas eléctricas">Herramientas eléctricas</option>
+                  <option value="Agentes relacionados con electricidad">Agentes relacionados con electricidad</option>
+                </optgroup>
+                <optgroup label="Entorno y equipos de oficina">
+                  <option value="Mobiliario de oficina">Mobiliario de oficina</option>
+                  <option value="Cables en piso">Cables en piso</option>
+                  <option value="Equipos informáticos">Equipos informáticos</option>
+                  <option value="Agentes relacionados con oficina">Agentes relacionados con oficina</option>
+                </optgroup>
+                <optgroup label="Fuentes térmicas y quemaduras">
+                  <option value="Fluidos calientes">Fluidos calientes</option>
+                  <option value="Componentes de alta temperatura">Componentes de alta temperatura</option>
+                  <option value="Químicos corrosivos">Químicos corrosivos</option>
+                  <option value="Agentes relacionados con quemaduras">Agentes relacionados con quemaduras</option>
+                </optgroup>
+                <optgroup label="Otros riesgos y agentes">
+                  <option value="Herramientas neumáticas">Herramientas neumáticas</option>
+                  <option value="Herramientas manuales">Herramientas manuales</option>
+                  <option value="Maquinaria pesada / vehículo">Maquinaria pesada / vehículo</option>
+                  <option value="Materiales, estructuras o superficies de trabajo">Materiales, estructuras o superficies de trabajo</option>
+                  <option value="Productos químicos / asfalto">Productos químicos / asfalto</option>
+                </optgroup>
+                <option value="Otros">Otros</option>
               </select>
             </div>
             <div>
               <label class="font-bold block text-slate-700 mb-1">Parte del Cuerpo Afectada:</label>
               <select name="les_parte_cuerpo" class="w-full border rounded p-2 bg-white">
-                <option value="1 Región craneal">1 Región craneal</option>
-                <option value="2 Ojos (con inclusión de la órbita)">2 Ojos (con inclusión de la órbita)</option>
-                <option value="3 Cara (ubicación múltiple)">3 Cara (ubicación múltiple)</option>
-                <option value="4 Nariz y senos paranasales">4 Nariz y senos paranasales</option>
-                <option value="5 Aparato auditivo">5 Aparato auditivo</option>
-                <option value="6 Cabeza, ubicación múltiple">6 Cabeza, ubicación múltiple</option>
-                <option value="7 Cuello">7 Cuello</option>
-                <option value="8 Región cervical">8 Región cervical</option>
-                <option value="9 Región dorsal">9 Región dorsal</option>
-                <option value="10 Región lumbar">10 Región lumbar</option>
-                <option value="11 Abdomen">11 Abdomen</option>
-                <option value="12 Pelvis">12 Pelvis</option>
-                <option value="13 Tronco, ubicación múltiple">13 Tronco, ubicación múltiple</option>
-                <option value="14 Hombro (incluye clavícula y escápula)">14 Hombro (incluye clavícula y escápula)</option>
-                <option value="15 Brazo">15 Brazo</option>
-                <option value="16 Codo">16 Codo</option>
-                <option value="17 Antebrazo">17 Antebrazo</option>
-                <option value="18 Muñeca">18 Muñeca</option>
-                <option value="19 Mano (con inclusión de la palma)">19 Mano (con inclusión de la palma)</option>
-                <option value="20 Dedos de la mano">20 Dedos de la mano</option>
-                <option value="21 Miembro superior, ubicación múltiple">21 Miembro superior, ubicación múltiple</option>
-                <option value="22 Cadera">22 Cadera</option>
-                <option value="23 Muslo">23 Muslo</option>
-                <option value="24 Rodilla">24 Rodilla</option>
-                <option value="25 Pierna">25 Pierna</option>
-                <option value="26 Tobillo">26 Tobillo</option>
-                <option value="27 Pie (con inclusión del talón)">27 Pie (con inclusión del talón)</option>
-                <option value="28 Dedos del pie">28 Dedos del pie</option>
-                <option value="29 Miembro inferior, ubicación múltiple">29 Miembro inferior, ubicación múltiple</option>
-                <option value="30 Aparato cardiovascular">30 Aparato cardiovascular</option>
-                <option value="31 Aparato respiratorio">31 Aparato respiratorio</option>
-                <option value="32 Aparato digestivo">32 Aparato digestivo</option>
-                <option value="33 Sistema nervioso">33 Sistema nervioso</option>
-                <option value="34 Mamas">34 Mamas</option>
-                <option value="35 Aparato genital">35 Aparato genital</option>
-                <option value="36 Aparato urinario">36 Aparato urinario</option>
-                <option value="37 Sistema hematopoyético">37 Sistema hematopoyético</option>
-                <option value="38 Sistema endocrino">38 Sistema endocrino</option>
-                <option value="39 Pie (solo)">39 Pie (solo)</option>
-                <option value="40 Aparato psíquico">40 Aparato psíquico</option>
-                <option value="41 Ubicaciones múltiples">41 Ubicaciones múltiples</option>
-                <option value="42 Órgano, aparato o sistema afectado en general">42 Órgano, aparato o sistema afectado en general</option>
-                <option value="43 Otros">43 Otros</option>
-                <option value="No aplica">No aplica</option>
+                <option value="Cabeza / Rostro">Cabeza / Rostro</option>
+                <option value="Ojos">Ojos</option>
+                <option value="Miembros Superiores (Manos, Dedos, Brazos)">Miembros Superiores (Manos, Dedos, Brazos)</option>
+                <option value="Miembros Inferiores (Pies, Tobillos, Piernas)">Miembros Inferiores (Pies, Tobillos, Piernas)</option>
+                <option value="Tronco / Espalda / Columna">Tronco / Espalda / Columna</option>
+                <option value="Múltiples Partes">Múltiples Partes</option>
               </select>
             </div>
             <div class="md:col-span-2">
@@ -675,6 +606,19 @@
                 <option value="Caída de Objetos / Estructura">Caída de Objetos / Estructura</option>
               </select>
             </div>
+            <div class="md:col-span-2">
+              <label class="font-bold block text-slate-700 mb-1">Descripción del Evento (Daños Materiales/M.A.):</label>
+              <textarea name="dan_descripcion_evento" rows="3" class="w-full border rounded p-2 bg-white"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- DETALLE DEL ACCIDENTE -->
+        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">DETALLE DEL ACCIDENTE</div>
+          <div class="p-4 bg-slate-50">
+            <label class="font-bold block text-slate-700 mb-1">Descripción detallada del accidente:</label>
+            <textarea name="detalle_accidente" rows="5" placeholder="Ej. Descripción detallada de cómo ocurrió el evento, secuencia de hechos, herramientas involucradas y contexto previo..." class="w-full border rounded p-2 bg-white"></textarea>
           </div>
         </div>
 
