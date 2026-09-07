@@ -248,7 +248,7 @@ def g(form_dict, key_or_keys, default="-"):
                     "tipo_contacto", "accion", "servicio", "trabajo_realizaba"
                 )
                 if any(fragmento in nombres for fragmento in campos_largos):
-                    return procesar_texto_multilinea(texto)
+                    return '<span class="pdf-answer">' + procesar_texto_multilinea(texto) + '</span>' 
                 return texto
     return default
 
@@ -370,16 +370,26 @@ def generar_pdf_preliminar(
                 white-space: normal !important;
                 word-wrap: break-word !important;
                 overflow-wrap: break-word !important;
-                word-break: break-word !important;
+                word-break: break-all !important;
                 vertical-align: top !important;
                 height: auto !important;
                 max-width: 100%;
+            }}
+            .pdf-answer {{
+                display: block;
+                width: 100%;
+                white-space: normal !important;
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
+                word-break: break-all !important;
+                line-height: 1.25;
+                height: auto !important;
             }}
             .grid-table {{ width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 6px; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top !important; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; width: 100%; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .photo-box {{ text-align: center; padding: 6px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
             .footer {{ margin-top: 15px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
@@ -493,17 +503,17 @@ def generar_pdf_100_porciento(
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
         <tr>
-            <td style="width: 9%;">{pdf_valor(trab.get('paterno','-'))}</td>
-            <td style="width: 9%;">{pdf_valor(trab.get('materno','-'))}</td>
-            <td style="width: 11%;">{pdf_valor(trab.get('nombres','-'))}</td>
-            <td style="width: 11%;">{pdf_valor(trab.get('ocupacion','-'))}</td>
-            <td style="width: 13%;">{pdf_valor(trab.get('area_interna','-'))}</td>
-            <td style="width: 9%;">{trab.get('jefe_inmediato', trab.get('condicion','-'))}</td>
+            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('paterno','-'))}</span></td>
+            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('materno','-'))}</span></td>
+            <td width="11%" style="width: 11%;"><span class="pdf-answer">{pdf_valor(trab.get('nombres','-'))}</span></td>
+            <td width="11%" style="width: 11%;"><span class="pdf-answer">{pdf_valor(trab.get('ocupacion','-'))}</span></td>
+            <td width="13%" style="width: 13%;"><span class="pdf-answer">{pdf_valor(trab.get('area_interna','-'))}</span></td>
+            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('jefe_inmediato', trab.get('condicion','-')))}</span></td>
             <td style="width: 5%;">{trab.get('sexo','-')}</td>
-            <td style="width: 8%;">{pdf_valor(trab.get('dni','-'))}</td>
+            <td width="8%" style="width: 8%;"><span class="pdf-answer">{pdf_valor(trab.get('dni','-'))}</span></td>
             <td style="width: 5%;">{trab.get('edad','-')}</td>
             <td style="width: 6%;">{trab.get('turno','-')}</td>
-            <td style="width: 14%;">{pdf_valor(trab.get('personal','-'))}</td>
+            <td width="14%" style="width: 14%;"><span class="pdf-answer">{pdf_valor(trab.get('personal','-'))}</span></td>
         </tr>
         """
     if not filas_trabajadores:
@@ -516,9 +526,9 @@ def generar_pdf_100_porciento(
         filas_causas_inmediatas += f"""
         <tr>
             <td style="text-align:center; width: 6%;">{ci.get('fila','-')}</td>
-            <td style="width: 24%;">{pdf_valor(ci.get('tipo','-'))}</td>
-            <td style="width: 35%;">{pdf_valor(ci.get('causa','-'))}</td>
-            <td style="width: 35%;">{pdf_valor(ci.get('obs','-'))}</td>
+            <td width="24%" style="width: 24%;"><span class="pdf-answer">{pdf_valor(ci.get('tipo','-'))}</span></td>
+            <td width="35%" style="width: 35%;"><span class="pdf-answer">{pdf_valor(ci.get('causa','-'))}</span></td>
+            <td width="35%" style="width: 35%;"><span class="pdf-answer">{pdf_valor(ci.get('obs','-'))}</span></td>
         </tr>
         """
     if not filas_causas_inmediatas:
@@ -544,11 +554,11 @@ def generar_pdf_100_porciento(
         <tr>
             <td style="text-align:center; width: 6%;">{mc.get('fila','-')}</td>
             <td style="width: 16%;">{pdf_valor(mc.get('tipo','-'))}</td>
-            <td style="width: 28%;">{pdf_valor(mc.get('accion','-'))}</td>
+            <td width="28%" style="width: 28%;"><span class="pdf-answer">{pdf_valor(mc.get('accion','-'))}</span></td>
             <td style="width: 16%;">{pdf_valor(mc.get('responsable','-'))}</td>
             <td style="width: 10%;">{mc.get('fecha','-')}</td>
             <td style="width: 10%;">{pdf_valor(mc.get('situacion','-'))}</td>
-            <td style="width: 14%;">{pdf_valor(mc.get('obs','-'))}</td>
+            <td width="14%" style="width: 14%;"><span class="pdf-answer">{pdf_valor(mc.get('obs','-'))}</span></td>
         </tr>
         """
     if not filas_medidas:
@@ -634,9 +644,9 @@ def generar_pdf_100_porciento(
 
     def fila_detalle(concepto, detalle, monto):
         return f"""<tr>
-            <td>{concepto}</td>
-            <td>{detalle}</td>
-            <td style="text-align:right;">S/ {dinero(monto)}</td>
+            <td width="30%"><span class="pdf-answer">{concepto}</span></td>
+            <td width="50%"><span class="pdf-answer">{detalle}</span></td>
+            <td width="20%" style="text-align:right;"><span class="pdf-answer">S/ {dinero(monto)}</span></td>
         </tr>"""
 
     personal_items = [
@@ -736,11 +746,12 @@ def generar_pdf_100_porciento(
             table {{ width: 100%; table-layout: fixed; border-collapse: collapse; }}
             table, .grid-table {{ page-break-inside: auto; }}
             tr {{ page-break-inside: avoid; page-break-after: auto; }}
-            td, th {{ white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; vertical-align: top !important; height: auto !important; max-width: 100%; }}
+            td, th {{ white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-all !important; vertical-align: top !important; height: auto !important; max-width: 100%; }}
+            .pdf-answer {{ display: block; width: 100%; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-all !important; line-height: 1.2; height: auto !important; }}
             .grid-table {{ width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: top !important; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; width: 100%; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
             /* ESTILOS ESPECÍFICOS COSTOS */
@@ -922,7 +933,7 @@ def generar_pdf_100_porciento(
             <tr>
                 <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; height: auto; white-space: normal; word-wrap: break-word;">
                     <b>Descripción detallada del accidente:</b><br/><br/>
-                    {detalle_accidente_pdf}
+                    <span class="pdf-answer">{detalle_accidente_pdf}</span>
                 </td>
             </tr>
         </table>
