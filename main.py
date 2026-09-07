@@ -270,9 +270,9 @@ def procesar_texto_multilinea(val, predeterminado="-") -> str:
     if not val or not isinstance(val, str):
         return predeterminado if not val else html_lib.escape(str(val), quote=True)
     texto = html_lib.escape(val, quote=True)
-    texto = texto.replace("\\r\\n", "\\n").replace("\\r", "\\n")
-    texto = re.sub(r"(\\S{12})", r"\\1 ", texto)
-    return texto.replace("\\n", "<br/>")
+    texto = texto.replace("\r\n", "\n").replace("\r", "\n")
+    texto = re.sub(r"(\S{12})", r"\1 ", texto)
+    return texto.replace("\n", "<br/>")
 
 
 def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
@@ -379,7 +379,7 @@ def generar_pdf_preliminar(
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 4px; font-size: 8pt; vertical-align: top !important; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .lbl {{ font-weight: bold; color: #2d3748; background-color: #f7fafc; width: 22%; }}
             .val {{ color: #1a202c; width: 28%; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 6px; font-size: 8pt; line-height: 1.2; margin-bottom: 6px; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .photo-box {{ text-align: center; padding: 6px; border: 1px solid #cbd5e0; background-color: #f7fafc; margin-bottom: 6px; }}
             .footer {{ margin-top: 15px; font-size: 7.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 4px; }}
         </style>
@@ -740,7 +740,7 @@ def generar_pdf_100_porciento(
             .grid-table {{ width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }}
             .grid-table td, .grid-table th {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.5pt; vertical-align: top !important; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .grid-table th {{ background-color: #edf2f7; color: #1a365d; text-align: left; font-weight: bold; }}
-            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; word-wrap: break-word; }}
+            .text-box {{ border: 1px solid #cbd5e0; background-color: #f7fafc; padding: 4px; font-size: 7pt; line-height: 1.1; margin-bottom: 5px; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; height: auto !important; }}
             .footer {{ margin-top: 8px; font-size: 6.5pt; color: #718096; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 3px; }}
             
             /* ESTILOS ESPECÍFICOS COSTOS */
