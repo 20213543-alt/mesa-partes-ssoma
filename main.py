@@ -244,6 +244,18 @@ def g(form_dict, key_or_keys, default="-"):
     return default
 
 
+def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
+    """Escapa texto de usuario y conserva saltos de línea para xhtml2pdf."""
+    if valor is None:
+        return predeterminado
+    texto = str(valor).strip()
+    if not texto:
+        return predeterminado
+    texto = html_lib.escape(texto, quote=True)
+    texto = texto.replace("\r\n", "\n").replace("\r", "\n")
+    return texto.replace("\n", "<br/>")
+
+
 def generar_tabla_campos_completos(formulario: dict) -> str:
     """Renderiza todos los valores recibidos del formulario en una tabla de respaldo PDF."""
     filas = []
@@ -660,6 +672,7 @@ def generar_pdf_100_porciento(
     """
 
     tabla_campos_completos = generar_tabla_campos_completos(f)
+    detalle_accidente_pdf = formatear_texto_para_pdf(f.get("detalle_accidente", ""))
 
     html_content = f"""
     <!DOCTYPE html>
@@ -851,6 +864,20 @@ def generar_pdf_100_porciento(
                 <tr><td class="cost-title">4. GASTOS DIVERSOS (2%)</td><td class="cost-val">S/ {g(f, 'coste_gastos_diversos', '0.00')}</td></tr>
                 <tr><td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td><td class="cost-total-val">S/ {g(f, 'coste_total_accidente', '0.00')}</td></tr>
             </tbody>
+        </table>
+
+        <table style="width: 100%; table-layout: fixed; margin-bottom: 12px;">
+            <tr>
+                <th style="background-color: #1b365d; color: white; padding: 6px; text-align: left; font-size: 10pt;">
+                    <b>DETALLE DEL ACCIDENTE</b>
+                </th>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #ccc; padding: 8px; vertical-align: top; height: auto; white-space: normal; word-wrap: break-word;">
+                    <b>Descripción detallada del accidente:</b><br/><br/>
+                    {detalle_accidente_pdf}
+                </td>
+            </tr>
         </table>
 
         <div class="sec-header">ANÁLISIS DEL ACCIDENTE</div>
