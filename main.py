@@ -280,7 +280,7 @@ def procesar_texto_multilinea(val, predeterminado="-") -> str:
     for linea in texto.split("\n"):
         partes = textwrap.wrap(
             linea,
-            width=75,
+            width=32,
             break_long_words=True,
             break_on_hyphens=False,
             replace_whitespace=False,
@@ -749,7 +749,7 @@ def generar_pdf_100_porciento(
             .cost-total-val {{ font-weight: bold; color: #d69e2e; background-color: #1a365d; text-align: right; font-size: 8pt; padding: 5px; }}
             .cost-category-title {{ background-color: #e2e8f0; color: #1a365d; font-weight: bold; font-size: 7pt; padding: 4px; margin-top: 5px; }}
             .cost-detail-table {{ width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 5px; page-break-inside: auto; }}
-            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: middle; word-wrap: break-word; }}
+            .cost-detail-table th, .cost-detail-table td {{ border: 1px solid #cbd5e0; padding: 3px; font-size: 6.3pt; vertical-align: top !important; white-space: normal !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-all !important; height: auto !important; }}
             .cost-detail-table th {{ background-color: #2b6cb0; color: #ffffff; text-align: left; }}
             .cost-detail-table th:nth-child(1) {{ width: 30%; }}
             .cost-detail-table th:nth-child(2) {{ width: 50%; }}
