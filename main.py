@@ -266,7 +266,7 @@ def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
     return texto.replace("\n", "<br/>")
 
 
-def procesar_texto_multilinea(val, predeterminado="-") -> str:
+def procesar_texto_multilinea(val, predeterminado="-", ancho=32) -> str:
     """Escapa y divide físicamente el texto para garantizar wrapping en xhtml2pdf."""
     if val is None or not isinstance(val, str) or not val.strip():
         return predeterminado
@@ -280,7 +280,7 @@ def procesar_texto_multilinea(val, predeterminado="-") -> str:
     for linea in texto.split("\n"):
         partes = textwrap.wrap(
             linea,
-            width=32,
+            width=max(8, int(ancho)),
             break_long_words=True,
             break_on_hyphens=False,
             replace_whitespace=False,
@@ -296,15 +296,15 @@ def procesar_texto_multilinea(val, predeterminado="-") -> str:
 
 def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
     """Alias compatible con la sección DETALLE DEL ACCIDENTE."""
-    return procesar_texto_multilinea(valor, predeterminado)
+    return procesar_texto_multilinea(valor, predeterminado, ancho=32)
 
 
 
-def pdf_valor(valor, predeterminado="-") -> str:
-    """Formatea valores provenientes de listas estructuradas del formulario."""
+def pdf_valor(valor, predeterminado="-", ancho=32) -> str:
+    """Formatea cualquier valor estructurado con corte físico y saltos HTML."""
     if valor is None or str(valor).strip() == "":
         return predeterminado
-    return procesar_texto_multilinea(str(valor), predeterminado)
+    return procesar_texto_multilinea(str(valor), predeterminado, ancho=ancho)
 
 def html_to_pdf_file(html_string: str, pdf_path: str):
     with open(pdf_path, "wb") as pdf_file:
@@ -490,17 +490,17 @@ def generar_pdf_100_porciento(
     for trab in f.get("lista_trabajadores", []):
         filas_trabajadores += f"""
         <tr>
-            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('paterno','-'))}</span></td>
-            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('materno','-'))}</span></td>
-            <td width="11%" style="width: 11%;"><span class="pdf-answer">{pdf_valor(trab.get('nombres','-'))}</span></td>
-            <td width="11%" style="width: 11%;"><span class="pdf-answer">{pdf_valor(trab.get('ocupacion','-'))}</span></td>
-            <td width="13%" style="width: 13%;"><span class="pdf-answer">{pdf_valor(trab.get('area_interna','-'))}</span></td>
-            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('jefe_inmediato', trab.get('condicion','-')))}</span></td>
-            <td style="width: 5%;">{trab.get('sexo','-')}</td>
-            <td width="8%" style="width: 8%;"><span class="pdf-answer">{pdf_valor(trab.get('dni','-'))}</span></td>
-            <td style="width: 5%;">{trab.get('edad','-')}</td>
-            <td style="width: 6%;">{trab.get('turno','-')}</td>
-            <td width="14%" style="width: 14%;"><span class="pdf-answer">{pdf_valor(trab.get('personal','-'))}</span></td>
+            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('paterno','-'), ancho=10)}</span></td>
+            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('materno','-'), ancho=10)}</span></td>
+            <td width="11%" style="width: 11%;"><span class="pdf-answer">{pdf_valor(trab.get('nombres','-'), ancho=12)}</span></td>
+            <td width="11%" style="width: 11%;"><span class="pdf-answer">{pdf_valor(trab.get('ocupacion','-'), ancho=12)}</span></td>
+            <td width="13%" style="width: 13%;"><span class="pdf-answer">{pdf_valor(trab.get('area_interna','-'), ancho=12)}</span></td>
+            <td width="9%" style="width: 9%;"><span class="pdf-answer">{pdf_valor(trab.get('jefe_inmediato', trab.get('condicion','-')), ancho=10)}</span></td>
+            <td style="width: 5%;">{pdf_valor(trab.get('sexo','-'), ancho=8)}</td>
+            <td width="8%" style="width: 8%;"><span class="pdf-answer">{pdf_valor(trab.get('dni','-'), ancho=9)}</span></td>
+            <td style="width: 5%;">{pdf_valor(trab.get('edad','-'), ancho=8)}</td>
+            <td style="width: 6%;">{pdf_valor(trab.get('turno','-'), ancho=8)}</td>
+            <td width="14%" style="width: 14%;"><span class="pdf-answer">{pdf_valor(trab.get('personal','-'), ancho=12)}</span></td>
         </tr>
         """
     if not filas_trabajadores:
