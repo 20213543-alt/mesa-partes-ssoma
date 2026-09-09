@@ -1444,149 +1444,391 @@
           <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">RESPONSABLE DE REGISTRO Y DE LA INVESTIGACIÓN (JEFE INMEDIATO)</div>
           <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="font-bold block text-slate-700 mb-1">Nombre Completo:</label>
-              <input type="text" id="inv_nombre" name="inv_nombre" oninput="actualizarFirmaInv()" class="w-full border rounded p-2 bg-white">
+              <label class="font-bold block text-slate-700 mb-1">Nombres y Apellidos:</label>
+              <input type="text" name="fin_resp_nombre" placeholder="Nombre completo del responsable" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
               <label class="font-bold block text-slate-700 mb-1">Cargo:</label>
-              <input type="text" name="inv_cargo" class="w-full border rounded p-2 bg-white">
+              <input type="text" name="fin_resp_cargo" placeholder="Ej. Jefe Inmediato / Supervisor SSOMA" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
-              <label class="font-bold block text-slate-700 mb-1">Área interna de responsabilidad:</label>
-              <select name="inv_area_interna_responsabilidad" class="w-full border rounded p-2 bg-white">
-                <option value="">-- Seleccionar Área --</option>
-                <option value="Gerencia de logística">Gerencia de logística</option>
-                <option value="Gerencia de contabilidad y finanzas">Gerencia de contabilidad y finanzas</option>
-                <option value="Gerencia de recursos humanos">Gerencia de recursos humanos</option>
-                <option value="Gerencia de tesorería">Gerencia de tesorería</option>
-                <option value="Gerencia de presupuesto">Gerencia de presupuesto</option>
-                <option value="Gerencia de planeamiento y modernización">Gerencia de planeamiento y modernización</option>
-                <option value="Gerencia de obras y supervisión">Gerencia de obras y supervisión</option>
-                <option value="Gerencia de estudios y proyectos">Gerencia de estudios y proyectos</option>
-                <option value="Gerencia de limpieza vial y mantenimientos de áreas verdes">Gerencia de limpieza vial y mantenimientos de áreas verdes</option>
-                <option value="Gerencia de mantenimiento vial, puentes y obras sociales">Gerencia de mantenimiento vial, puentes y obras sociales</option>
-                <option value="Gerencia de administración de carreteras">Gerencia de administración de carreteras</option>
-                <option value="Gerencia de seguridad vial">Gerencia de seguridad vial</option>
-                <option value="Gerencia de servicios de seguridad y negocios">Gerencia de servicios de seguridad y negocios</option>
-                <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
-              </select>
+              <label class="font-bold block text-slate-700 mb-1">Fecha de Registro:</label>
+              <input type="date" name="fin_resp_fecha" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
             <div>
-              <label class="font-bold block text-slate-700 mb-1">Fecha de Investigación:</label>
-              <input type="date" name="inv_fecha" class="w-full border rounded p-2 bg-white">
-            </div>
-            <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
-              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma Digital Registrada (Investigador):</label>
-              <p id="vista_firma_inv" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-                [AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]
-              </p>
+              <label class="font-bold block text-slate-700 mb-1">DNI / Registro:</label>
+              <input type="text" name="fin_resp_dni" placeholder="Ej. 12345678" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
             </div>
           </div>
         </div>
 
-      </div>
+        <div class="flex justify-end gap-4 pt-4">
+          <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3 rounded-lg shadow-md transition text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer">
+            💾 Registrar Informe
+          </button>
+        </div>
 
-      <!-- BOTONES DE ACCIÓN PRINCIPALES -->
-      <div class="flex justify-end gap-4 pt-4 border-t border-slate-300">
-        <button type="button" onclick="window.print()" class="px-6 py-3 rounded-lg border border-slate-400 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition text-xs uppercase tracking-wide cursor-pointer">
-          🖨️ Imprimir / Guardar PDF
-        </button>
-        <button type="submit" class="px-6 py-3 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold shadow-lg transition text-xs uppercase tracking-wide cursor-pointer flex items-center gap-2">
-          💾 Registrar Informe
-        </button>
       </div>
 
     </form>
   </div>
 
-  <!-- SCRIPT CON LA LÓGICA COMPLETA DEL FORMULARIO -->
+  <!-- SCRIPT CON DATOS Y LÓGICA DE DESPLEGABLES -->
   <script>
-    let inputObservacionActual = null;
-    let botonObservacionActual = null;
-
-    // Listas de datos para selects dinámicos
+    // --- DATOS DE CAUSAS INMEDIATAS ---
     const datosCausasInmediatas = {
       "Acto Subestandar": [
-        "Uso inadecuado de herramientas",
-        "Operar equipo sin autorización",
-        "No usar EPP adecuado",
-        "No seguir procedimientos",
-        "Postura de trabajo inadecuada"
+        "10 Operar equipos sin autorización",
+        "12 No señalar o advertir",
+        "14 Fallo en asegurar",
+        "16 Operar a velocidad inadecuada",
+        "18 Poner fuera de servicio los dispositivos de seguridad",
+        "20 Eliminar los dispositivos de seguridad",
+        "22 Usar equipo defectuoso",
+        "24 Usar el EPP inadecuadamente",
+        "26 Cargar incorrectamente",
+        "28 Ubicar incorrectamente",
+        "30 Levantar objetos en forma incorrecta",
+        "32 Adoptar una posición inadecuada para el trabajo",
+        "34 Dar servicio a equipo en funcionamiento",
+        "36 Bromear o hacer juegos pesados",
+        "38 Usar equipos de manera incorrecta",
+        "40 Trabajar bajo la influencia del alcohol y/u otras drogas",
+        "99 Falta de atención / Distracción"
       ],
       "Condición Subestandar": [
-        "Herramienta defectuosa",
-        "Falta de orden y limpieza",
-        "Iluminación insuficiente",
-        "Estructura inestable",
-        "Protección o barrera inadecuada"
+        "42 Protecciones y resguardos inadecuados",
+        "44 Equipos de protección inadecuados o insuficientes",
+        "46 Herramientas, equipos o materiales defectuosos",
+        "48 Espacio limitado para desenvolverse",
+        "50 Sistemas de advertencia insuficientes",
+        "52 Peligro de incendio y explosión",
+        "54 Orden y limpieza deficientes / desorden",
+        "56 Condición ambiental peligrosa: gases, polvos, humos, vapores",
+        "58 Exposición a ruido",
+        "60 Exposición a radiación",
+        "62 Exposición a temperaturas extremas",
+        "64 Iluminación excesiva o deficiente",
+        "66 Ventilación insuficiente",
+        "98 Condiciones ambientales peligrosas"
       ]
     };
 
-    const datosCausasSubyacentes = {
-      "Factores Personales": [
-        "Capacidad física/fisiológica inadecuada",
-        "Capacidad mental/psicológica inadecuada",
-        "Tensión física o fisiológica",
-        "Tensión mental o psicológica",
-        "Falta de conocimiento",
-        "Falta de habilidad",
-        "Motivación inadecuada"
-      ],
-      "Factores Laborales / Trabajo": [
-        "Liderazgo y/o supervisión inadecuada",
-        "Ingeniería inadecuada",
-        "Adquisiciones inadecuadas",
-        "Mantenimiento inadecuado",
-        "Herramientas y equipos inadecuados",
-        "Estándares de trabajo inadecuados",
-        "Uso y desgaste excesivo"
-      ]
+    // --- DATOS DE CAUSAS BÁSICAS / SUBYACENTES Y CAUSA RAÍZ ---
+    const datosCausasBasicas = {
+      "Factores Personales": {
+        "100 CAPACIDAD FÍSICA / FISIOLÓGICA INADECUADA": [
+          "101 Estatura, peso, tamaño, fuerza, alcance, etc. inadecuados",
+          "102 Capacidad de movimiento corporal restringida",
+          "103 Capacidad limitada para mantener posiciones del cuerpo",
+          "104 Sensibilidad a sustancias o alergias",
+          "105 Sensibilidad a extremos sensoriales (temperatura, ruido, etc.)",
+          "106 Deficiencia visual",
+          "107 Deficiencia auditiva",
+          "108 Otras deficiencias sensoriales (tacto, gusto, olfato, equilibrio)",
+          "109 Incapacidad permanente",
+          "110 Incapacidad temporal"
+        ],
+        "200 CAPACIDAD MENTAL / PSICOLÓGICA INADECUADA": [
+          "201 Temores y fobias",
+          "202 Perturbación emocional",
+          "203 Enfermedad mental",
+          "204 Nivel de inteligencia",
+          "205 Incapacidad de comprensión",
+          "206 Mal juicio",
+          "207 Mala coordinación",
+          "208 Tiempo de reacción lento",
+          "209 Aptitud mecánica deficiente",
+          "210 Aptitud de aprendizaje deficiente",
+          "211 Fallas de memoria"
+        ],
+        "300 TENSIÓN FÍSICA O FISIOLÓGICA": [
+          "301 Lesión o enfermedad",
+          "302 Fatiga debido a la carga o duración del trabajo",
+          "303 Fatiga debido a la falta de descanso",
+          "304 Fatiga debido a sobrecarga sensorial",
+          "305 Exposición a riesgos para la salud",
+          "306 Exposición a temperaturas extremas",
+          "307 Insuficiencia de oxígeno",
+          "308 Variaciones en la presión barométrica",
+          "309 Restricción del movimiento",
+          "310 Insuficiencia de azúcar en la sangre",
+          "311 Ingestión de drogas / alcohol / medicamentos"
+        ],
+        "400 TENSIÓN MENTAL O PSICOLÓGICA": [
+          "401 Sobrecarga emocional",
+          "402 Fatiga por velocidad o carga de trabajo mental",
+          "403 Demandas extremas de opinión / decisión",
+          "404 Rutina, monotonía, exigencia de vigilancia sin sentido",
+          "405 Demandas extremas de concentración",
+          "406 Actividades 'sin sentido' o 'degradantes'",
+          "407 Instrucciones / exigencias confusas",
+          "408 Exigencias / peticiones contradictorias",
+          "409 Preocupación por problemas",
+          "410 Frustración"
+        ],
+        "500 FALTA DE CONOCIMIENTO": [
+          "501 Falta de experiencia",
+          "502 Orientación deficiente",
+          "503 Entrenamiento inicial inadecuado",
+          "504 Entrenamiento de actualización / reentrenamiento inadecuado",
+          "505 Miscomprensión de las instrucciones"
+        ],
+        "600 FALTA DE HABILIDAD": [
+          "601 Instrucción inicial inadecuada",
+          "602 Práctica insuficiente",
+          "603 Ejecución poco frecuente",
+          "604 Falta de preparación o entrenamiento",
+          "605 Falta de aptitudes / destrezas"
+        ],
+        "700 MOTIVACIÓN INADECUADA": [
+          "701 Premiación (tolerancia) del desempeño incorrecto",
+          "702 Castigo del desempeño correcto",
+          "703 Falta de incentivos",
+          "704 Frustración excesiva",
+          "705 Agresividad inapropiada",
+          "706 Intento incorrecto de ahorrar tiempo o esfuerzo",
+          "707 Intento incorrecto de evitar la incomodidad",
+          "708 Intento incorrecto de llamar la atención",
+          "709 Disciplina inadecuada",
+          "710 Presión inadecuada de los compañeros",
+          "711 Ejemplo inadecuado de la supervisión",
+          "712 Retroalimentación inadecuada del desempeño",
+          "713 Refuerzo inadecuado del comportamiento correcto",
+          "714 Incentivos de producción inapropiados"
+        ]
+      },
+      "Factores Laborales / Trabajo": {
+        "800 LIDERAZGO Y/O SUPERVISIÓN INADECUADA": [
+          "801 Relaciones jerárquicas poco claras o contradictorias",
+          "802 Asignación de responsabilidad confusa o contradictoria",
+          "803 Delegación inadecuada o insuficiente",
+          "804 Dar políticas, procedimientos, prácticas o pautas inadecuadas",
+          "805 Dar objetivos, metas o estándares contradictorios",
+          "806 Planificación o programación inadecuada del trabajo",
+          "807 Instrucciones, orientación y/o entrenamiento inadecuado",
+          "808 Proveer documentos de referencia, publicaciones e instrucciones inadecuadas",
+          "809 Identificación y evaluación inadecuada de exposiciones a pérdidas",
+          "810 Conocimiento inadecuado del trabajo de supervisión / administración",
+          "811 Calificaciones individuales inadecuadas para el trabajo o tarea",
+          "812 Medición y evaluación inadecuadas del desempeño",
+          "813 Retroalimentación inadecuada o incorrecta del desempeño"
+        ],
+        "900 INGENIERÍA INADECUADA": [
+          "901 Evaluación inadecuada de las exposiciones a pérdidas",
+          "902 Consideración inadecuada de los factores humanos / ergonomía",
+          "903 Estándares, especificaciones y/o criterios de diseño inadecuados",
+          "904 Control inadecuado de la construcción",
+          "905 Evaluación inadecuada de la operatividad / disposición",
+          "906 Controles inadecuados o correctos de los procesos",
+          "907 Monitoreo inadecuado de las operaciones iniciales",
+          "908 Evaluación inadecuada de los cambios"
+        ],
+        "1000 ADQUISICIONES INADECUADAS": [
+          "1001 Especificaciones deficientes en los pedidos y compras",
+          "1002 Investigación/selección inadecuada de materiales o equipos",
+          "1003 Especificaciones inadecuadas a vendedores / proveedores",
+          "1004 Modalidad o ruta de envío inadecuada",
+          "1005 Inspección de recepción / aprobación inadecuada",
+          "1006 Comunicación inadecuada de datos de seguridad y salud",
+          "1007 Manipulación inadecuada de materiales",
+          "1008 Almacenamiento inadecuado de materiales",
+          "1009 Transporte inadecuado de materiales",
+          "1010 Identificación inadecuada de materiales peligrosos",
+          "1011 Disposición inadecuada de residuos y desperdicios",
+          "1012 Selección inadecuada de contratistas / subcontratistas"
+        ],
+        "1100 MANTENIMIENTO INADECUADO": [
+          "1101 Aspectos preventivos inadecuados: Evaluación de necesidades, lubricación y servicio, ajuste/montaje, limpieza o pulido",
+          "1102 Aspectos correctivos inadecuados: Comunicación de necesidades, programación de trabajo, examen de unidades, sustitución de piezas"
+        ],
+        "1200 HERRAMIENTAS Y EQUIPOS INADECUADOS": [
+          "1201 Evaluación inadecuada de necesidades y riesgos",
+          "1202 Consideraciones humanas / ergonomía inadecuadas",
+          "1203 Estándares o especificaciones inadecuadas",
+          "1204 Disponibilidad inadecuada",
+          "1205 Ajuste / reparación / mantenimiento inadecuado",
+          "1206 Recuperación y renovación inadecuadas",
+          "1207 Inadecuada remoción y reemplazo de piezas deficientes"
+        ],
+        "1300 ESTÁNDARES DE TRABAJO INADECUADOS": [
+          "1301 Desarrollo inadecuado de estándares para: Inventarios y evaluación de riesgos, análisis de tareas, políticas y procedimientos",
+          "1302 Comunicación inadecuada de estándares: Publicación, distribución, traducción, entrenamiento, refuerzo",
+          "1303 Mantención inadecuada de estándares: Seguimiento de flujo de trabajo, actualización, monitoreo de cumplimiento",
+          "1304 Monitoreo del cumplimiento inadecuado"
+        ],
+        "1400 USO Y DESGASTE EXCESIVO / ABUSO O MAL USO": [
+          "1401 Planificación inadecuada del uso",
+          "1402 Prolongación excesiva de la vida útil del elemento",
+          "1403 Inspección y/o monitoreo inadecuado",
+          "1404 Carga o velocidad de uso inadecuadas",
+          "1405 Mantenimiento inadecuado",
+          "1406 Empleo del elemento por personas no calificadas / no entrenadas",
+          "1407 Empleo para usos no indicados / prohibidos",
+          "1408 Conducta no permitida (intencional / no intencional)"
+        ]
+      }
     };
 
+    const causasRaizFaltaControl = [
+      "Falta de Control - Programas inadecuados",
+      "Falta de Control - Estándares inadecuados del programa",
+      "Falta de Control - Cumplimiento inadecuado de los estándares"
+    ];
+
+    // --- FUNCIONES DE CARGA DINÁMICA DE CAUSAS INMEDIATAS ---
+    function cargarCausasFrecuentes(index) {
+      const tipoSelect = document.getElementById(`cinm_tipo_${index}`);
+      const causaSelect = document.getElementById(`cinm_causa_${index}`);
+      if (!tipoSelect || !causaSelect) return;
+
+      const tipo = tipoSelect.value;
+      causaSelect.innerHTML = '<option value="">-- Seleccionar Causa --</option>';
+
+      if (datosCausasInmediatas[tipo]) {
+        datosCausasInmediatas[tipo].forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          causaSelect.appendChild(opt);
+        });
+      }
+    }
+
+    // --- FUNCIONES DE CARGA DINÁMICA DE CAUSAS SUBYACENTES Y RAÍZ ---
+    function cargarCausasSubyacentes(index) {
+      const tipoSelect = document.getElementById(`csub_tipo_${index}`);
+      const causaSelect = document.getElementById(`csub_causa_${index}`);
+      const subyacenteSelect = document.getElementById(`csub_subyacente_${index}`);
+      if (!tipoSelect || !causaSelect) return;
+
+      const tipo = tipoSelect.value;
+      causaSelect.innerHTML = '<option value="">-- Seleccionar Causa Común --</option>';
+      if (subyacenteSelect) {
+        subyacenteSelect.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
+      }
+
+      if (datosCausasBasicas[tipo]) {
+        Object.keys(datosCausasBasicas[tipo]).forEach(categoria => {
+          const opt = document.createElement('option');
+          opt.value = categoria;
+          opt.textContent = categoria;
+          causaSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function cargarCausasRaiz(index) {
+      const tipoSelect = document.getElementById(`csub_tipo_${index}`);
+      const causaSelect = document.getElementById(`csub_causa_${index}`);
+      const subyacenteSelect = document.getElementById(`csub_subyacente_${index}`);
+      if (!tipoSelect || !causaSelect || !subyacenteSelect) return;
+
+      const tipo = tipoSelect.value;
+      const causa = causaSelect.value;
+
+      subyacenteSelect.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
+
+      if (datosCausasBasicas[tipo] && datosCausasBasicas[tipo][causa]) {
+        const groupEspecificas = document.createElement('optgroup');
+        groupEspecificas.label = "Causas Específicas Detalladas";
+
+        datosCausasBasicas[tipo][causa].forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          groupEspecificas.appendChild(opt);
+        });
+        subyacenteSelect.appendChild(groupEspecificas);
+      }
+
+      const groupFaltaControl = document.createElement('optgroup');
+      groupFaltaControl.label = "Falta de Control (Causa Raíz)";
+      causasRaizFaltaControl.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        groupFaltaControl.appendChild(opt);
+      });
+      subyacenteSelect.appendChild(groupFaltaControl);
+    }
+
+    // --- FUNCIONES UI Y CONTROLADORES GENERALES ---
     function cambiarTipoInforme() {
-      const tipo = document.getElementById("tipo_informe").value;
-      const secPre = document.getElementById("seccion_preliminar");
-      const secFin = document.getElementById("seccion_final");
-
-      if (tipo === "PRELIMINAR") {
-        secPre.classList.remove("hidden");
-        secFin.classList.add("hidden");
+      const tipo = document.getElementById('tipo_informe').value;
+      const secPre = document.getElementById('seccion_preliminar');
+      const secFin = document.getElementById('seccion_final');
+      if (tipo === 'PRELIMINAR') {
+        secPre.classList.remove('hidden');
+        secFin.classList.add('hidden');
       } else {
-        secPre.classList.add("hidden");
-        secFin.classList.remove("hidden");
+        secPre.classList.add('hidden');
+        secFin.classList.remove('hidden');
       }
     }
 
     function evaluarTipoPersona() {
-      const tipo = document.getElementById("tipoPersona").value;
-      const secContratista = document.getElementById("seccion-contratista");
-      const secLocador = document.getElementById("seccion-locador");
-
-      secContratista.classList.add("hidden");
-      secLocador.classList.add("hidden");
-
-      if (tipo === "contratista") {
-        secContratista.classList.remove("hidden");
-      } else if (tipo === "locador") {
-        secLocador.classList.remove("hidden");
+      const val = document.getElementById('tipoPersona').value;
+      const secCont = document.getElementById('seccion-contratista');
+      const secLoc = document.getElementById('seccion-locador');
+      if (val === 'contratista') {
+        secCont.classList.remove('hidden');
+        secLoc.classList.add('hidden');
+      } else if (val === 'locador') {
+        secLoc.classList.remove('hidden');
+        secCont.classList.add('hidden');
+      } else {
+        secCont.classList.add('hidden');
+        secLoc.classList.add('hidden');
       }
     }
 
     function evaluarOpcionesEvento() {
-      const tipo = document.getElementById("fin_tipo_evento").value;
-      const bloque = document.getElementById("bloque_accidente");
-      if (tipo === "ACCIDENTE") {
-        bloque.classList.remove("hidden");
+      const tipo = document.getElementById('fin_tipo_evento').value;
+      const bloqAcc = document.getElementById('bloque_accidente');
+      if (tipo === 'INCIDENTE') {
+        bloqAcc.classList.add('hidden');
       } else {
-        bloque.classList.add("hidden");
+        bloqAcc.classList.remove('hidden');
       }
     }
 
+    function toggleDanoPropiedad(chk) {
+      const sec = document.getElementById('sec_dano_propiedad');
+      if (chk.checked) {
+        sec.classList.add('opacity-50', 'pointer-events-none');
+      } else {
+        sec.classList.remove('opacity-50', 'pointer-events-none');
+      }
+    }
+
+    function actualizarFirmaPre() {
+      const nom = document.getElementById('resp_nombre_pre').value;
+      document.getElementById('vista_firma_pre').textContent = nom ? nom.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
+    }
+
+    function previsualizarImagenes(event) {
+      const container = document.getElementById('preview_fotos_pre');
+      container.innerHTML = '';
+      const files = event.target.files;
+      if (files.length > 0) container.classList.remove('hidden');
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'w-full h-24 object-cover rounded border border-slate-300 shadow-sm';
+          container.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     function agregarFilaTrabajador() {
-      const tbody = document.getElementById("body_trabajadores");
-      const row = document.createElement("tr");
-      row.className = "border-b bg-white hover:bg-slate-50 transition";
-      row.innerHTML = `
+      const tbody = document.getElementById('body_trabajadores');
+      const tr = document.createElement('tr');
+      tr.className = 'border-b bg-white hover:bg-slate-50 transition';
+      tr.innerHTML = `
         <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
@@ -1611,266 +1853,150 @@
           </select>
         </td>
         <td class="p-1"><input type="text" name="trab_jefe_inmediato[]" placeholder="Nombre del jefe inmediato" class="w-full border rounded p-1"></td>
-        <td class="p-1">
-          <select name="trab_sexo[]" class="w-full border rounded p-1 bg-white">
-            <option value="M">M</option>
-            <option value="F">F</option>
-          </select>
-        </td>
+        <td class="p-1"><select name="trab_sexo[]" class="w-full border rounded p-1 bg-white"><option value="M">M</option><option value="F">F</option></select></td>
         <td class="p-1"><input type="text" name="trab_dni[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="number" name="trab_edad[]" class="w-full border rounded p-1"></td>
-        <td class="p-1">
-          <select name="trab_turno[]" class="w-full border rounded p-1 bg-white">
-            <option value="D">D</option>
-            <option value="T">T</option>
-            <option value="N">N</option>
-          </select>
-        </td>
-        <td class="p-1">
-          <select name="trab_personal[]" class="w-full border rounded p-1 bg-white">
-            <option value="Propio">Propio</option>
-            <option value="Tercero">Tercero</option>
-            <option value="Contratista">Contratista</option>
-          </select>
-        </td>
-        <td class="p-1 text-center">
-          <button type="button" onclick="eliminarFilaTrabajador(this)" class="text-red-600 hover:text-red-800 font-bold px-2 py-1">✕</button>
-        </td>
+        <td class="p-1"><select name="trab_turno[]" class="w-full border rounded p-1 bg-white"><option value="D">D</option><option value="T">T</option><option value="N">N</option></select></td>
+        <td class="p-1"><select name="trab_personal[]" class="w-full border rounded p-1 bg-white"><option value="Propio">Propio</option><option value="Tercero">Tercero</option><option value="Contratista">Contratista</option></select></td>
+        <td class="p-1 text-center"><button type="button" onclick="eliminarFilaTrabajador(this)" class="text-red-600 hover:text-red-800 font-bold px-2 py-1">✕</button></td>
       `;
-      tbody.appendChild(row);
+      tbody.appendChild(tr);
     }
 
     function eliminarFilaTrabajador(btn) {
-      const row = btn.closest("tr");
-      if (document.querySelectorAll("#body_trabajadores tr").length > 1) {
+      const row = btn.closest('tr');
+      if (document.querySelectorAll('#body_trabajadores tr').length > 1) {
         row.remove();
-      } else {
-        alert("Debe mantener al menos una fila de trabajador.");
       }
     }
 
-    function toggleDanoPropiedad(chk) {
-      const sec = document.getElementById("sec_dano_propiedad");
-      const inputs = sec.querySelectorAll("input, select");
-      inputs.forEach(i => i.disabled = chk.checked);
-    }
-
-    function cargarCausasFrecuentes(idx) {
-      const tipo = document.getElementById(`cinm_tipo_${idx}`).value;
-      const selectCausa = document.getElementById(`cinm_causa_${idx}`);
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
-
-      if (datosCausasInmediatas[tipo]) {
-        datosCausasInmediatas[tipo].forEach(item => {
-          const opt = document.createElement("option");
-          opt.value = item;
-          opt.textContent = item;
-          selectCausa.appendChild(opt);
-        });
-      }
-    }
-
-    function cargarCausasSubyacentes(idx) {
-      const tipo = document.getElementById(`csub_tipo_${idx}`).value;
-      const selectCausa = document.getElementById(`csub_causa_${idx}`);
-      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
-
-      if (datosCausasSubyacentes[tipo]) {
-        datosCausasSubyacentes[tipo].forEach(item => {
-          const opt = document.createElement("option");
-          opt.value = item;
-          opt.textContent = item;
-          selectCausa.appendChild(opt);
-        });
-      }
-      cargarCausasRaiz(idx);
-    }
-
-    function cargarCausasRaiz(idx) {
-      const causaPadre = document.getElementById(`csub_causa_${idx}`).value;
-      const selectRaiz = document.getElementById(`csub_subyacente_${idx}`);
-      selectRaiz.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
-
-      if (causaPadre) {
-        const opcionesEjemplo = ["Procedimiento Inexistente", "Falta de Capacitación", "Supervisión Insuficiente", "Falla de Inspección"];
-        opcionesEjemplo.forEach(item => {
-          const opt = document.createElement("option");
-          opt.value = item;
-          opt.textContent = item;
-          selectRaiz.appendChild(opt);
-        });
-      }
-    }
+    // Modal Observaciones
+    let targetObservacionInput = null;
+    let currentButton = null;
 
     function abrirModalObservacionFila(btn) {
-      const targetId = btn.getAttribute("data-observation-target");
-      inputObservacionActual = document.getElementById(targetId);
-      botonObservacionActual = btn;
-
-      document.getElementById("observacion_modal_input").value = inputObservacionActual.value;
-      document.getElementById("modalObservaciones").classList.remove("hidden");
-      document.getElementById("modalObservaciones").classList.add("flex");
+      currentButton = btn;
+      const targetId = btn.getAttribute('data-observation-target');
+      targetObservacionInput = document.getElementById(targetId);
+      document.getElementById('observacion_modal_input').value = targetObservacionInput.value || '';
+      document.getElementById('modalObservaciones').classList.add('flex');
+      document.getElementById('modalObservaciones').classList.remove('hidden');
     }
 
-    function cerrarModalObservaciones(guardar = false) {
-      const modal = document.getElementById("modalObservaciones");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
+    function cerrarModalObservaciones(guardar) {
+      if (!guardar && targetObservacionInput) {
+        // no-op
+      }
+      document.getElementById('modalObservaciones').classList.add('hidden');
+      document.getElementById('modalObservaciones').classList.remove('flex');
     }
 
     function guardarModalObservaciones() {
-      if (inputObservacionActual) {
-        const val = document.getElementById("observacion_modal_input").value;
-        inputObservacionActual.value = val;
-        if (val.trim().length > 0) {
-          botonObservacionActual.classList.add("observation-button-filled");
-          botonObservacionActual.textContent = "✅ Observación Registrada";
+      if (targetObservacionInput && currentButton) {
+        const val = document.getElementById('observacion_modal_input').value.trim();
+        targetObservacionInput.value = val;
+        if (val) {
+          currentButton.classList.add('observation-button-filled');
+          currentButton.textContent = '✅ Observación Guardada';
         } else {
-          botonObservacionActual.classList.remove("observation-button-filled");
-          botonObservacionActual.textContent = "📝 Agregar / Editar Observación";
+          currentButton.classList.remove('observation-button-filled');
+          currentButton.textContent = '📝 Agregar / Editar Observación';
         }
       }
-      cerrarModalObservaciones();
-    }
-
-    function getNum(id) {
-      const val = parseFloat(document.getElementById(id)?.value);
-      return isNaN(val) ? 0 : val;
-    }
-
-    function calcularCostesPersonal() {
-      const salAcc = getNum("salario_accidentado");
-      const hrsAcc = getNum("coste_hrs_accidentado");
-
-      const salOtr = getNum("salario_otros");
-      const hrsOtr = getNum("coste_hrs_otros_trabajadores");
-
-      const salSup = getNum("salario_supervisor");
-      const hrsSup = getNum("coste_hrs_supervisor");
-
-      const salSso = getNum("salario_ssoma");
-      const hrsSso = getNum("coste_hrs_ssoma");
-
-      const socorro = getNum("coste_socorro_transporte");
-      const descanso = getNum("coste_dias_descanso_medico");
-
-      // Asumiendo mes de 240 hrs
-      const costAcc = (salAcc / 240) * hrsAcc;
-      const costOtr = (salOtr / 240) * hrsOtr;
-      const costSup = (salSup / 240) * hrsSup;
-      const costSso = (salSso / 240) * hrsSso;
-
-      const total = costAcc + costOtr + costSup + costSso + socorro + descanso;
-      document.getElementById("coste_total_personal").value = total.toFixed(2);
-      document.getElementById("resumen_personal").textContent = total.toFixed(2);
-
-      calcularTotalesGenerales();
-    }
-
-    function calcularCostesDanos() {
-      const edif = (getNum("dm_edif_propio_hrs") * getNum("dm_edif_propio_costo")) + getNum("dm_edif_externo_costo") + getNum("dm_edif_mat_costo");
-      const maq = (getNum("dm_maq_propio_hrs") * getNum("dm_maq_propio_costo")) + getNum("dm_maq_externo_costo") + getNum("dm_maq_repuestos_costo") + getNum("dm_maq_reposicion_costo");
-      const mat = getNum("dm_mat_primas_cant") * getNum("dm_mat_primas_costo");
-      const prod = getNum("dm_prod_terminados_cant") * getNum("dm_prod_terminados_costo");
-      const parada = getNum("dm_parada_hrs") * getNum("dm_parada_costo_hora");
-
-      const total = edif + maq + mat + prod + parada;
-      document.getElementById("coste_total_danos_materiales").value = total.toFixed(2);
-      document.getElementById("resumen_materiales").textContent = total.toFixed(2);
-
-      calcularTotalesGenerales();
-    }
-
-    function calcularOtrosCostes() {
-      const aux = getNum("oc_mat_auxilios") + getNum("oc_traslado");
-      const sanc = getNum("oc_sanciones_contrato");
-      const mult = getNum("oc_multas_ley");
-      const resp = getNum("oc_resp_civil");
-      const ter = getNum("oc_danos_terceros_ma");
-
-      const rend1 = getNum("oc_rend_hrs_1") * getNum("oc_rend_costo_1");
-      const rend2 = getNum("oc_rend_hrs_2") * getNum("oc_rend_costo_2");
-      const rend3 = getNum("oc_rend_hrs_3") * getNum("oc_rend_costo_3");
-      const rend = rend1 + rend2 + rend3;
-
-      const total = aux + sanc + mult + resp + ter + rend;
-      document.getElementById("coste_subtotal_otros").value = total.toFixed(2);
-      document.getElementById("resumen_otros").textContent = total.toFixed(2);
-
-      calcularTotalesGenerales();
-    }
-
-    function calcularTotalesGenerales() {
-      const cPersonal = parseFloat(document.getElementById("coste_total_personal").value) || 0;
-      const cMateriales = parseFloat(document.getElementById("coste_total_danos_materiales").value) || 0;
-      const cOtros = parseFloat(document.getElementById("coste_subtotal_otros").value) || 0;
-
-      const subtotal = cPersonal + cMateriales + cOtros;
-      const gastosDiv = subtotal * 0.02;
-      const totalAccidente = subtotal + gastosDiv;
-
-      document.getElementById("coste_gastos_diversos").value = gastosDiv.toFixed(2);
-      document.getElementById("coste_total_accidente").value = totalAccidente.toFixed(2);
-
-      document.getElementById("resumen_gastos").textContent = gastosDiv.toFixed(2);
-      document.getElementById("resumen_total").textContent = totalAccidente.toFixed(2);
-    }
-
-    function actualizarFirmaPre() {
-      const nombre = document.getElementById("resp_nombre_pre").value;
-      const preview = document.getElementById("vista_firma_pre");
-      preview.textContent = nombre ? nombre : "[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]";
-    }
-
-    function actualizarFirmaInv() {
-      const nombre = document.getElementById("inv_nombre").value;
-      const preview = document.getElementById("vista_firma_inv");
-      preview.textContent = nombre ? nombre : "[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]";
-    }
-
-    function previsualizarImagenes(event) {
-      const container = document.getElementById("preview_fotos_pre");
-      container.innerHTML = "";
-      const files = event.target.files;
-
-      if (files.length > 0) {
-        container.classList.remove("hidden");
-        Array.from(files).forEach(file => {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            const img = document.createElement("img");
-            img.src = e.target.result;
-            img.className = "w-full h-24 object-cover rounded border border-slate-300 shadow-sm";
-            container.appendChild(img);
-          };
-          reader.readAsDataURL(file);
-        });
-      } else {
-        container.classList.add("hidden");
-      }
+      cerrarModalObservaciones(true);
     }
 
     function prepararEnvio(event) {
       event.preventDefault();
-      document.getElementById("modalConfirmacion").classList.remove("hidden");
-      document.getElementById("modalConfirmacion").classList.add("flex");
+      document.getElementById('modalConfirmacion').classList.remove('hidden');
+      document.getElementById('modalConfirmacion').classList.add('flex');
     }
 
     function cerrarModalConfirmacion() {
-      document.getElementById("modalConfirmacion").classList.add("hidden");
-      document.getElementById("modalConfirmacion").classList.remove("flex");
+      document.getElementById('modalConfirmacion').classList.add('hidden');
+      document.getElementById('modalConfirmacion').classList.remove('flex');
     }
 
     function confirmarYEnviar() {
       cerrarModalConfirmacion();
-      document.getElementById("ssomaForm").submit();
+      document.getElementById('ssomaForm').submit();
     }
 
-    // Inicializaciones al cargar la página
-    document.addEventListener("DOMContentLoaded", () => {
-      cargarCausasFrecuentes(1);
-      cargarCausasSubyacentes(1);
+    // CÁLCULOS DE COSTES
+    function calcularCostesPersonal() {
+      const getVal = id => parseFloat(document.getElementById(id)?.value) || 0;
+      const acc = (getVal('salario_accidentado') / 240) * getVal('coste_hrs_accidentado');
+      const otr = (getVal('salario_otros') / 240) * getVal('coste_hrs_otros_trabajadores');
+      const sup = (getVal('salario_supervisor') / 240) * getVal('coste_hrs_supervisor');
+      const sso = (getVal('salario_ssoma') / 240) * getVal('coste_hrs_ssoma');
+      const soc = getVal('coste_socorro_transporte');
+      const des = getVal('coste_dias_descanso_medico');
+
+      const total = acc + otr + sup + sso + soc + des;
+      document.getElementById('coste_total_personal').value = total.toFixed(2);
+      document.getElementById('resumen_personal').textContent = total.toFixed(2);
+      calcularTotalGeneral();
+    }
+
+    function calcularCostesDanos() {
+      const getVal = id => parseFloat(document.getElementById(id)?.value) || 0;
+      const edif = (getVal('dm_edif_propio_hrs') * getVal('dm_edif_propio_costo')) + getVal('dm_edif_externo_costo') + getVal('dm_edif_mat_costo');
+      const maq = (getVal('dm_maq_propio_hrs') * getVal('dm_maq_propio_costo')) + getVal('dm_maq_externo_costo') + getVal('dm_maq_repuestos_costo') + getVal('dm_maq_reposicion_costo');
+      const mat = getVal('dm_mat_primas_cant') * getVal('dm_mat_primas_costo');
+      const prod = getVal('dm_prod_terminados_cant') * getVal('dm_prod_terminados_costo');
+      const par = getVal('dm_parada_hrs') * getVal('dm_parada_costo_hora');
+
+      const total = edif + maq + mat + prod + par;
+      document.getElementById('coste_total_danos_materiales').value = total.toFixed(2);
+      document.getElementById('resumen_materiales').textContent = total.toFixed(2);
+      calcularTotalGeneral();
+    }
+
+    function calcularOtrosCostes() {
+      const getVal = id => parseFloat(document.getElementById(id)?.value) || 0;
+      const aux = getVal('oc_mat_auxilios') + getVal('oc_traslado');
+      const san = getVal('oc_sanciones_contrato');
+      const ley = getVal('oc_multas_ley');
+      const civ = getVal('oc_resp_civil');
+      const ter = getVal('oc_danos_terceros_ma');
+
+      const r1 = getVal('oc_rend_hrs_1') * getVal('oc_rend_costo_1');
+      const r2 = getVal('oc_rend_hrs_2') * getVal('oc_rend_costo_2');
+      const r3 = getVal('oc_rend_hrs_3') * getVal('oc_rend_costo_3');
+
+      const total = aux + san + ley + civ + ter + r1 + r2 + r3;
+      document.getElementById('coste_subtotal_otros').value = total.toFixed(2);
+      document.getElementById('resumen_otros').textContent = total.toFixed(2);
+      calcularTotalGeneral();
+    }
+
+    function calcularTotalGeneral() {
+      const pers = parseFloat(document.getElementById('coste_total_personal')?.value) || 0;
+      const mat = parseFloat(document.getElementById('coste_total_danos_materiales')?.value) || 0;
+      const otr = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
+
+      const subtotal = pers + mat + otr;
+      const diversos = subtotal * 0.02;
+      const total = subtotal + diversos;
+
+      document.getElementById('coste_gastos_diversos').value = diversos.toFixed(2);
+      document.getElementById('resumen_gastos').textContent = diversos.toFixed(2);
+      document.getElementById('coste_total_accidente').value = total.toFixed(2);
+      document.getElementById('resumen_total').textContent = total.toFixed(2);
+    }
+
+    // Inicialización automática de desplegables al cargar
+    document.addEventListener('DOMContentLoaded', () => {
+      for (let i = 1; i <= 5; i++) {
+        if (document.getElementById(`cinm_tipo_${i}`)) {
+          cargarCausasFrecuentes(i);
+        }
+        if (document.getElementById(`csub_tipo_${i}`)) {
+          cargarCausasSubyacentes(i);
+        }
+      }
     });
   </script>
+
 </body>
 </html>
