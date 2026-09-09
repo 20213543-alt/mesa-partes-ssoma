@@ -416,7 +416,7 @@
                   <th class="p-2">Edad</th>
                   <th class="p-2">Turno</th>
                   <th class="p-2">Personal</th>
-                  
+                  <th class="p-2 text-center">Acción</th>
                 </tr>
               </thead>
               <tbody id="body_trabajadores">
@@ -467,7 +467,10 @@
                       <option value="Contratista">Contratista</option>
                     </select>
                   </td>
-                                  </tr>
+                  <td class="p-1 text-center">
+                    <button type="button" onclick="eliminarFilaTrabajador(this)" class="text-red-600 hover:text-red-800 font-bold px-2 py-1">✕</button>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -1468,31 +1471,14 @@
                 <option value="Gerencia de formación y soporte">Gerencia de formación y soporte</option>
               </select>
             </div>
+            <div>
+              <label class="font-bold block text-slate-700 mb-1">Fecha de Investigación:</label>
+              <input type="date" name="inv_fecha" class="w-full border rounded p-2 bg-white">
+            </div>
             <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
-              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Investigador:</label>
+              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma Digital Registrada (Investigador):</label>
               <p id="vista_firma_inv" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-                [FIRMA EN NEGRITAS]
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- TESTIGOS -->
-        <div class="border border-blue-900 rounded-lg overflow-hidden shadow-sm">
-          <div class="bg-blue-900 text-white p-2.5 font-extrabold uppercase text-xs tracking-wider">TESTIGOS</div>
-          <div class="p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Nombre Completo del Testigo:</label>
-              <input type="text" id="tes_nombre" name="tes_nombre" oninput="actualizarFirmaTes()" class="w-full border rounded p-2 bg-white">
-            </div>
-            <div>
-              <label class="font-bold block text-slate-700 mb-1">Cargo / Vínculo:</label>
-              <input type="text" name="tes_cargo" class="w-full border rounded p-2 bg-white">
-            </div>
-            <div class="md:col-span-2 bg-white p-4 rounded-lg border-2 border-dashed border-slate-300">
-              <label class="font-bold block text-slate-500 text-[10px] uppercase tracking-wider mb-1">Firma del Testigo:</label>
-              <p id="vista_firma_tes" class="font-black text-slate-800 text-base tracking-wide italic min-h-[28px] uppercase font-serif flex items-center">
-                [FIRMA EN NEGRITAS]
+                [AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]
               </p>
             </div>
           </div>
@@ -1500,73 +1486,46 @@
 
       </div>
 
-      <button type="submit" id="btnGuardar" class="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-slate-900 font-black py-4 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2 cursor-pointer">
-        <span>💾</span> GENERAR Y GUARDAR REGISTRO EN EXCEL
-      </button>
+      <!-- BOTONES DE ACCIÓN PRINCIPALES -->
+      <div class="flex justify-end gap-4 pt-4 border-t border-slate-300">
+        <button type="button" onclick="window.print()" class="px-6 py-3 rounded-lg border border-slate-400 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 transition text-xs uppercase tracking-wide cursor-pointer">
+          🖨️ Imprimir / Guardar PDF
+        </button>
+        <button type="submit" class="px-6 py-3 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-bold shadow-lg transition text-xs uppercase tracking-wide cursor-pointer flex items-center gap-2">
+          💾 Registrar Informe
+        </button>
+      </div>
 
     </form>
   </div>
 
+  <!-- SCRIPT CON LA LÓGICA COMPLETA DEL FORMULARIO -->
   <script>
-    const causasInmediatasData = {
+    let inputObservacionActual = null;
+    let botonObservacionActual = null;
+
+    // Listas de datos para selects dinámicos
+    const datosCausasInmediatas = {
       "Acto Subestandar": [
+        "Uso inadecuado de herramientas",
         "Operar equipo sin autorización",
-        "Omisión de informar/ advertir",
-        "Omisión de Sujetar/Bloquear/Contener",
-        "Operar Equipo /Sistema a Velocidad Inadecuada",
-        "Desactivar o Anular Dispositivos Críticos de Seguridad",
-        "Usar Herramientas /Equipos/ Máquina /Dispositivo Defectuoso",
-        "Operación inadecuada de Herramientas / equipo / Maquina /Dispositivo /Instalación de Proceso",
-        "Mantenimiento Inadecuado de Equipo / Maquina / Instalación de proceso en funcionamiento",
-        "Uso de Material Incorrecto / Inadecuado",
-        "No usar correctamente el equipo de protección personal (EPP).",
-        "Operación incorrecta de carga",
-        "Operación incorrecta de colocación",
-        "Operación incorrecta de izado",
-        "Posición inadecuada para el trabajo o la tarea.",
-        "Comportamiento incorrecto/ inadecuado.",
-        "Trabajar bajo la influencia de medicación/ alcohol/ drogas.",
-        "No seguir procedimiento/ instrucciones.",
-        "Falla al identificar peligro",
-        "Acto sub estándar por parte de terceros (que no está bajo control propio).",
-        "No identificar requisitos de clientes/ partes interesadas",
-        "No cumplir requisitos de clientes/ partes interesadas",
-        "Disturbios civiles (motines, revueltas, guerra)",
-        "Actividad Delictivas"
+        "No usar EPP adecuado",
+        "No seguir procedimientos",
+        "Postura de trabajo inadecuada"
       ],
       "Condición Subestandar": [
-        "Condiciones inadecuadas de pisos/superficie",
-        "Herramienta/ equipo defectuoso",
-        "Herramientas/ equipo incorrecto/ Inadecuado.",
-        "Integridad inadecuada de herramientas/ equipo de proceso",
-        "Falla en detectar/ medir",
-        "Medida /medida de señal inadecuada",
-        "Material incorrecto",
-        "Composición incorrecta de material / gas/ líquido",
-        "Protección/ barrera inadecuada",
-        "Equipo de Protección Personal (EPP) inadecuado/ incorrecto",
-        "Espacio para actuar limited/ restringido.",
-        "Sistema de advertencia inadecuado",
-        "Presencia de atmosfera explosiva /Inflamable",
-        "Presencia no autorizada de materiales peligrosos",
-        "Orden y limpieza deficiente",
-        "Nivel de ruido por encima del umbral",
-        "Radiación por encima del umbral",
-        "Iluminación excesiva / deficiente",
-        "Vibración por encima del umbral.",
-        "Exposición a altas temperaturas",
-        "Exposición a bajas temperaturas",
-        "Presión excede los límites",
-        "Ventilación inadecuada",
-        "Información inadecuada",
-        "Exposición a condiciones climáticas adversas"
+        "Herramienta defectuosa",
+        "Falta de orden y limpieza",
+        "Iluminación insuficiente",
+        "Estructura inestable",
+        "Protección o barrera inadecuada"
       ]
     };
 
-    const causasSubyacentesData = {
+    const datosCausasSubyacentes = {
       "Factores Personales": [
-        "Capacidad física / fisiológica inadecuada",
-        "Capacidad mental / psicológica inadecuada",
+        "Capacidad física/fisiológica inadecuada",
+        "Capacidad mental/psicológica inadecuada",
         "Tensión física o fisiológica",
         "Tensión mental o psicológica",
         "Falta de conocimiento",
@@ -1580,170 +1539,54 @@
         "Mantenimiento inadecuado",
         "Herramientas y equipos inadecuados",
         "Estándares de trabajo inadecuados",
-        "Uso y desgaste excesivo",
-        "Abuso o mal uso"
-      ]
-    };
-
-    const causasRaizData = {
-      "Capacidad física / fisiológica inadecuada": [
-        "Estatura, peso, tamaño, fuerza, alcance inadecuado",
-        "Capacidad de movimiento corporal restringida",
-        "Capacidad limitada para mantener posiciones corporales",
-        "Sensibilidad a sustancias o alergias",
-        "Sensibilidad a extremos sensoriales (ruido, temperatura)",
-        "Deficiencia visual o auditiva",
-        "Otras deficiencias físicas (tacto, gusto, olfato, equilibrio)",
-        "Incapacidad física permanente o temporal"
-      ],
-      "Capacidad mental / psicológica inadecuada": [
-        "Temores y fobias",
-        "Desequilibrio emocional / estrés mental",
-        "Enfermedad o trastorno mental",
-        "Nivel de inteligencia / capacidad de comprensión reducida",
-        "Juicio deficiente o fallas de memoria",
-        "Mala coordinación o tiempo de reacción lento",
-        "Aptitud de aprendizaje o mecánica deficiente"
-      ],
-      "Tensión física o fisiológica": [
-        "Lesión o enfermedad previa no recuperada",
-        "Fatiga por carga o duración del trabajo",
-        "Fatiga por falta de descanso adecuado",
-        "Exposición a temperaturas u otros riesgos de salud",
-        "Insuficiencia de oxígeno o cambios de presión",
-        "Restricción de movimiento",
-        "Efectos de medicamentos, drogas o alcohol"
-      ],
-      "Tensión mental o psicológica": [
-        "Sobrecarga emocional o fatiga por carga mental",
-        "Exigencias extremas de juicio o decisión",
-        "Rutina, monotonía o aburrimiento",
-        "Órdenes o exigencias confusas / contradictorias",
-        "Preocupación por problemas personales / laborales",
-        "Frustración o razonamiento ilógico"
-      ],
-      "Falta de conocimiento": [
-        "Falta de experiencia en la labor",
-        "Inducción o capacitación inicial insuficiente",
-        "Capacitación periódica o de actualización deficiente",
-        "Falta de entrenamiento específico en el puesto",
-        "Instrucciones o procedimientos mal interpretados"
-      ],
-      "Falta de habilidad": [
-        "Instrucción práctica inicial insuficiente",
-        "Práctica o entrenamiento de campo insuficiente",
-        "Ejecución de la tarea poco frecuente",
-        "Falta de asesoramiento / coaching de desempeño",
-        "Deficiente coordinación psicomotriz en la tarea"
-      ],
-      "Motivación inadecuada": [
-        "El comportamiento subestándar es tolerado o premiado",
-        "Falta de incentivos al desempeño seguro",
-        "Intento incorrecto de ahorrar tiempo o esfuerzo",
-        "Intento incorrecto de evitar incomodidad",
-        "Intento incorrecto de llamar la atención",
-        "Presión de los compañeros o ejemplo inadecuado del supervisor",
-        "Retroalimentación o disciplina inadecuada"
-      ],
-      "Liderazgo y/o supervisión inadecuada": [
-        "Relaciones jerárquicas o funciones poco claras",
-        "Delegación de responsabilidades inadecuada",
-        "Políticas, procedimientos o pautas de trabajo insuficientes",
-        "Planificación o programación inadecuada del trabajo",
-        "Instrucciones, orientación o capacitación inadecuada por el líder",
-        "Supervisión y control en campo insuficiente",
-        "Identificación y evaluación inadecuada de riesgos"
-      ],
-      "Ingeniería inadecuada": [
-        "Evaluación inadecuada de los riesgos en la etapa de diseño",
-        "Consideración ergonómica / de factores humanos inadecuada",
-        "Criterios, especificaciones o normas de diseño defectuosas",
-        "Supervisión y control de construcción / montaje inadecuado",
-        "Evaluación inadecuada de la operatividad antes del arranque"
-      ],
-      "Adquisiciones inadecuadas": [
-        "Especificaciones de compra incompletas o erróneas",
-        "Selección o evaluación inadecuada de proveedores/contratistas",
-        "Inspección de recepción y verificación de calidad deficiente",
-        "Falta de información sobre seguridad/fichas técnicas (HDS)",
-        "Almacenamiento o manipulación de materiales inadecuado"
-      ],
-      "Mantenimiento inadecuado": [
-        "Mantenimiento preventivo insuficiente o ausente",
-        "Programación de mantenimiento inadecuada",
-        "Mantenimiento correctivo / reparación deficiente",
-        "Falta de repuestos originales o inspección de reparaciones"
-      ],
-      "Herramientas y equipos inadecuados": [
-        "Evaluación de necesidades y riesgos del equipo inadecuada",
-        "Especificaciones de herramientas/equipos inadecuadas",
-        "Disponibilidad o accesibilidad de equipos deficiente",
-        "Mantenimiento o calibración de herramientas deficiente",
-        "Falta de sistema para retirar/reemplazar equipos defectuosos"
-      ],
-      "Estándares de trabajo inadecuados": [
-        "Desarrollo o elaboración deficiente de PETS/IPERC",
-        "Comunicación y difusión de estándares insuficiente",
-        "Falta de revisión o actualización periódica de procedimientos",
-        "Monitoreo o fiscalización del cumplimiento de estándares deficiente"
-      ],
-      "Uso y desgaste excesivo": [
-        "Planificación o cálculo de vida útil del equipo inadecuado",
-        "Sobrecarga o tasa de uso superior al límite de diseño",
-        "Inspección y monitoreo de desgaste deficiente",
-        "Extensión injustificada de la vida útil sin mantenimiento"
-      ],
-      "Abuso o mal uso": [
-        "Uso de equipos para fines distintos a su diseño con conocimiento",
-        "Uso inadecuado por falta de supervisión estricta",
-        "Uso inapropiado no intencional por desconocimiento"
+        "Uso y desgaste excesivo"
       ]
     };
 
     function cambiarTipoInforme() {
-      const tipo = document.getElementById('tipo_informe').value;
-      const pre = document.getElementById('seccion_preliminar');
-      const fin = document.getElementById('seccion_final');
-      if (tipo === 'PRELIMINAR') {
-        pre.classList.remove('hidden');
-        fin.classList.add('hidden');
+      const tipo = document.getElementById("tipo_informe").value;
+      const secPre = document.getElementById("seccion_preliminar");
+      const secFin = document.getElementById("seccion_final");
+
+      if (tipo === "PRELIMINAR") {
+        secPre.classList.remove("hidden");
+        secFin.classList.add("hidden");
       } else {
-        pre.classList.add('hidden');
-        fin.classList.remove('hidden');
+        secPre.classList.add("hidden");
+        secFin.classList.remove("hidden");
       }
     }
 
     function evaluarTipoPersona() {
-      const val = document.getElementById('tipoPersona').value;
-      const secContra = document.getElementById('seccion-contratista');
-      const secLoc = document.getElementById('seccion-locador');
-      if (val === 'contratista') {
-        secContra.classList.remove('hidden');
-        secLoc.classList.add('hidden');
-      } else if (val === 'locador') {
-        secContra.classList.add('hidden');
-        secLoc.classList.remove('hidden');
-      } else {
-        secContra.classList.add('hidden');
-        secLoc.classList.add('hidden');
+      const tipo = document.getElementById("tipoPersona").value;
+      const secContratista = document.getElementById("seccion-contratista");
+      const secLocador = document.getElementById("seccion-locador");
+
+      secContratista.classList.add("hidden");
+      secLocador.classList.add("hidden");
+
+      if (tipo === "contratista") {
+        secContratista.classList.remove("hidden");
+      } else if (tipo === "locador") {
+        secLocador.classList.remove("hidden");
       }
     }
 
     function evaluarOpcionesEvento() {
-      const tipo = document.getElementById('fin_tipo_evento').value;
-      const bloqueAcc = document.getElementById('bloque_accidente');
-      if (tipo === 'ACCIDENTE') {
-        bloqueAcc.classList.remove('hidden');
+      const tipo = document.getElementById("fin_tipo_evento").value;
+      const bloque = document.getElementById("bloque_accidente");
+      if (tipo === "ACCIDENTE") {
+        bloque.classList.remove("hidden");
       } else {
-        bloqueAcc.classList.add('hidden');
+        bloque.classList.add("hidden");
       }
     }
 
     function agregarFilaTrabajador() {
-      const tbody = document.getElementById('body_trabajadores');
-      const tr = document.createElement('tr');
-      tr.className = 'border-b bg-white hover:bg-slate-50 transition';
-      tr.innerHTML = `
+      const tbody = document.getElementById("body_trabajadores");
+      const row = document.createElement("tr");
+      row.className = "border-b bg-white hover:bg-slate-50 transition";
+      row.innerHTML = `
         <td class="p-1"><input type="text" name="trab_paterno[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_materno[]" class="w-full border rounded p-1"></td>
         <td class="p-1"><input type="text" name="trab_nombres[]" class="w-full border rounded p-1"></td>
@@ -1790,519 +1633,244 @@
             <option value="Contratista">Contratista</option>
           </select>
         </td>
-        <td class="p-1 text-center font-bold">
-          <button type="button" onclick="this.closest('tr').remove()" class="text-red-600 hover:text-red-800 font-bold px-1">✕</button>
+        <td class="p-1 text-center">
+          <button type="button" onclick="eliminarFilaTrabajador(this)" class="text-red-600 hover:text-red-800 font-bold px-2 py-1">✕</button>
         </td>
       `;
-      tbody.appendChild(tr);
+      tbody.appendChild(row);
+    }
+
+    function eliminarFilaTrabajador(btn) {
+      const row = btn.closest("tr");
+      if (document.querySelectorAll("#body_trabajadores tr").length > 1) {
+        row.remove();
+      } else {
+        alert("Debe mantener al menos una fila de trabajador.");
+      }
     }
 
     function toggleDanoPropiedad(chk) {
-      const sec = document.getElementById('sec_dano_propiedad');
-      const inputs = sec.querySelectorAll('input, select, textarea');
-      if (chk.checked) {
-        sec.classList.add('opacity-50', 'pointer-events-none');
-        inputs.forEach(i => i.disabled = true);
-      } else {
-        sec.classList.remove('opacity-50', 'pointer-events-none');
-        inputs.forEach(i => i.disabled = false);
-      }
+      const sec = document.getElementById("sec_dano_propiedad");
+      const inputs = sec.querySelectorAll("input, select");
+      inputs.forEach(i => i.disabled = chk.checked);
     }
 
-    function cargarCausasFrecuentes(index) {
-      const tipoSel = document.getElementById(`cinm_tipo_${index}`).value;
-      const causaSel = document.getElementById(`cinm_causa_${index}`);
-      causaSel.innerHTML = '<option value="">-- Opcional --</option>';
-      if (causasInmediatasData[tipoSel]) {
-        causasInmediatasData[tipoSel].forEach(item => {
-          const opt = document.createElement('option');
+    function cargarCausasFrecuentes(idx) {
+      const tipo = document.getElementById(`cinm_tipo_${idx}`).value;
+      const selectCausa = document.getElementById(`cinm_causa_${idx}`);
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      if (datosCausasInmediatas[tipo]) {
+        datosCausasInmediatas[tipo].forEach(item => {
+          const opt = document.createElement("option");
           opt.value = item;
           opt.textContent = item;
-          causaSel.appendChild(opt);
+          selectCausa.appendChild(opt);
         });
       }
     }
 
-    function cargarCausasSubyacentes(index) {
-      const tipoSel = document.getElementById(`csub_tipo_${index}`).value;
-      const causaSel = document.getElementById(`csub_causa_${index}`);
-      const subSel = document.getElementById(`csub_subyacente_${index}`);
-      causaSel.innerHTML = '<option value="">-- Opcional --</option>';
-      subSel.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
-      if (causasSubyacentesData[tipoSel]) {
-        causasSubyacentesData[tipoSel].forEach(item => {
-          const opt = document.createElement('option');
+    function cargarCausasSubyacentes(idx) {
+      const tipo = document.getElementById(`csub_tipo_${idx}`).value;
+      const selectCausa = document.getElementById(`csub_causa_${idx}`);
+      selectCausa.innerHTML = '<option value="">-- Opcional --</option>';
+
+      if (datosCausasSubyacentes[tipo]) {
+        datosCausasSubyacentes[tipo].forEach(item => {
+          const opt = document.createElement("option");
           opt.value = item;
           opt.textContent = item;
-          causaSel.appendChild(opt);
+          selectCausa.appendChild(opt);
+        });
+      }
+      cargarCausasRaiz(idx);
+    }
+
+    function cargarCausasRaiz(idx) {
+      const causaPadre = document.getElementById(`csub_causa_${idx}`).value;
+      const selectRaiz = document.getElementById(`csub_subyacente_${idx}`);
+      selectRaiz.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
+
+      if (causaPadre) {
+        const opcionesEjemplo = ["Procedimiento Inexistente", "Falta de Capacitación", "Supervisión Insuficiente", "Falla de Inspección"];
+        opcionesEjemplo.forEach(item => {
+          const opt = document.createElement("option");
+          opt.value = item;
+          opt.textContent = item;
+          selectRaiz.appendChild(opt);
         });
       }
     }
 
-    function cargarCausasRaiz(index) {
-      const causaSel = document.getElementById(`csub_causa_${index}`).value;
-      const subSel = document.getElementById(`csub_subyacente_${index}`);
-      subSel.innerHTML = '<option value="">-- Seleccione Causa Raíz --</option>';
-      if (causasRaizData[causaSel]) {
-        causasRaizData[causaSel].forEach(item => {
-          const opt = document.createElement('option');
-          opt.value = item;
-          opt.textContent = item;
-          subSel.appendChild(opt);
-        });
-      }
+    function abrirModalObservacionFila(btn) {
+      const targetId = btn.getAttribute("data-observation-target");
+      inputObservacionActual = document.getElementById(targetId);
+      botonObservacionActual = btn;
+
+      document.getElementById("observacion_modal_input").value = inputObservacionActual.value;
+      document.getElementById("modalObservaciones").classList.remove("hidden");
+      document.getElementById("modalObservaciones").classList.add("flex");
     }
 
-    function previsualizarImagenes(e) {
-      const container = document.getElementById('preview_fotos_pre');
-      container.innerHTML = '';
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        container.classList.remove('hidden');
+    function cerrarModalObservaciones(guardar = false) {
+      const modal = document.getElementById("modalObservaciones");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function guardarModalObservaciones() {
+      if (inputObservacionActual) {
+        const val = document.getElementById("observacion_modal_input").value;
+        inputObservacionActual.value = val;
+        if (val.trim().length > 0) {
+          botonObservacionActual.classList.add("observation-button-filled");
+          botonObservacionActual.textContent = "✅ Observación Registrada";
+        } else {
+          botonObservacionActual.classList.remove("observation-button-filled");
+          botonObservacionActual.textContent = "📝 Agregar / Editar Observación";
+        }
+      }
+      cerrarModalObservaciones();
+    }
+
+    function getNum(id) {
+      const val = parseFloat(document.getElementById(id)?.value);
+      return isNaN(val) ? 0 : val;
+    }
+
+    function calcularCostesPersonal() {
+      const salAcc = getNum("salario_accidentado");
+      const hrsAcc = getNum("coste_hrs_accidentado");
+
+      const salOtr = getNum("salario_otros");
+      const hrsOtr = getNum("coste_hrs_otros_trabajadores");
+
+      const salSup = getNum("salario_supervisor");
+      const hrsSup = getNum("coste_hrs_supervisor");
+
+      const salSso = getNum("salario_ssoma");
+      const hrsSso = getNum("coste_hrs_ssoma");
+
+      const socorro = getNum("coste_socorro_transporte");
+      const descanso = getNum("coste_dias_descanso_medico");
+
+      // Asumiendo mes de 240 hrs
+      const costAcc = (salAcc / 240) * hrsAcc;
+      const costOtr = (salOtr / 240) * hrsOtr;
+      const costSup = (salSup / 240) * hrsSup;
+      const costSso = (salSso / 240) * hrsSso;
+
+      const total = costAcc + costOtr + costSup + costSso + socorro + descanso;
+      document.getElementById("coste_total_personal").value = total.toFixed(2);
+      document.getElementById("resumen_personal").textContent = total.toFixed(2);
+
+      calcularTotalesGenerales();
+    }
+
+    function calcularCostesDanos() {
+      const edif = (getNum("dm_edif_propio_hrs") * getNum("dm_edif_propio_costo")) + getNum("dm_edif_externo_costo") + getNum("dm_edif_mat_costo");
+      const maq = (getNum("dm_maq_propio_hrs") * getNum("dm_maq_propio_costo")) + getNum("dm_maq_externo_costo") + getNum("dm_maq_repuestos_costo") + getNum("dm_maq_reposicion_costo");
+      const mat = getNum("dm_mat_primas_cant") * getNum("dm_mat_primas_costo");
+      const prod = getNum("dm_prod_terminados_cant") * getNum("dm_prod_terminados_costo");
+      const parada = getNum("dm_parada_hrs") * getNum("dm_parada_costo_hora");
+
+      const total = edif + maq + mat + prod + parada;
+      document.getElementById("coste_total_danos_materiales").value = total.toFixed(2);
+      document.getElementById("resumen_materiales").textContent = total.toFixed(2);
+
+      calcularTotalesGenerales();
+    }
+
+    function calcularOtrosCostes() {
+      const aux = getNum("oc_mat_auxilios") + getNum("oc_traslado");
+      const sanc = getNum("oc_sanciones_contrato");
+      const mult = getNum("oc_multas_ley");
+      const resp = getNum("oc_resp_civil");
+      const ter = getNum("oc_danos_terceros_ma");
+
+      const rend1 = getNum("oc_rend_hrs_1") * getNum("oc_rend_costo_1");
+      const rend2 = getNum("oc_rend_hrs_2") * getNum("oc_rend_costo_2");
+      const rend3 = getNum("oc_rend_hrs_3") * getNum("oc_rend_costo_3");
+      const rend = rend1 + rend2 + rend3;
+
+      const total = aux + sanc + mult + resp + ter + rend;
+      document.getElementById("coste_subtotal_otros").value = total.toFixed(2);
+      document.getElementById("resumen_otros").textContent = total.toFixed(2);
+
+      calcularTotalesGenerales();
+    }
+
+    function calcularTotalesGenerales() {
+      const cPersonal = parseFloat(document.getElementById("coste_total_personal").value) || 0;
+      const cMateriales = parseFloat(document.getElementById("coste_total_danos_materiales").value) || 0;
+      const cOtros = parseFloat(document.getElementById("coste_subtotal_otros").value) || 0;
+
+      const subtotal = cPersonal + cMateriales + cOtros;
+      const gastosDiv = subtotal * 0.02;
+      const totalAccidente = subtotal + gastosDiv;
+
+      document.getElementById("coste_gastos_diversos").value = gastosDiv.toFixed(2);
+      document.getElementById("coste_total_accidente").value = totalAccidente.toFixed(2);
+
+      document.getElementById("resumen_gastos").textContent = gastosDiv.toFixed(2);
+      document.getElementById("resumen_total").textContent = totalAccidente.toFixed(2);
+    }
+
+    function actualizarFirmaPre() {
+      const nombre = document.getElementById("resp_nombre_pre").value;
+      const preview = document.getElementById("vista_firma_pre");
+      preview.textContent = nombre ? nombre : "[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]";
+    }
+
+    function actualizarFirmaInv() {
+      const nombre = document.getElementById("inv_nombre").value;
+      const preview = document.getElementById("vista_firma_inv");
+      preview.textContent = nombre ? nombre : "[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]";
+    }
+
+    function previsualizarImagenes(event) {
+      const container = document.getElementById("preview_fotos_pre");
+      container.innerHTML = "";
+      const files = event.target.files;
+
+      if (files.length > 0) {
+        container.classList.remove("hidden");
         Array.from(files).forEach(file => {
           const reader = new FileReader();
-          reader.onload = function(evt) {
-            const img = document.createElement('img');
-            img.src = evt.target.result;
-            img.className = 'w-full h-24 object-cover rounded border border-slate-300 shadow-sm';
+          reader.onload = function(e) {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.className = "w-full h-24 object-cover rounded border border-slate-300 shadow-sm";
             container.appendChild(img);
           };
           reader.readAsDataURL(file);
         });
       } else {
-        container.classList.add('hidden');
+        container.classList.add("hidden");
       }
     }
 
-    function actualizarFirmaPre() {
-      const val = document.getElementById('resp_nombre_pre').value;
-      document.getElementById('vista_firma_pre').textContent = val ? val.toUpperCase() : '[AQUÍ APARECERÁ LA FIRMA EN NEGRITAS]';
-    }
-
-    function actualizarFirmaInv() {
-      const val = document.getElementById('inv_nombre').value;
-      document.getElementById('vista_firma_inv').textContent = val ? val.toUpperCase() : '[FIRMA EN NEGRITAS]';
-    }
-
-    function actualizarFirmaTes() {
-      const val = document.getElementById('tes_nombre').value;
-      document.getElementById('vista_firma_tes').textContent = val ? val.toUpperCase() : '[FIRMA EN NEGRITAS]';
-    }
-
-    function prepararEnvio(e) {
-      e.preventDefault();
-      const modal = document.getElementById('modalConfirmacion');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    function prepararEnvio(event) {
+      event.preventDefault();
+      document.getElementById("modalConfirmacion").classList.remove("hidden");
+      document.getElementById("modalConfirmacion").classList.add("flex");
     }
 
     function cerrarModalConfirmacion() {
-      const modal = document.getElementById('modalConfirmacion');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      document.getElementById("modalConfirmacion").classList.add("hidden");
+      document.getElementById("modalConfirmacion").classList.remove("flex");
     }
 
     function confirmarYEnviar() {
       cerrarModalConfirmacion();
-      document.getElementById('ssomaForm').submit();
+      document.getElementById("ssomaForm").submit();
     }
 
-    function calcularCostesPersonal() {
-      const salAcc = parseFloat(document.getElementById('salario_accidentado')?.value) || 0;
-      const hrsAcc = parseFloat(document.getElementById('coste_hrs_accidentado')?.value) || 0;
-
-      const salOtros = parseFloat(document.getElementById('salario_otros')?.value) || 0;
-      const hrsOtros = parseFloat(document.getElementById('coste_hrs_otros_trabajadores')?.value) || 0;
-
-      const salSup = parseFloat(document.getElementById('salario_supervisor')?.value) || 0;
-      const hrsSup = parseFloat(document.getElementById('coste_hrs_supervisor')?.value) || 0;
-
-      const salSsoma = parseFloat(document.getElementById('salario_ssoma')?.value) || 0;
-      const hrsSsoma = parseFloat(document.getElementById('coste_hrs_ssoma')?.value) || 0;
-
-      const socorro = parseFloat(document.getElementById('coste_socorro_transporte')?.value) || 0;
-      const descansoMed = parseFloat(document.getElementById('coste_dias_descanso_medico')?.value) || 0;
-
-      const subtotalAcc = (salAcc / 240) * hrsAcc;
-      const subtotalOtros = (salOtros / 240) * hrsOtros;
-      const subtotalSup = (salSup / 240) * hrsSup;
-      const subtotalSsoma = (salSsoma / 240) * hrsSsoma;
-
-      const totalCoste = subtotalAcc + subtotalOtros + subtotalSup + subtotalSsoma + socorro + descansoMed;
-
-      const elemTotal = document.getElementById('coste_total_personal');
-      if (elemTotal) {
-        elemTotal.value = totalCoste.toFixed(2);
-      }
-
-      calcularMasterTotales();
-    }
-
-    function calcularCostesDanos() {
-      const edifPropHrs = parseFloat(document.getElementById('dm_edif_propio_hrs')?.value) || 0;
-      const edifPropCosto = parseFloat(document.getElementById('dm_edif_propio_costo')?.value) || 0;
-      const edifExtCosto = parseFloat(document.getElementById('dm_edif_externo_costo')?.value) || 0;
-      const edifMatCosto = parseFloat(document.getElementById('dm_edif_mat_costo')?.value) || 0;
-
-      const maqPropHrs = parseFloat(document.getElementById('dm_maq_propio_hrs')?.value) || 0;
-      const maqPropCosto = parseFloat(document.getElementById('dm_maq_propio_costo')?.value) || 0;
-      const maqExtCosto = parseFloat(document.getElementById('dm_maq_externo_costo')?.value) || 0;
-      const maqRepCosto = parseFloat(document.getElementById('dm_maq_repuestos_costo')?.value) || 0;
-      const maqRepoCosto = parseFloat(document.getElementById('dm_maq_reposicion_costo')?.value) || 0;
-
-      const matPrimCant = parseFloat(document.getElementById('dm_mat_primas_cant')?.value) || 0;
-      const matPrimCosto = parseFloat(document.getElementById('dm_mat_primas_costo')?.value) || 0;
-
-      const prodTermCant = parseFloat(document.getElementById('dm_prod_terminados_cant')?.value) || 0;
-      const prodTermCosto = parseFloat(document.getElementById('dm_prod_terminados_costo')?.value) || 0;
-
-      const paradaHrs = parseFloat(document.getElementById('dm_parada_hrs')?.value) || 0;
-      const paradaCostoHora = parseFloat(document.getElementById('dm_parada_costo_hora')?.value) || 0;
-
-      const subtotal21 = (edifPropHrs * edifPropCosto) + edifExtCosto + edifMatCosto;
-      const subtotal22 = (maqPropHrs * maqPropCosto) + maqExtCosto + maqRepCosto + maqRepoCosto;
-      const subtotal23 = matPrimCant * matPrimCosto;
-      const subtotal24 = prodTermCant * prodTermCosto;
-      const subtotal25 = paradaHrs * paradaCostoHora;
-
-      const totalDanos = subtotal21 + subtotal22 + subtotal23 + subtotal24 + subtotal25;
-
-      const elemTotal = document.getElementById('coste_total_danos_materiales');
-      if (elemTotal) {
-        elemTotal.value = totalDanos.toFixed(2);
-      }
-
-      calcularMasterTotales();
-    }
-
-    function calcularOtrosCostes() {
-      const matAux = parseFloat(document.getElementById('oc_mat_auxilios')?.value) || 0;
-      const traslado = parseFloat(document.getElementById('oc_traslado')?.value) || 0;
-      const sanciones = parseFloat(document.getElementById('oc_sanciones_contrato')?.value) || 0;
-      const multas = parseFloat(document.getElementById('oc_multas_ley')?.value) || 0;
-      const respCivil = parseFloat(document.getElementById('oc_resp_civil')?.value) || 0;
-      const danosTer = parseFloat(document.getElementById('oc_danos_terceros_ma')?.value) || 0;
-
-      const rHrs1 = parseFloat(document.getElementById('oc_rend_hrs_1')?.value) || 0;
-      const rCos1 = parseFloat(document.getElementById('oc_rend_costo_1')?.value) || 0;
-
-      const rHrs2 = parseFloat(document.getElementById('oc_rend_hrs_2')?.value) || 0;
-      const rCos2 = parseFloat(document.getElementById('oc_rend_costo_2')?.value) || 0;
-
-      const rHrs3 = parseFloat(document.getElementById('oc_rend_hrs_3')?.value) || 0;
-      const rCos3 = parseFloat(document.getElementById('oc_rend_costo_3')?.value) || 0;
-
-      const subRend = ((rHrs1 * rCos1) + (rHrs2 * rCos2) + (rHrs3 * rCos3)) * 5 * 0.30;
-
-      const subtotalOtros = matAux + traslado + sanciones + multas + respCivil + danosTer + subRend;
-
-      const elemSubOtros = document.getElementById('coste_subtotal_otros');
-      if (elemSubOtros) {
-        elemSubOtros.value = subtotalOtros.toFixed(2);
-      }
-
-      calcularMasterTotales();
-    }
-
-    function calcularMasterTotales() {
-      const totalPersonal = parseFloat(document.getElementById('coste_total_personal')?.value) || 0;
-      const totalDanos = parseFloat(document.getElementById('coste_total_danos_materiales')?.value) || 0;
-      const subtotalOtros = parseFloat(document.getElementById('coste_subtotal_otros')?.value) || 0;
-
-      const totalAnterior = totalPersonal + totalDanos + subtotalOtros;
-      const gastosDiversos = totalAnterior * 0.02;
-
-      const elemGastosDiv = document.getElementById('coste_gastos_diversos');
-      if (elemGastosDiv) {
-        elemGastosDiv.value = gastosDiversos.toFixed(2);
-      }
-
-      const costeTotalAccidente = totalAnterior + gastosDiversos;
-      const elemTotalAcc = document.getElementById('coste_total_accidente');
-      if (elemTotalAcc) {
-        elemTotalAcc.value = costeTotalAccidente.toFixed(2);
-      }
-
-      // Actualizar resumen
-      if (document.getElementById('resumen_personal')) document.getElementById('resumen_personal').innerText = totalPersonal.toFixed(2);
-      if (document.getElementById('resumen_materiales')) document.getElementById('resumen_materiales').innerText = totalDanos.toFixed(2);
-      if (document.getElementById('resumen_otros')) document.getElementById('resumen_otros').innerText = subtotalOtros.toFixed(2);
-      if (document.getElementById('resumen_gastos')) document.getElementById('resumen_gastos').innerText = gastosDiversos.toFixed(2);
-      if (document.getElementById('resumen_total')) document.getElementById('resumen_total').innerText = costeTotalAccidente.toFixed(2);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
+    // Inicializaciones al cargar la página
+    document.addEventListener("DOMContentLoaded", () => {
       cargarCausasFrecuentes(1);
       cargarCausasSubyacentes(1);
     });
-      // Auto-expansión de todos los campos textarea, incluidas las observaciones dinámicas.
-    function ajustarAlturaTextarea(textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-
-    function iniciarAutoResize() {
-      document.querySelectorAll('textarea').forEach(textarea => {
-        textarea.classList.add('auto-resize');
-        textarea.addEventListener('input', () => ajustarAlturaTextarea(textarea));
-        ajustarAlturaTextarea(textarea);
-      });
-    }
-
-    // Convierte únicamente los cuatro bloques de costos en acordeones.
-    function iniciarAcordeonesCostos() {
-      const titulos = [
-        'VALORACIÓN DE LOS COSTES DEL ACCIDENTE',
-        'VALORACIÓN DE LOS COSTES DE DAÑOS MATERIALES',
-        'OTROS COSTES',
-        'GASTOS DIVERSOS (INFORMES, INVESTIGACIONES'
-      ];
-
-      document.querySelectorAll('.border.border-blue-900.overflow-hidden').forEach(bloque => {
-        const encabezado = Array.from(bloque.children).find(el =>
-          el.classList.contains('bg-blue-900') && titulos.some(t => el.textContent.trim().includes(t))
-        );
-        if (!encabezado || encabezado.dataset.accordionReady === '1') return;
-
-        const contenido = encabezado.nextElementSibling;
-        if (!contenido) return;
-
-        encabezado.classList.add('accordion-header', 'flex', 'justify-between', 'items-center', 'gap-2');
-        encabezado.setAttribute('role', 'button');
-        encabezado.setAttribute('tabindex', '0');
-        encabezado.setAttribute('aria-expanded', 'false');
-        encabezado.dataset.accordionReady = '1';
-
-        const indicador = document.createElement('span');
-        indicador.className = 'accordion-indicator cost-toggle-indicator ml-auto';
-        indicador.setAttribute('aria-hidden', 'true');
-        indicador.textContent = 'Mostrar ▼';
-        contenido.classList.add('hidden');
-        encabezado.appendChild(indicador);
-
-        function alternar() {
-          const cerrado = contenido.classList.toggle('hidden');
-          encabezado.setAttribute('aria-expanded', String(!cerrado));
-          indicador.textContent = cerrado ? 'Mostrar ▼' : 'Ocultar ▲';
-        }
-
-        encabezado.addEventListener('click', alternar);
-        encabezado.addEventListener('keydown', event => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            alternar();
-          }
-        });
-      });
-    }
-
-    // Mantiene un solo bloque de vínculo activo y evita enviar campos ocultos.
-    const evaluarTipoPersonaOriginal = window.evaluarTipoPersona;
-    window.evaluarTipoPersona = function() {
-      if (typeof evaluarTipoPersonaOriginal === 'function') evaluarTipoPersonaOriginal();
-      const valor = document.getElementById('tipoPersona')?.value || '';
-      const contratista = document.getElementById('seccion-contratista');
-      const locador = document.getElementById('seccion-locador');
-      [[contratista, valor === 'contratista'], [locador, valor === 'locador']].forEach(([bloque, activo]) => {
-        if (!bloque) return;
-        bloque.querySelectorAll('input, select, textarea').forEach(campo => { campo.disabled = !activo; });
-      });
-    };
-
-    document.addEventListener('DOMContentLoaded', () => {
-      iniciarAutoResize();
-      iniciarAcordeonesCostos();
-      if (typeof window.evaluarTipoPersona === 'function') window.evaluarTipoPersona();
-
-      const observador = new MutationObserver(() => {
-        iniciarAutoResize();
-        iniciarAcordeonesCostos();
-      });
-      observador.observe(document.getElementById('ssomaForm') || document.body, {
-        childList: true,
-        subtree: true
-      });
-    });
-    let textareaObservacionActivo = null;
-    let valorObservacionInicial = '';
-
-    function esCampoObservacion(textarea) {
-      const nombre = (textarea.name || '').toLowerCase();
-      if (/(obs|observacion|observaciones)/.test(nombre)) return true;
-      const contenedor = textarea.closest('div, td, tr');
-      return !!(contenedor && /observaciones|observación|observación/i.test(contenedor.textContent || ''));
-    }
-
-    function abrirModalObservaciones(textarea) {
-      if (!textarea || !esCampoObservacion(textarea)) return;
-      textareaObservacionActivo = textarea;
-      valorObservacionInicial = textarea.value;
-      const modal = document.getElementById('modalObservaciones');
-      const entrada = document.getElementById('observacion_modal_input');
-      const contexto = document.getElementById('observacion_modal_contexto');
-      if (!modal || !entrada) return;
-
-      const etiqueta = textarea.closest('div, td, tr')?.querySelector('label, th');
-      contexto.textContent = etiqueta?.textContent?.trim() || 'Redacte el detalle de la observación.';
-      entrada.value = textarea.value;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.body.classList.add('overflow-hidden');
-      window.setTimeout(() => entrada.focus(), 0);
-    }
-
-    function cerrarModalObservaciones(guardar = false) {
-      if (guardar) guardarModalObservaciones();
-      const modal = document.getElementById('modalObservaciones');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-      document.body.classList.remove('overflow-hidden');
-      textareaObservacionActivo = null;
-    }
-
-    function guardarModalObservaciones() {
-      const entrada = document.getElementById('observacion_modal_input');
-      if (textareaObservacionActivo && entrada) {
-        textareaObservacionActivo.value = entrada.value;
-        textareaObservacionActivo.dispatchEvent(new Event('input', { bubbles: true }));
-        textareaObservacionActivo.dispatchEvent(new Event('change', { bubbles: true }));
-        ajustarAlturaTextarea(textareaObservacionActivo);
-      }
-      cerrarModalObservaciones(false);
-    }
-
-    function iniciarModalObservaciones() {
-      document.querySelectorAll('#ssomaForm textarea').forEach(textarea => {
-        if (!esCampoObservacion(textarea) || textarea.dataset.modalObservacionReady === '1') return;
-        textarea.dataset.modalObservacionReady = '1';
-        textarea.setAttribute('readonly', 'readonly');
-        textarea.classList.add('cursor-pointer');
-        textarea.addEventListener('focus', () => abrirModalObservaciones(textarea));
-        textarea.addEventListener('click', () => abrirModalObservaciones(textarea));
-      });
-    }
-
-    document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && textareaObservacionActivo) cerrarModalObservaciones(false);
-    });
-
-    function sincronizarObservacionActivaAntesDeEnviar() {
-      const entrada = document.getElementById('observacion_modal_input');
-      if (campoObservacionActivo && entrada) {
-        campoObservacionActivo.value = entrada.value;
-        actualizarEstadoBotonObservacion(botonObservacionActivo, entrada.value);
-      }
-    }
-
-    const formularioCompleto = document.getElementById('ssomaForm');
-    if (formularioCompleto) {
-      formularioCompleto.addEventListener('submit', sincronizarObservacionActivaAntesDeEnviar, true);
-    }
-
-
-    const observadorObservaciones = new MutationObserver(() => iniciarModalObservaciones());
-    document.addEventListener('DOMContentLoaded', () => {
-      iniciarModalObservaciones();
-      const formulario = document.getElementById('ssomaForm');
-      if (formulario) observadorObservaciones.observe(formulario, { childList: true, subtree: true });
-    });
-
-    let botonObservacionActivo = null;
-    let campoObservacionActivo = null;
-
-    function actualizarEstadoBotonObservacion(boton, valor) {
-      if (!boton) return;
-      const tieneTexto = Boolean((valor || '').trim());
-      boton.textContent = tieneTexto
-        ? '✓ Observación registrada · Editar'
-        : '📝 Agregar / Editar Observación';
-      boton.classList.toggle('observation-button-filled', tieneTexto);
-    }
-
-    function abrirModalObservacionFila(boton) {
-      const nombreCampo = boton?.dataset?.observationTarget;
-      const campo = nombreCampo ? document.getElementById(nombreCampo) : null;
-      const modal = document.getElementById('modalObservaciones');
-      const entrada = document.getElementById('observacion_modal_input');
-      const contexto = document.getElementById('observacion_modal_contexto');
-      if (!campo || !modal || !entrada) return;
-
-      botonObservacionActivo = boton;
-      campoObservacionActivo = campo;
-      entrada.value = campo.value || '';
-      if (contexto) {
-        const fila = boton.closest('tr');
-        const numero = fila?.querySelector('td')?.textContent?.trim() || '';
-        contexto.textContent = numero
-          ? `Observación de la fila ${numero}. Redacte el detalle y pulse Guardar.`
-          : 'Redacte el detalle de la observación y pulse Guardar.';
-      }
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.body.classList.add('overflow-hidden');
-      window.setTimeout(() => entrada.focus(), 0);
-    }
-
-    function guardarModalObservacionFila() {
-      const entrada = document.getElementById('observacion_modal_input');
-      if (campoObservacionActivo && entrada) {
-        campoObservacionActivo.value = entrada.value;
-        campoObservacionActivo.dispatchEvent(new Event('input', { bubbles: true }));
-        campoObservacionActivo.dispatchEvent(new Event('change', { bubbles: true }));
-        actualizarEstadoBotonObservacion(botonObservacionActivo, entrada.value);
-      }
-      cerrarModalObservaciones(false);
-    }
-
-    function iniciarBotonesObservaciones() {
-      document.querySelectorAll('[data-observation-button="1"]').forEach(boton => {
-        if (boton.dataset.observationReady === '1') return;
-        boton.dataset.observationReady = '1';
-        const nombre = boton.dataset.observationTarget;
-        const campo = nombre ? document.getElementById(nombre) : null;
-        actualizarEstadoBotonObservacion(boton, campo?.value || '');
-      });
-    }
-
-    // El botón Guardar del modal utiliza la versión por fila cuando existe una fila activa.
-    const guardarModalObservacionesOriginal = window.guardarModalObservaciones;
-    window.guardarModalObservaciones = function() {
-      if (campoObservacionActivo) {
-        guardarModalObservacionFila();
-        return;
-      }
-      if (typeof guardarModalObservacionesOriginal === 'function') {
-        guardarModalObservacionesOriginal();
-      }
-    };
-
-    const cerrarModalObservacionesOriginal = window.cerrarModalObservaciones;
-    window.cerrarModalObservaciones = function(guardar = false) {
-      if (guardar && campoObservacionActivo) {
-        guardarModalObservacionFila();
-        return;
-      }
-      const modal = document.getElementById('modalObservaciones');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-      document.body.classList.remove('overflow-hidden');
-      botonObservacionActivo = null;
-      campoObservacionActivo = null;
-      if (typeof cerrarModalObservacionesOriginal === 'function' && !guardar) {
-        // La función original realiza la misma limpieza para textareas generales.
-      }
-    };
-
-    document.addEventListener('DOMContentLoaded', iniciarBotonesObservaciones);
-    const observadorBotonesObservaciones = new MutationObserver(iniciarBotonesObservaciones);
-    document.addEventListener('DOMContentLoaded', () => {
-      const formulario = document.getElementById('ssomaForm');
-      if (formulario) observadorBotonesObservaciones.observe(formulario, { childList: true, subtree: true });
-    });
-</script>
+  </script>
 </body>
 </html>
