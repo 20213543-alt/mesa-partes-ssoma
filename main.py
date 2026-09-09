@@ -229,7 +229,7 @@ def enviar_correo_con_pdf(
 def g(form_dict, key_or_keys, default="-"):
     """
     Busca de manera flexible claves simples o listas de alias dentro de form_dict.
-    Acepta un string o una lista/tupla de nombres de campos posibles.
+    Retorna únicamente el valor de texto limpio sin etiquetas HTML embebidas.
     """
     if isinstance(key_or_keys, (list, tuple)):
         keys = key_or_keys
@@ -242,28 +242,8 @@ def g(form_dict, key_or_keys, default="-"):
             if isinstance(val, list):
                 val = val[0] if len(val) > 0 else None
             if val is not None and str(val).strip() != "" and str(val).strip().lower() != "none":
-                texto = str(val).strip()
-                nombres = " ".join(str(k).lower() for k in keys)
-                campos_largos = (
-                    "descripcion", "detalle", "observ", "sucedio", "causa_inmediata",
-                    "tipo_contacto", "accion", "servicio", "trabajo_realizaba"
-                )
-                if any(fragmento in nombres for fragmento in campos_largos):
-                    return '<span class="pdf-answer">' + procesar_texto_multilinea(texto) + '</span>' 
-                return texto
+                return str(val).strip()
     return default
-
-
-def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
-    """Escapa texto de usuario y conserva saltos de línea para xhtml2pdf."""
-    if valor is None:
-        return predeterminado
-    texto = str(valor).strip()
-    if not texto:
-        return predeterminado
-    texto = html_lib.escape(texto, quote=True)
-    texto = texto.replace("\r\n", "\n").replace("\r", "\n")
-    return texto.replace("\n", "<br/>")
 
 
 def procesar_texto_multilinea(val, predeterminado="-", ancho=32) -> str:
@@ -274,9 +254,6 @@ def procesar_texto_multilinea(val, predeterminado="-", ancho=32) -> str:
     texto = val.replace("\r\n", "\n").replace("\r", "\n")
     resultado = []
 
-    # Se fuerza un salto físico aproximadamente cada 75 caracteres.
-    # Esto evita depender únicamente de word-wrap, que algunas versiones
-    # de xhtml2pdf no aplican de forma consistente dentro de tablas.
     for linea in texto.split("\n"):
         partes = textwrap.wrap(
             linea,
@@ -295,9 +272,8 @@ def procesar_texto_multilinea(val, predeterminado="-", ancho=32) -> str:
 
 
 def formatear_texto_para_pdf(valor, predeterminado="-") -> str:
-    """Alias compatible con la sección DETALLE DEL ACCIDENTE."""
+    """Alias compatible con el formateo de campos largos."""
     return procesar_texto_multilinea(valor, predeterminado, ancho=32)
-
 
 
 def pdf_valor(valor, predeterminado="-", ancho=32) -> str:
@@ -305,6 +281,7 @@ def pdf_valor(valor, predeterminado="-", ancho=32) -> str:
     if valor is None or str(valor).strip() == "":
         return predeterminado
     return procesar_texto_multilinea(str(valor), predeterminado, ancho=ancho)
+
 
 def html_to_pdf_file(html_string: str, pdf_path: str):
     with open(pdf_path, "wb") as pdf_file:
@@ -405,7 +382,7 @@ def generar_pdf_preliminar(
             </tr>
             <tr>
                 <td class="lbl">Tipo de Evento:</td>
-                <td class="val" colspan="4">{g(f, ['pre_tipo_evento', 'tipo_evento_pre', 'tipo_evento'])}</td>
+                <td class="val" colspan="4">{pdf_valor(g(f, ['pre_tipo_evento', 'tipo_evento_pre', 'tipo_evento']))}</td>
             </tr>
         </table>
 
@@ -413,42 +390,42 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Fecha de Evento:</td>
-                <td class="val">{g(f, ['pre_fecha_evento', 'fecha_evento_pre', 'fecha_evento'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_fecha_evento', 'fecha_evento_pre', 'fecha_evento']))}</td>
                 <td class="lbl">Hora de Ocurrencia:</td>
-                <td class="val">{g(f, ['pre_hora_evento', 'hora_ocurrencia_pre', 'hora_evento'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_hora_evento', 'hora_ocurrencia_pre', 'hora_evento']))}</td>
             </tr>
             <tr>
                 <td class="lbl">Lugar de Ocurrencia:</td>
-                <td class="val">{g(f, ['pre_lugar_evento', 'lugar_ocurrencia_pre', 'lugar_evento'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_lugar_evento', 'lugar_ocurrencia_pre', 'lugar_evento']))}</td>
                 <td class="lbl">Fecha de Reporte:</td>
-                <td class="val">{g(f, ['pre_fecha_reporte', 'fecha_reporte_pre', 'fecha_reporte'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_fecha_reporte', 'fecha_reporte_pre', 'fecha_reporte']))}</td>
             </tr>
         </table>
         <div class="text-box">
             <b>Trabajo que se Realizaba:</b><br/>
-            {g(f, ['pre_trabajo_realizaba', 'trabajo_realizaba_pre', 'trabajo_realizaba'])}
+            <span class="pdf-answer">{pdf_valor(g(f, ['pre_trabajo_realizaba', 'trabajo_realizaba_pre', 'trabajo_realizaba']))}</span>
         </div>
 
         <div class="sec-header">DESCRIPCIÓN DE LOS LESIONADOS</div>
         <table class="grid-table">
             <tr>
                 <td class="lbl">Nombre Completo:</td>
-                <td class="val">{g(f, ['pre_nombre_lesionado', 'nombre_lesionado_pre', 'nombre_lesionado'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_nombre_lesionado', 'nombre_lesionado_pre', 'nombre_lesionado']))}</td>
                 <td class="lbl">Edad:</td>
-                <td class="val">{g(f, ['pre_edad_lesionado', 'edad_lesionado_pre', 'edad'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_edad_lesionado', 'edad_lesionado_pre', 'edad']))}</td>
             </tr>
             <tr>
                 <td class="lbl">Cargo:</td>
-                <td class="val" colspan="3">{g(f, ['pre_cargo_lesionado', 'cargo_lesionado_pre', 'cargo'])}</td>
+                <td class="val" colspan="3">{pdf_valor(g(f, ['pre_cargo_lesionado', 'cargo_lesionado_pre', 'cargo']))}</td>
             </tr>
             <tr>
                 <td class="lbl">Área interna de responsabilidad:</td>
-                <td class="val" colspan="3">{g(f, ['pre_area_interna_responsabilidad', 'area_interna_responsabilidad_pre', 'pre_area_interna', 'area_interna_responsabilidad'])}</td>
+                <td class="val" colspan="3">{pdf_valor(g(f, ['pre_area_interna_responsabilidad', 'area_interna_responsabilidad_pre', 'pre_area_interna', 'area_interna_responsabilidad']))}</td>
             </tr>
         </table>
         <div class="text-box">
             <b>Breve Descripción del Suceso:</b><br/>
-            {g(f, ['pre_breve_descripcion', 'breve_descripcion_pre', 'descripcion'])}
+            <span class="pdf-answer">{pdf_valor(g(f, ['pre_breve_descripcion', 'breve_descripcion_pre', 'descripcion']))}</span>
         </div>
 
         <div class="sec-header">REGISTRO FOTOGRÁFICO</div>
@@ -460,13 +437,13 @@ def generar_pdf_preliminar(
         <table class="grid-table">
             <tr>
                 <td class="lbl">Nombre y Apellido:</td>
-                <td class="val">{g(f, ['pre_resp_nombre', 'resp_nombre_pre', 'inv_nombre'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_resp_nombre', 'resp_nombre_pre', 'inv_nombre']))}</td>
                 <td class="lbl">Cargo:</td>
-                <td class="val">{g(f, ['pre_resp_cargo', 'resp_cargo_pre', 'inv_cargo'])}</td>
+                <td class="val">{pdf_valor(g(f, ['pre_resp_cargo', 'resp_cargo_pre', 'inv_cargo']))}</td>
             </tr>
             <tr>
                 <td class="lbl">Fecha:</td>
-                <td class="val" colspan="3">{g(f, ['pre_resp_fecha', 'resp_fecha_pre', 'fecha_reporte'])}</td>
+                <td class="val" colspan="3">{pdf_valor(g(f, ['pre_resp_fecha', 'resp_fecha_pre', 'fecha_reporte']))}</td>
             </tr>
             <tr>
                 <td class="lbl">Firma:</td>
@@ -512,7 +489,7 @@ def generar_pdf_100_porciento(
     for ci in f.get("causas_inmediatas_list", []):
         filas_causas_inmediatas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{ci.get('fila','-')}</td>
+            <td style="text-align:center; width: 6%;">{pdf_valor(ci.get('fila','-'))}</td>
             <td width="24%" style="width: 24%;"><span class="pdf-answer">{pdf_valor(ci.get('tipo','-'))}</span></td>
             <td width="35%" style="width: 35%;"><span class="pdf-answer">{pdf_valor(ci.get('causa','-'))}</span></td>
             <td width="35%" style="width: 35%;"><span class="pdf-answer">{pdf_valor(ci.get('obs','-'))}</span></td>
@@ -525,7 +502,7 @@ def generar_pdf_100_porciento(
     for cb in f.get("causas_basicas_list", []):
         filas_causas_basicas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{cb.get('fila','-')}</td>
+            <td style="text-align:center; width: 6%;">{pdf_valor(cb.get('fila','-'))}</td>
             <td style="width: 20%;">{pdf_valor(cb.get('tipo','-'))}</td>
             <td style="width: 24%;">{pdf_valor(cb.get('causa','-'))}</td>
             <td style="width: 25%;">{pdf_valor(cb.get('subyacente','-'))}</td>
@@ -539,7 +516,7 @@ def generar_pdf_100_porciento(
     for mc in f.get("medidas_correctivas_list", []):
         filas_medidas += f"""
         <tr>
-            <td style="text-align:center; width: 6%;">{mc.get('fila','-')}</td>
+            <td style="text-align:center; width: 6%;">{pdf_valor(mc.get('fila','-'))}</td>
             <td width="16%" style="width: 16%;"><span class="pdf-answer">{pdf_valor(mc.get('tipo','-'), ancho=16)}</span></td>
             <td width="28%" style="width: 28%;"><span class="pdf-answer">{pdf_valor(mc.get('accion','-'))}</span></td>
             <td width="16%" style="width: 16%;"><span class="pdf-answer">{pdf_valor(mc.get('responsable','-'), ancho=16)}</span></td>
@@ -551,14 +528,13 @@ def generar_pdf_100_porciento(
     if not filas_medidas:
         filas_medidas = "<tr><td colspan='7'>Sin registros</td></tr>"
 
-    inv_nombre_val = g(f, ["inv_nombre", "resp_nombre"])
+    inv_nombre_val = pdf_valor(g(f, ["inv_nombre", "resp_nombre"]))
     firma_inv_default = f"<b>[REGISTRADO POR: {inv_nombre_val}]</b>"
-    firma_inv_text = g(f, ["firma_inv_text", "inv_firma"], firma_inv_default)
+    firma_inv_text = pdf_valor(g(f, ["firma_inv_text", "inv_firma"], firma_inv_default))
 
-    # Mapeo explícito del bloque de tercerización/locación. El formulario usa
-    # nombres loc_* para el locador y ter_* para una empresa contratista.
-    tipo_vinculo_pdf = g(f, ["tipo_persona", "tipo_vinculo", "vinculo_entidad"], "-")
-    es_locador_pdf = tipo_vinculo_pdf.strip().lower() == "locador"
+    # Mapeo explícito del bloque de tercerización/locación.
+    tipo_vinculo_pdf = pdf_valor(g(f, ["tipo_persona", "tipo_vinculo", "vinculo_entidad"], "-"))
+    es_locador_pdf = str(g(f, ["tipo_persona", "tipo_vinculo", "vinculo_entidad"], "")).strip().lower() == "locador"
 
     if es_locador_pdf:
         nombre_tercero_pdf = pdf_valor(g(f, ["loc_nombre_razon", "loc_nombre", "nombre_locador"], "-"), ancho=24)
@@ -611,11 +587,11 @@ def generar_pdf_100_porciento(
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Centro Laboral:</td>
-                <td>{g(f, ["ter_num_trabajadores", "ter_num_trab"])}</td>
+                <td>{pdf_valor(g(f, ["ter_num_trabajadores", "ter_num_trab"]))}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Afiliados SCTR:</td>
-                <td>{g(f, "ter_num_sctr")}</td>
+                <td>{pdf_valor(g(f, "ter_num_sctr"))}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Aseguradora:</td>
-                <td>{g(f, "ter_aseguradora")}</td>
+                <td>{pdf_valor(g(f, "ter_aseguradora"))}</td>
             </tr>
         </table>
         """
@@ -631,8 +607,8 @@ def generar_pdf_100_porciento(
 
     def fila_detalle(concepto, detalle, monto):
         return f"""<tr>
-            <td width="30%"><span class="pdf-answer">{concepto}</span></td>
-            <td width="50%"><span class="pdf-answer">{detalle}</span></td>
+            <td width="30%"><span class="pdf-answer">{pdf_valor(concepto)}</span></td>
+            <td width="50%"><span class="pdf-answer">{pdf_valor(detalle)}</span></td>
             <td width="20%" style="text-align:right;"><span class="pdf-answer">S/ {dinero(monto)}</span></td>
         </tr>"""
 
@@ -711,7 +687,7 @@ def generar_pdf_100_porciento(
         </table>
     """
 
-    detalle_accidente_pdf = procesar_texto_multilinea(f.get("detalle_accidente", ""))
+    detalle_accidente_pdf = pdf_valor(f.get("detalle_accidente", ""))
 
     html_content = f"""
     <!DOCTYPE html>
@@ -800,9 +776,9 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Fecha Evento:</td>
-                <td style="width: 28%;">{g(f, ['fin_fecha_evento', 'fecha_evento'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['fin_fecha_evento', 'fecha_evento']))}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Hora Evento:</td>
-                <td style="width: 28%;">{g(f, ['fin_hora_evento', 'hora_evento'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['fin_hora_evento', 'hora_evento']))}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Lugar Exacto:</td>
                 <td width="28%" style="width: 28%; vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['fin_lugar_exacto', 'lugar_exacto', 'lugar_evento']), ancho=18)}</span></td>
             </tr>
@@ -812,7 +788,7 @@ def generar_pdf_100_porciento(
                 <td style="font-weight: bold; background-color: #f7fafc;">Clasificación Evento:</td>
                 <td style="vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['fin_clasificacion', 'clasificacion']), ancho=18)}</span></td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Solo Incidente:</td>
-                <td>{g(f, ['fin_incidente_peligro', 'fin_solo_incidente', 'solo_incidente'])}</td>
+                <td>{pdf_valor(g(f, ['fin_incidente_peligro', 'fin_solo_incidente', 'solo_incidente']))}</td>
             </tr>
         </table>
 
@@ -842,23 +818,23 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Gravedad Accidente:</td>
-                <td style="width: 28%;">{g(f, ['acc_gravedad', 'fin_gravedad_evento', 'gravedad'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['acc_gravedad', 'fin_gravedad_evento', 'gravedad']))}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Grado Incapacitante:</td>
-                <td style="width: 28%;">{g(f, ['acc_grado_incapacitante', 'grado_incapacitante'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['acc_grado_incapacitante', 'grado_incapacitante']))}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Días Descanso Médico:</td>
-                <td style="width: 28%;">{g(f, ['acc_dias_descanso', 'dias_descanso'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['acc_dias_descanso', 'dias_descanso']))}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Días Cargados:</td>
-                <td>{g(f, ['acc_dias_cargados', 'dias_cargados'])}</td>
+                <td>{pdf_valor(g(f, ['acc_dias_cargados', 'dias_cargados']))}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">N° Trab. Afectados:</td>
-                <td colspan="3">{g(f, ['acc_num_afectados', 'num_afectados'])}</td>
+                <td colspan="3">{pdf_valor(g(f, ['acc_num_afectados', 'num_afectados']))}</td>
             </tr>
         </table>
 
         <div class="sec-header">SOLO EN CASO DE INCIDENTE DE PRIMEROS AUXILIOS</div>
         <div class="text-box">
-            <b>Tipo de Atención en Primeros Auxilios:</b> {g(f, ['inc_primeros_auxilios', 'pa_tipo_atencion', 'primeros_auxilios'])}
+            <b>Tipo de Atención en Primeros Auxilios:</b> {pdf_valor(g(f, ['inc_primeros_auxilios', 'pa_tipo_atencion', 'primeros_auxilios']))}
         </div>
 
         <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
@@ -867,17 +843,17 @@ def generar_pdf_100_porciento(
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Forma Accidente/Incidente:</td>
                 <td width="28%" style="width: 28%; vertical-align: top;"><span class="pdf-answer">{pdf_valor(g(f, ['les_forma_evento', 'les_forma', 'forma_evento']), ancho=18)}</span></td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Tipo de Lesión:</td>
-                <td style="width: 28%;" colspan="3">{g(f, ['les_tipo_lesion', 'les_tipo', 'tipo_lesion'])}</td>
+                <td style="width: 28%;" colspan="3">{pdf_valor(g(f, ['les_tipo_lesion', 'les_tipo', 'tipo_lesion']))}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Agente Causante:</td>
-                <td>{g(f, ['les_agente_causante', 'les_agente', 'agente_causante'])}</td>
+                <td>{pdf_valor(g(f, ['les_agente_causante', 'les_agente', 'agente_causante']))}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Parte Cuerpo Afectada:</td>
-                <td colspan="3">{g(f, ['les_parte_cuerpo', 'parte_cuerpo'])}</td>
+                <td colspan="3">{pdf_valor(g(f, ['les_parte_cuerpo', 'parte_cuerpo']))}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Hospital / Clínica / Tópico:</td>
-                <td colspan="5">{g(f, ['les_hospital_atencion', 'les_hospital', 'hospital_atencion'])}</td>
+                <td colspan="5">{pdf_valor(g(f, ['les_hospital_atencion', 'les_hospital', 'hospital_atencion']))}</td>
             </tr>
         </table>
 
@@ -885,9 +861,9 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Daño Material:</td>
-                <td style="width: 28%;">{g(f, ['dan_material', 'dano_material'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['dan_material', 'dano_material']))}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Agente Causante del Daño:</td>
-                <td style="width: 28%;">{g(f, ['dan_agente_causante', 'dan_agente'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['dan_agente_causante', 'dan_agente']))}</td>
             </tr>
         </table>
         <div class="sec-header sec-green">VALORACIÓN DETALLADA DE LOS COSTES DEL ACCIDENTE</div>
@@ -902,11 +878,11 @@ def generar_pdf_100_porciento(
                 </tr>
             </thead>
             <tbody>
-                <tr><td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td><td class="cost-val">S/ {g(f, 'coste_total_personal', '0.00')}</td></tr>
-                <tr><td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td><td class="cost-val">S/ {g(f, 'coste_total_danos_materiales', '0.00')}</td></tr>
-                <tr><td class="cost-title">3. SUBTOTAL OTROS COSTOS</td><td class="cost-val">S/ {g(f, 'coste_subtotal_otros', '0.00')}</td></tr>
-                <tr><td class="cost-title">4. GASTOS DIVERSOS (2%)</td><td class="cost-val">S/ {g(f, 'coste_gastos_diversos', '0.00')}</td></tr>
-                <tr><td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td><td class="cost-total-val">S/ {g(f, 'coste_total_accidente', '0.00')}</td></tr>
+                <tr><td class="cost-title">1. COSTO DEL PERSONAL TOTAL</td><td class="cost-val">S/ {pdf_valor(g(f, 'coste_total_personal', '0.00'))}</td></tr>
+                <tr><td class="cost-title">2. COSTO DE DAÑOS MATERIALES TOTAL</td><td class="cost-val">S/ {pdf_valor(g(f, 'coste_total_danos_materiales', '0.00'))}</td></tr>
+                <tr><td class="cost-title">3. SUBTOTAL OTROS COSTOS</td><td class="cost-val">S/ {pdf_valor(g(f, 'coste_subtotal_otros', '0.00'))}</td></tr>
+                <tr><td class="cost-title">4. GASTOS DIVERSOS (2%)</td><td class="cost-val">S/ {pdf_valor(g(f, 'coste_gastos_diversos', '0.00'))}</td></tr>
+                <tr><td class="cost-total-lbl">COSTO TOTAL DEL ACCIDENTE</td><td class="cost-total-val">S/ {pdf_valor(g(f, 'coste_total_accidente', '0.00'))}</td></tr>
             </tbody>
         </table>
 
@@ -986,13 +962,13 @@ def generar_pdf_100_porciento(
         <table class="grid-table">
             <tr>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Nombre Resp./Investigador:</td>
-                <td style="width: 28%;">{g(f, ['inv_nombre', 'resp_nombre'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['inv_nombre', 'resp_nombre']))}</td>
                 <td style="width: 22%; font-weight: bold; background-color: #f7fafc;">Cargo:</td>
-                <td style="width: 28%;">{g(f, ['inv_cargo', 'resp_cargo'])}</td>
+                <td style="width: 28%;">{pdf_valor(g(f, ['inv_cargo', 'resp_cargo']))}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Área interna de responsabilidad:</td>
-                <td colspan="3">{g(f, ['inv_area_interna_responsabilidad', 'inv_area_interna', 'area_interna_responsabilidad_inv', 'area_interna_responsabilidad'])}</td>
+                <td colspan="3">{pdf_valor(g(f, ['inv_area_interna_responsabilidad', 'inv_area_interna', 'area_interna_responsabilidad_inv', 'area_interna_responsabilidad']))}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Firma Investigador:</td>
@@ -1000,9 +976,9 @@ def generar_pdf_100_porciento(
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Nombre Completo Testigo:</td>
-                <td>{g(f, 'tes_nombre')}</td>
+                <td>{pdf_valor(g(f, 'tes_nombre'))}</td>
                 <td style="font-weight: bold; background-color: #f7fafc;">Cargo / Vínculo:</td>
-                <td>{g(f, 'tes_cargo')}</td>
+                <td>{pdf_valor(g(f, 'tes_cargo'))}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; background-color: #f7fafc;">Firma del Testigo:</td>
