@@ -837,7 +837,7 @@ def generar_pdf_100_porciento(
 
         <div class="sec-header">DETALLES DEL ACCIDENTE</div>
         <div class="text-box">
-            <b>Tipo de Atención en Primeros Auxilios:</b> {safe_g(f, ['inc_primeros_auxilios', 'pa_tipo_atencion', 'primeros_auxilios'])}
+            <b>Detallar accidente:</b> {safe_g(f, ['inc_primeros_auxilios', 'pa_tipo_atencion', 'primeros_auxilios'])}
         </div>
 
         <div class="sec-header">DETALLE DE LESIONES Y LUGAR DE ATENCIÓN</div>
