@@ -794,8 +794,6 @@ def generar_pdf_100_porciento(
             <b>Descripción del Evento (Daños / M.A.):</b> {safe_g(f, ['dan_descripcion_evento', 'dan_descripcion'])}
         </div>
 
-        <div class="sec-header sec-green">VALORACIÓN DETALLADA DE LOS COSTES DEL ACCIDENTE</div>
-        {desglose_costos_html}
 
         <div class="sec-header sec-green">RESUMEN CONSOLIDADO DE COSTOS</div>
         <table class="grid-table">
